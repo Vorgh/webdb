@@ -1,0 +1,29 @@
+.connection-form-container {
+  justify-content: center;
+  min-width: 150px;
+  max-width: 600px;
+  border: solid #343a40 1px;
+  box-shadow: 5px 5px 10px #343a40;
+}
+
+.prevent-autocomplete {
+  display: none;
+}
+
+input {
+  border-color: #768a96;
+}
+
+.col-form-label {
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.has-error, .has-error:focus {
+  border-radius: 3px;
+  border: solid 1px #ff1f1c;
+}
+
+.error-block {
+  color: #ff1f1c;
+}
