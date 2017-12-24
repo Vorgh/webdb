@@ -15,6 +15,7 @@ import rest.auth.ClientConnectionDetailsService;
 import rest.model.ConnectionAuthInfo;
 import rest.model.UserConnection;
 
+import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -34,9 +35,13 @@ public class ConnectionDAOImpl implements ConnectionDAO
         this.connectionList = new ArrayList<>();
     }
 
-    public void setAuthInfo(ConnectionAuthInfo connAuth) throws DataAccessException, IllegalArgumentException
+    public void setAuthInfo(ConnectionAuthInfo connAuth) throws IllegalArgumentException, IllegalStateException
     {
         DriverManagerDataSource ds = (DriverManagerDataSource)jdbcTemplate.getDataSource();
+
+        String originalUrl = ds.getUrl();
+        String originalUsername = ds.getUsername();
+        String originalPassword = ds.getPassword();
 
         String url = connAuth.getUrl();
         String username = connAuth.getUsername();
@@ -51,22 +56,37 @@ public class ConnectionDAOImpl implements ConnectionDAO
         ds.setUsername(username);
         ds.setPassword(password);
 
-        testConnection();
+        if (!testConnection())
+        {
+            ds.setUrl(originalUrl);
+            ds.setUsername(originalUsername);
+            ds.setPassword(originalPassword);
+            throw new IllegalStateException("Couldn't access the database.");
+        }
+
 
         //connAuth.setPassword(passwordEncoder.encode(password));
 
-        String originalPassword = password;
         UserConnection userConnection = new UserConnection(url, username, passwordEncoder.encode(password));
         connectionList.add(userConnection);
-        clientDetailsService.addClient(createClientDetails(userConnection.getUsername(), originalPassword));
+        clientDetailsService.addClient(createClientDetails(userConnection.getUsername(), password));
     }
 
     @Transactional
-    public void testConnection() throws DataAccessException
+    public boolean testConnection()
     {
         String sql = "SELECT 1";
         //RowMapper<Article> rowMapper = new BeanPropertyRowMapper<Article>(Article.class);
-        this.jdbcTemplate.execute(sql);
+        try
+        {
+            this.jdbcTemplate.execute(sql);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
     }
 
     public UserConnection getConnectedUserByName(String username)

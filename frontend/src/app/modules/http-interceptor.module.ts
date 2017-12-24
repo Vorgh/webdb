@@ -11,7 +11,7 @@ export class HttpsRequestInterceptor implements HttpInterceptor
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>
   {
-    if (req.url === "rest/oauth/token")
+    if (req.url === "rest/oauth/token" || req.url === "rest/connection/connectionAuth")
       return next.handle(req);
 
     let token = localStorage.getItem("access_token");

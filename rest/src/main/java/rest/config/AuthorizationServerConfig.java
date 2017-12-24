@@ -3,24 +3,17 @@ package rest.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import rest.auth.ClientConnectionDetailsService;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 @Configuration
 @EnableAuthorizationServer
@@ -44,25 +37,35 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception
     {
         clients.withClientDetails(clientDetailsService());
-
-        /*clients.inMemory()
-                .withClient("trusted-client")
-                .authorizedGrantTypes("client_credentials", "password")
-                .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-                .scopes("read", "write", "trust")
-                .resourceIds("oauth2-resource")
-                .accessTokenValiditySeconds(3600)
-                .secret("Super_s3cret_keY");*/
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception
     {
         endpoints.authenticationManager(authenticationManager);
+        endpoints.tokenServices(tokenServices());
     }
 
     @Bean
-    public ClientConnectionDetailsService clientDetailsService() {
+    public ClientConnectionDetailsService clientDetailsService()
+    {
         return new ClientConnectionDetailsService();
+    }
+
+    @Bean
+    public TokenStore tokenStore()
+    {
+        return new InMemoryTokenStore();
+    }
+
+    @Bean
+    @Primary
+    public DefaultTokenServices tokenServices()
+    {
+        DefaultTokenServices tokenServices = new DefaultTokenServices();
+        tokenServices.setTokenStore(tokenStore());
+        tokenServices.setSupportRefreshToken(false);
+
+        return tokenServices;
     }
 }
