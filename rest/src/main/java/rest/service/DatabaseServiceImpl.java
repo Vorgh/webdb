@@ -1,10 +1,9 @@
 package rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import rest.dao.TableDAO;
-import rest.model.Table;
+import rest.model.database.Table;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -20,16 +19,22 @@ public class DatabaseServiceImpl implements DatabaseService
         this.tableDAO = tableDAO;
     }
 
-    public List<Table> getAllTables()
+    public List<Table> getAllTables(boolean includeDetails, boolean isView)
     {
-        List<Table> tables = null;
-        try
+        List<Table> tables;
+        if (!includeDetails)
         {
-            tables = tableDAO.getAllTableNames();
+            if (!isView)
+                tables = tableDAO.getAllTables("webdb");
+            else
+                tables = tableDAO.getAllViews("webdb");
         }
-        catch (SQLException e)
+        else
         {
-            e.printStackTrace();
+            if (!isView)
+                tables = tableDAO.getAllTablesDetail("webdb");
+            else
+                tables = tableDAO.getAllViewsDetail("webdb");
         }
 
         return tables;

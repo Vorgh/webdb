@@ -9,11 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import rest.dao.ConnectionDAO;
-import rest.model.ConnectionAuthInfo;
-import rest.model.UserConnection;
+import rest.model.connection.UserConnection;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service

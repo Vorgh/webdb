@@ -1,4 +1,4 @@
-package rest.model;
+package rest.model.connection;
 
 public class ConnectionAuthInfo
 {

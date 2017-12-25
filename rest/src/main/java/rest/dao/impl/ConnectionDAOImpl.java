@@ -1,7 +1,6 @@
-package rest.dao;
+package rest.dao.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,10 +11,10 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import rest.auth.ClientConnectionDetailsService;
-import rest.model.ConnectionAuthInfo;
-import rest.model.UserConnection;
+import rest.dao.ConnectionDAO;
+import rest.model.connection.ConnectionAuthInfo;
+import rest.model.connection.UserConnection;
 
-import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -73,7 +72,7 @@ public class ConnectionDAOImpl implements ConnectionDAO
     }
 
     @Transactional
-    public boolean testConnection()
+    protected boolean testConnection()
     {
         String sql = "SELECT 1";
         //RowMapper<Article> rowMapper = new BeanPropertyRowMapper<Article>(Article.class);

@@ -4,14 +4,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
-import rest.model.Table;
+import rest.model.database.Table;
 
 public class TableMapper implements RowMapper<Table>
 {
-    public Table mapRow(ResultSet row, int rowNum) throws SQLException
+    @Override
+    public Table mapRow(ResultSet rs, int rowNum) throws SQLException
     {
         Table table = new Table();
-        table.setName(row.getString("Tables_in_webdb"));
+        table.setName(rs.getString("table_name"));
+
         return table;
     }
 }

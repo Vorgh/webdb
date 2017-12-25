@@ -1,8 +1,8 @@
 package rest.dao;
 
 import org.springframework.dao.DataAccessException;
-import rest.model.ConnectionAuthInfo;
-import rest.model.UserConnection;
+import rest.model.connection.ConnectionAuthInfo;
+import rest.model.connection.UserConnection;
 
 public interface ConnectionDAO
 {

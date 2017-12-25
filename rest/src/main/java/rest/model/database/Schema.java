@@ -1,8 +1,12 @@
-package rest.model;
+package rest.model.database;
 
-public class Table
+import java.util.List;
+
+public class Schema
 {
     private String name;
+    private List<Table> tables;
+
 
     public String getName()
     {
@@ -13,5 +17,4 @@ public class Table
     {
         this.name = name;
     }
-
 }

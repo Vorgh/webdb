@@ -1,4 +1,4 @@
-package rest.model;
+package rest.model.connection;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

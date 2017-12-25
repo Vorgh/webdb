@@ -1,16 +1,8 @@
 package rest.controller;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerTokenServicesConfiguration;
-import org.springframework.dao.DataAccessException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
-import rest.model.ConnectionAuthInfo;
+import rest.model.connection.ConnectionAuthInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +22,6 @@ public class ConnectionController
     {
         this.connectionService = connectionService;
         this.tokenServices = tokenServices;
-    }
-
-    @GetMapping("isConnected")
-    public ResponseEntity<Void> isConnected()
-    {
-        if (connectionService.isConnected())
-            return new ResponseEntity<Void>(HttpStatus.OK);
-        else
-            return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("connectionAuth")
@@ -70,7 +53,7 @@ public class ConnectionController
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("revokeToken")
+    @DeleteMapping("logout")
     public ResponseEntity<Void> logout(HttpServletRequest request)
     {
         String authorization = request.getHeader("Authorization");
