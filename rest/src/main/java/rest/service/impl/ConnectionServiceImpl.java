@@ -1,9 +1,10 @@
-package rest.service;
+package rest.service.impl;
 
-import rest.dao.ConnectionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rest.dao.ConnectionDAO;
 import rest.model.connection.ConnectionAuthInfo;
+import rest.service.ConnectionService;
 
 @Service
 public class ConnectionServiceImpl implements ConnectionService

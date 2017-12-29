@@ -6,7 +6,7 @@ import rest.model.database.Table;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TableDetailMapper extends TableMapper
+public class TableDetailMapper implements RowMapper<Table>
 {
     @Override
     public Table mapRow(ResultSet rs, int rowNum) throws SQLException

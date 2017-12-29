@@ -34,12 +34,13 @@ public class ClientConnectionDetailsService implements ClientDetailsService
         return details;
     }
 
-    public void setClientDetailsStore(Map<String, ? extends ClientDetails> clientDetailsStore) {
-        this.clientDetailsStore = new HashMap<String, ClientDetails>(clientDetailsStore);
-    }
-
     public void addClient(ClientDetails clientDetails)
     {
         clientDetailsStore.put(clientDetails.getClientId(), clientDetails);
+    }
+
+    public ClientDetails getClient(String name)
+    {
+        return clientDetailsStore.get(name);
     }
 }

@@ -15,18 +15,22 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import rest.auth.RestAuthenticationEntryPoint;
+import rest.auth.UrlWithNameAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
-    private UserDetailsService userDetailsService;
+    //private UserDetailsService userDetailsService;
+    private UrlWithNameAuthenticationProvider authenticationProvider;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService, RestAuthenticationEntryPoint authenticationEntryPoint)
+    public SecurityConfig(UrlWithNameAuthenticationProvider authenticationProvider)
     {
-        this.userDetailsService = userDetailsService;
+        //this.userDetailsService = userDetailsService;
+        this.authenticationProvider = authenticationProvider;
     }
 
     @Bean
@@ -35,25 +39,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         return new BCryptPasswordEncoder();
     }
 
-    /*@Bean
-    public DaoAuthenticationProvider authenticationProvider()
-    {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(bCryptPasswordEncoder());
-
-        return authProvider;
-    }*/
-
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception
     {
-        auth.userDetailsService(userDetailsService).passwordEncoder(BCryptPasswordEncoder());
+        //auth.userDetailsService(userDetailsService).passwordEncoder(BCryptPasswordEncoder());
+        auth.authenticationProvider(authenticationProvider);
     }
-
-    /*@Override
-    public void configure(WebSecurity web)
-    {
-        //web.ignoring().antMatchers("/connection/**");
-    }*/
 }

@@ -1,30 +1,51 @@
 package rest.model.connection;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-public class UserConnection implements UserDetails
+public class UserConnection extends User
 {
     private String url;
-    private String username;
-    private String password;
     private Collection<? extends GrantedAuthority> authorities;
     private String urlUsernameID;
+    private JdbcTemplate jdbcTemplate;
 
-    public UserConnection(String url, String username, String password)
+    public UserConnection(String username, String password, Collection<? extends GrantedAuthority> authorities)
     {
-        if (url != null && !url.equals("") && username != null && !username.equals(""))
+        super(username, password, authorities);
+    }
+
+    public UserConnection(String url, String username, String password, Collection<? extends GrantedAuthority> authorities)
+    {
+        super(username, password, authorities);
+
+        if (url != null && !url.equals(""))
         {
             this.url = url;
-            this.username = username;
-            this.password = password;
-
-            this.urlUsernameID = url + "_*_" + username;
+            this.jdbcTemplate = jdbcTemplateBuilder(url, username, password);
+            this.urlUsernameID = username+"@"+url;
         }
         else
-            throw new IllegalArgumentException("Url can't be null.");
+            throw new IllegalArgumentException("Invalid null argument.");
+    }
+
+    private JdbcTemplate jdbcTemplateBuilder(String url, String username, String password)
+    {
+        DriverManagerDataSource ds = new DriverManagerDataSource();
+        ds.setUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
+
+        return new JdbcTemplate(ds);
     }
 
     public String getUrl()
@@ -37,45 +58,13 @@ public class UserConnection implements UserDetails
         return urlUsernameID;
     }
 
-    @Override
-    public String getUsername()
+    public JdbcTemplate getJdbcTemplate()
     {
-        return username;
+        return jdbcTemplate;
     }
 
-    @Override
-    public String getPassword()
+    public void setJdbcTemplate(String url, String username, String password)
     {
-        return password;
-    }
-
-    @Override
-    public boolean isAccountNonExpired()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isAccountNonLocked()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return true;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities()
-    {
-        return authorities;
+        this.jdbcTemplate = jdbcTemplateBuilder(url, username, password);
     }
 }

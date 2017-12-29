@@ -5,8 +5,6 @@ import java.util.List;
 public class Schema
 {
     private String name;
-    private List<Table> tables;
-
 
     public String getName()
     {

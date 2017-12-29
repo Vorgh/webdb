@@ -26,6 +26,7 @@ export class ConnectionService
                .then(() =>
                {
                  let params = new HttpParams()
+                   .append('url', connAuth.url)
                    .append('username', connAuth.username)
                    .append('password', connAuth.password)
                    .append('grant_type','password');
