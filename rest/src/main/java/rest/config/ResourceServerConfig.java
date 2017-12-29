@@ -35,15 +35,15 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
     public void configure(HttpSecurity http) throws Exception
     {
         http
-            .authorizeRequests()
-            .antMatchers("/connection/**").permitAll()
-            .antMatchers("/oauth/**").permitAll()
-            .antMatchers("/db/**").authenticated()
-            .and()
             .csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+            .and()
+            .authorizeRequests()
+            .antMatchers("/connection/**").permitAll()
+            .antMatchers("/oauth/**").permitAll()
+            .antMatchers("/db/**").authenticated();
     }
 
     @Override
