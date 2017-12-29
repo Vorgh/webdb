@@ -1,6 +1,5 @@
 package rest.dao;
 
-import ch.qos.logback.core.db.dialect.SQLDialect;
 import org.springframework.transaction.annotation.Transactional;
 import rest.mapper.ColumnDetailMapper;
 import rest.mapper.TableDetailMapper;

@@ -9,7 +9,6 @@ import rest.model.connection.UserConnection;
 import rest.model.database.Schema;
 import rest.service.SchemaService;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController

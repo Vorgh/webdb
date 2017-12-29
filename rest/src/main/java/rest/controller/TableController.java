@@ -1,10 +1,7 @@
 package rest.controller;
 
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import rest.model.connection.UserConnection;

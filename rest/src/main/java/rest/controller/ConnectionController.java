@@ -34,16 +34,6 @@ public class ConnectionController
     {
         connectionService.setConnectionAuthInfo(connAuth);
 
-        //request.login(connAuth.getUsername(), connAuth.getPassword());
-
-        /*List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        Authentication token = new UsernamePasswordAuthenticationToken(connAuth.getUsername(), authorities);
-        SecurityContextHolder.getContext().setAuthentication(token);
-
-        HttpSession session = request.getSession(true);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());*/
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

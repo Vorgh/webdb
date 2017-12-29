@@ -21,16 +21,6 @@ public class ClientConnectionDetailsService implements ClientDetailsService
             throw new NoSuchClientException("No client with requested id: " + id);
         }
 
-        /*BaseClientDetails details = new BaseClientDetails();
-        details.setClientId(id);
-        details.setAuthorizedGrantTypes(Arrays.asList("client_credentials", "password") );
-        details.setScope(Arrays.asList("read", "write", "trust"));
-        details.setResourceIds(Arrays.asList("oauth2-resource"));
-        details.setAccessTokenValiditySeconds(3600);
-        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        details.setAuthorities(authorities);*/
-
         return details;
     }
 
