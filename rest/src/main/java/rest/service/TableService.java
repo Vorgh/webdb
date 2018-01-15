@@ -3,11 +3,14 @@ package rest.service;
 import rest.model.connection.UserConnection;
 import rest.model.database.Column;
 import rest.model.database.Table;
+import rest.model.request.RowRequest;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TableService
 {
     List<Table> getAllTablesMetadata(String schemaName, boolean isView, UserConnection connection);
     List<Column> getAllColumnsMetadata(String schemaName, String tableName, UserConnection connection);
+    List<Map<String, Object>> getRowData(RowRequest request, UserConnection connection);
 }

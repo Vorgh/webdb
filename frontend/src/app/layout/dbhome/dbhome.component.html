@@ -1,0 +1,29 @@
+<div [@routerTransition]>
+    <div class="row">
+        <div class="col col-lg-12">
+            <div class="card mb-3">
+                <div class="card-header">Tables</div>
+                <table class="card-body table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Engine</th>
+                        <th>Creation Date</th>
+                        <th>Collation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let table of tables$ | async">
+                        <th scope="row">{{table.name}}</th>
+                        <td>{{table.type}}</td>
+                        <td>{{table.engine}}</td>
+                        <td>{{table.creationDate}}</td>
+                        <td>{{table.collation}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

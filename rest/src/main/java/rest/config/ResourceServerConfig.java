@@ -29,6 +29,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
     public void configure(HttpSecurity http) throws Exception
     {
         http
+            .cors()
+            .and()
             .csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
@@ -37,7 +39,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
             .authorizeRequests()
             .antMatchers("/connection/**").permitAll()
             .antMatchers("/oauth/**").permitAll()
-            .antMatchers("/db/**").authenticated();
+            .antMatchers("/**").authenticated();
     }
 
     @Override

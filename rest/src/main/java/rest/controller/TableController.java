@@ -1,6 +1,7 @@
 package rest.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,8 @@ import rest.model.database.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rest.model.request.MetadataRequest;
+import rest.model.request.RowRequest;
 import rest.service.TableService;
 
 @RestController
@@ -19,9 +22,9 @@ public class TableController
     @Autowired
     private TableService tableService;
 
-    @GetMapping("all")
+    @GetMapping("metadata/all")
     public ResponseEntity<List<Table>> getAllTablesMetadata(@RequestParam(value = "view", required = false) boolean isView,
-                                                            @RequestParam("schema") String schema,
+                                                            @RequestParam String schema,
                                                             @AuthenticationPrincipal UserConnection connection)
     {
         List<Table> list;
@@ -30,13 +33,22 @@ public class TableController
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @GetMapping("{tableName}/all")
-    public ResponseEntity<List<Column>> getAllColumnsMetadata(@RequestParam("schema") String schema,
-                                                              @PathVariable String tableName,
+    @GetMapping("metadata/single")
+    public ResponseEntity<List<Column>> getAllColumnsMetadata(@RequestParam String schema,
+                                                              @RequestParam String table,
                                                               @AuthenticationPrincipal UserConnection connection)
     {
         List<Column> list;
-        list = tableService.getAllColumnsMetadata(schema, tableName, connection);
+        list = tableService.getAllColumnsMetadata(schema, table, connection);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @PostMapping("rows")
+    public ResponseEntity<List<Map<String, Object>>> getRows(@RequestBody RowRequest request,
+                                                             @AuthenticationPrincipal UserConnection connection)
+    {
+        List<Map<String, Object>> list = tableService.getRowData(request, connection);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

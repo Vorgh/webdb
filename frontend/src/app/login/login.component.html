@@ -1,0 +1,51 @@
+<div class="login-page" [@routerTransition]>
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <img src="assets/images/logo.png" width="150px" class="user-avatar"/>
+            <h1>WebDB Login</h1>
+            <form role="form" #loginForm>
+                <div class="form-content">
+                    <div class="form-group">
+                        <span class="url-example"><small>(ex.: jdbc:mysql://localhost:3306/webdb)</small></span>
+                        <input [(ngModel)]="connAuth.url" #urlInput="ngModel" type="url"
+                               class="form-control input-underline input-lg" id="urlInput" name="urlInput"
+                               placeholder="JDBC Url" required autocomplete="off"
+                               [class.has-error]="urlInput.invalid && (urlInput.dirty || urlInput.touched)">
+                        <div *ngIf="urlInput.invalid && (urlInput.dirty || urlInput.touched)" class="error-block">
+                            <small *ngIf="urlInput.errors.required">
+                                URL is required!
+                            </small>
+                            <small *ngIf="urlInput.errors.pattern && !urlInput.errors.required">
+                                Invalid URL!
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input [(ngModel)]="connAuth.username" #userInput="ngModel" type="text"
+                               class="form-control input-underline input-lg" id="userInput" name="userInput"
+                               placeholder="Username" required autocomplete="off"
+                               [class.has-error]="userInput.invalid && (userInput.dirty || userInput.touched)">
+                        <div *ngIf="userInput.invalid && (userInput.dirty || userInput.touched)" class="error-block">
+                            <small *ngIf="userInput.errors.required">
+                                Username is required!
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input [(ngModel)]="connAuth.password" #passwordInput="ngModel" type="password"
+                               class="form-control input-underline input-lg" id="passwordInput"
+                               name="passwordInput" placeholder="Password" required
+                               [class.has-error]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
+                        <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
+                             class="error-block">
+                            <small *ngIf="passwordInput.errors.required">
+                                Password is required!
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn rounded-btn" (click)="onLoggedin()"> Log in </button>
+            </form>
+        </div>
+    </div>
+</div>

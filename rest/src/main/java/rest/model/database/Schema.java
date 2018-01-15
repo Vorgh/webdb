@@ -1,7 +1,5 @@
 package rest.model.database;
 
-import java.util.List;
-
 public class Schema
 {
     private String name;

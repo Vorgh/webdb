@@ -5,9 +5,11 @@ import rest.dao.TableDAO;
 import rest.model.connection.UserConnection;
 import rest.model.database.Column;
 import rest.model.database.Table;
+import rest.model.request.RowRequest;
 import rest.service.TableService;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TableServiceImpl implements TableService
@@ -29,5 +31,13 @@ public class TableServiceImpl implements TableService
         TableDAO tableDAO = new TableDAO(connection);
 
         return tableDAO.getAllColumnsMetadata(schemaName, tableName);
+    }
+
+    @Override
+    public List<Map<String, Object>> getRowData(RowRequest request, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        return tableDAO.getRowData(request.getSchemaName(), request.getTableName(), request.getColumnNames());
     }
 }

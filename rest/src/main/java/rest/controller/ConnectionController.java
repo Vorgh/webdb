@@ -19,14 +19,12 @@ public class ConnectionController
 {
     private ConnectionService connectionService;
     private DefaultTokenServices tokenServices;
-    private ConnectionDAO connectionDAO;
 
     @Autowired
     public ConnectionController(ConnectionService connectionService, DefaultTokenServices tokenServices, ConnectionDAO connectionDAO)
     {
         this.connectionService = connectionService;
         this.tokenServices = tokenServices;
-        this.connectionDAO = connectionDAO;
     }
 
     @PostMapping("connectionAuth")
@@ -37,7 +35,7 @@ public class ConnectionController
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("logout")
+    @PostMapping("logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, @AuthenticationPrincipal UserConnection connection)
     {
         String authorization = request.getHeader("Authorization");
@@ -48,7 +46,7 @@ public class ConnectionController
 
             if (removed)
             {
-                connectionDAO.logout(connection);
+                connectionService.logout(connection);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
             else

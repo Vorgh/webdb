@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rest.dao.ConnectionDAO;
 import rest.model.connection.ConnectionAuthInfo;
+import rest.model.connection.UserConnection;
 import rest.service.ConnectionService;
 
 @Service
@@ -20,5 +21,10 @@ public class ConnectionServiceImpl implements ConnectionService
     public void setConnectionAuthInfo(ConnectionAuthInfo connectionAuthInfo) throws IllegalStateException, IllegalArgumentException
     {
         connectionDAO.setAuthInfo(connectionAuthInfo);
+    }
+
+    public void logout(UserConnection connection)
+    {
+        connectionDAO.logout(connection);
     }
 }

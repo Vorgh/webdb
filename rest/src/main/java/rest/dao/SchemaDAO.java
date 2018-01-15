@@ -20,7 +20,7 @@ public class SchemaDAO extends AbstractDatabaseDAO
         return jdbcTemplate.query(
                 "SELECT schema_name " +
                         "FROM information_schema.SCHEMATA " +
-                        "WHERE SCHEMA_NAME not in ('information_schema', 'performance_schema', 'mysql');",
+                        "WHERE SCHEMA_NAME not in ('information_schema', 'performance_schema', 'mysql', 'sys');",
                 new SchemaMapper());
     }
 }

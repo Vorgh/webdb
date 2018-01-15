@@ -1,4 +1,9 @@
 export class Table
 {
-  name: string;
+    schema: string;
+    name: string;
+    type: string;
+    engine: string;
+    creationDate: Date;
+    collation: String;
 }
