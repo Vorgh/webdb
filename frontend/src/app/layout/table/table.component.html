@@ -1,0 +1,65 @@
+<div [@routerTransition]>
+    <app-page-header [heading]="table" [icon]="'fa-table'"></app-page-header>
+    <div class="row">
+        <div class="col col-lg-12">
+            <div class="card mb-3">
+                <ngb-tabset>
+                    <ngb-tab title="Rows">
+                        <ng-template ngbTabContent>
+                            <div class="table-responsive">
+                                <table class="card-body table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th *ngFor="let col of columns">{{col.name}}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let row of rows">
+                                        <td *ngFor="let key of row | keys">{{row[key]}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                    <ngb-tab title="Columns">
+                        <ng-template ngbTabContent>
+                            <div class="table-responsive">
+                                <table class="card-body table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th *ngFor="let key of columns[0] | keys">{{key}}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let col of columns">
+                                        <td *ngFor="let key of col | keys">{{col[key]}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                    <ngb-tab title="Metadata">
+                        <ng-template ngbTabContent>
+                            <div class="table-responsive">
+                                <table class="card-body table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th *ngFor="let key of metadata | keys">{{key}}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td *ngFor="let meta of metadata | values">{{meta}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                </ngb-tabset>
+            </div>
+        </div>
+    </div>
+</div>

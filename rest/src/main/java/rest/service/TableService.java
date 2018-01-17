@@ -11,6 +11,8 @@ import java.util.Map;
 public interface TableService
 {
     List<Table> getAllTablesMetadata(String schemaName, boolean isView, UserConnection connection);
+    Table getTableMetadata(String schemaName, String tableName, boolean isView, UserConnection connection);
     List<Column> getAllColumnsMetadata(String schemaName, String tableName, UserConnection connection);
-    List<Map<String, Object>> getRowData(RowRequest request, UserConnection connection);
+    List<Map<String, Object>> getRowData(String schema, String table, String column, UserConnection connection);
+    List<Map<String, Object>> getRowData(String schema, String table, String[] columns, UserConnection connection);
 }

@@ -34,6 +34,18 @@ public class TableController
     }
 
     @GetMapping("metadata/single")
+    public ResponseEntity<Table> getTableMetadata(@RequestParam(value = "view", required = false) boolean isView,
+                                                         @RequestParam String schema,
+                                                         @RequestParam String table,
+                                                         @AuthenticationPrincipal UserConnection connection)
+    {
+        Table tableMetadata;
+        tableMetadata = tableService.getTableMetadata(schema, table, isView, connection);
+
+        return new ResponseEntity<>(tableMetadata, HttpStatus.OK);
+    }
+
+    @GetMapping("metadata/columns")
     public ResponseEntity<List<Column>> getAllColumnsMetadata(@RequestParam String schema,
                                                               @RequestParam String table,
                                                               @AuthenticationPrincipal UserConnection connection)
@@ -44,11 +56,22 @@ public class TableController
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @GetMapping("rows")
+    public ResponseEntity<List<Map<String, Object>>> getRows(@RequestParam String schema,
+                                                             @RequestParam String table,
+                                                             @RequestParam String column,
+                                                             @AuthenticationPrincipal UserConnection connection)
+    {
+        List<Map<String, Object>> list = tableService.getRowData(schema, table, column, connection);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
     @PostMapping("rows")
     public ResponseEntity<List<Map<String, Object>>> getRows(@RequestBody RowRequest request,
                                                              @AuthenticationPrincipal UserConnection connection)
     {
-        List<Map<String, Object>> list = tableService.getRowData(request, connection);
+        List<Map<String, Object>> list = tableService.getRowData(request.getSchemaName(), request.getTableName(), request.getColumnNames(), connection);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

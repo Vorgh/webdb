@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { DBHomeComponent } from "./dbhome.component";
+import { TableComponent } from "./table.component";
 
 const routes: Routes = [
-    { path: '', redirectTo: '/not-found', pathMatch: 'full' },
-    { path: ':schema', component: DBHomeComponent }
+    {path: '', redirectTo: '/not-found', pathMatch: 'full'},
+    {path: ':table', component: TableComponent}
 ];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class DBHomeRoutingModule {
+export class TableRoutingModule {
 }

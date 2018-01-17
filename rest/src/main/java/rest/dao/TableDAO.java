@@ -1,6 +1,5 @@
 package rest.dao;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +9,6 @@ import rest.model.connection.UserConnection;
 import rest.model.database.Column;
 import rest.model.database.Table;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +32,17 @@ public class TableDAO extends AbstractDatabaseDAO
             new TableDetailMapper());
     }
 
+    public Table getTableMetadata(String schemaName, String tableName)
+    {
+        return jdbcTemplate.query(
+                "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
+                        "FROM information_schema.tables " +
+                        "WHERE table_schema=? AND table_name=? AND table_type='BASE TABLE';",
+                new Object[] {schemaName, tableName},
+                new TableDetailMapper())
+                .get(0);
+    }
+
     public List<Table> getAllViewsMetadata(String schemaName)
     {
         return jdbcTemplate.query(
@@ -42,6 +51,17 @@ public class TableDAO extends AbstractDatabaseDAO
                         "WHERE table_schema=? AND table_type='VIEW';",
                 new Object[] {schemaName},
                 new TableDetailMapper());
+    }
+
+    public Table getViewMetadata(String schemaName, String tableName)
+    {
+        return jdbcTemplate.query(
+                "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
+                        "FROM information_schema.tables " +
+                        "WHERE table_schema=? AND table_name=? AND table_type='VIEW';",
+                new Object[] {schemaName, tableName},
+                new TableDetailMapper())
+                .get(0);
     }
 
     public List<Column> getAllColumnsMetadata(String schemaName, String tableName)
@@ -54,6 +74,16 @@ public class TableDAO extends AbstractDatabaseDAO
                 "ORDER BY ordinal_position ASC;",
                 new Object[] {schemaName, tableName},
                 new ColumnDetailMapper());
+    }
+
+    public List<Map<String, Object>> getRowData(String schemaName, String tableName, String column)
+    {
+        String query =
+                "SELECT " + column +
+                        " FROM " + schemaName + "." + tableName +
+                        ";";
+
+        return jdbcTemplate.queryForList(query);
     }
 
     public List<Map<String, Object>> getRowData(String schemaName, String tableName, String[] columnNames)

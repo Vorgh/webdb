@@ -23,7 +23,7 @@ export class DBHomeComponent implements OnInit
 
     ngOnInit()
     {
-        this.route.parent.params.subscribe((params: Params) =>
+        this.route.params.subscribe((params: Params) =>
         {
             if (this.schema != params['schema'] && !isNullOrUndefined(params['schema']))
             {

@@ -15,7 +15,7 @@
                     </thead>
                     <tbody>
                     <tr *ngFor="let table of tables$ | async">
-                        <th scope="row">{{table.name}}</th>
+                        <th scope="row"><a [routerLink]="['/table', table.name]" [queryParams]="{schema: schema}">{{table.name}}</a></th>
                         <td>{{table.type}}</td>
                         <td>{{table.engine}}</td>
                         <td>{{table.creationDate}}</td>

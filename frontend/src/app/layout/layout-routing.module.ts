@@ -9,7 +9,8 @@ const routes: Routes = [
         children: [
             { path: '', redirectTo: 'home' },
             { path: 'home', loadChildren: './home/home.module#HomeModule' },
-            { path: 'db/:schema', loadChildren: './dbhome/dbhome.module#DBHomeModule'}
+            { path: 'db', loadChildren: './dbhome/dbhome.module#DBHomeModule'},
+            { path: 'table', loadChildren: './table/table.module#TableModule'},
         ]
     }
 ];

@@ -2,7 +2,6 @@ package rest.model.database;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Column
 {
     private String tableSchema;
