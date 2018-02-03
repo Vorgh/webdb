@@ -1,13 +1,14 @@
 <div class="row">
     <div class="col-xl-12">
         <h2 class="page-header">
-            {{heading}}
+            {{header.title}}
         </h2>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <i class="fa fa-dashboard"></i> <a href="Javascript:void(0)" [routerLink]="['/home']">Home</a>
+            <li *ngFor="let head of path" class="breadcrumb-item" [class.active]="head.id === header.id">
+                <i class="fa {{head.icon}}"></i>
+                <a *ngIf="head.id !== header.id" [routerLink]="head.link">{{head.title}}</a>
+                <a *ngIf="head.id === header.id">{{head.title}}</a>
             </li>
-            <li class="breadcrumb-item active"><i class="fa {{icon}}"></i> {{heading}}</li>
         </ol>
     </div>
 </div>

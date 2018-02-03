@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, NavigationEnd, ActivatedRoute} from '@angular/router';
 import {DatabaseService} from "../../../services/database.service";
-import {Schema} from "../../../models/schema";
+import {Schema} from "../../../models/rest-models";
 import {ConnectionService} from "../../../services/connection.service";
 
 @Component({
@@ -67,10 +67,5 @@ export class SidebarComponent implements OnInit
         this.connectionService.logout()
             .then(() => localStorage.removeItem('access_token'))
             .catch(error => console.log(error));
-    }
-
-    setCurrentSchema(schema: string)
-    {
-        this.databaseService.setCurrentSchema(schema);
     }
 }

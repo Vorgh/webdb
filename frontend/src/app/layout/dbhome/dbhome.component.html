@@ -2,7 +2,15 @@
     <div class="row">
         <div class="col col-lg-12">
             <div class="card mb-3">
-                <div class="card-header">Tables</div>
+                <div class="card-header d-flex">
+                    <div>Tables</div>
+                    <div class="ml-auto">
+                        <button class="btn btn-info new-table" (click)="openTableModal()">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            <small>NEW</small>
+                        </button>
+                    </div>
+                </div>
                 <table class="card-body table table-hover">
                     <thead>
                     <tr>
@@ -11,6 +19,7 @@
                         <th>Engine</th>
                         <th>Creation Date</th>
                         <th>Collation</th>
+                        <th class="operation-column"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -20,6 +29,14 @@
                         <td>{{table.engine}}</td>
                         <td>{{table.creationDate}}</td>
                         <td>{{table.collation}}</td>
+                        <td class="d-flex justify-content-center">
+                            <button class="btn btn-info" (click)="alterTable(table)">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-danger" (click)="dropTable(table)">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                            </button>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

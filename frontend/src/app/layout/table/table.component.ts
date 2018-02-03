@@ -1,10 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Column} from "../../models/column";
+import {Column} from "../../models/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
-import {Table} from "../../models/table";
+import {Table} from "../../models/rest-models";
+import {HeaderElement} from "../../models/header-element";
+import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 
 @Component({
     selector: 'app-table',
@@ -14,6 +16,8 @@ import {Table} from "../../models/table";
 })
 export class TableComponent implements OnInit
 {
+    header: HeaderElement;
+
     columns: Column[];
     rows: any[];
     metadata: Table;
@@ -21,6 +25,7 @@ export class TableComponent implements OnInit
     table: string;
 
     constructor(private databaseService: DatabaseService,
+                private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
                 private router: Router)
     {
@@ -54,6 +59,15 @@ export class TableComponent implements OnInit
                 this.databaseService.getTable(this.schema, this.table)
                     .then(metadata => this.metadata = metadata)
                     .catch(error => console.log(error));
+
+                this.header = <HeaderElement>{
+                    id: 'table',
+                    parent: this.pageHeaderService.getHeaderByID('dbhome'),
+                    link: this.router.url,
+                    title: this.table,
+                    icon: 'fa-table'
+                };
+                this.pageHeaderService.addFragment(this.header);
             }
         });
     }

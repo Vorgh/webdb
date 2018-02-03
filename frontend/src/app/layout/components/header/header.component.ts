@@ -41,7 +41,12 @@ export class HeaderComponent implements OnInit
     onLoggedout()
     {
         this.connectionService.logout()
-            .then(() => localStorage.removeItem('access_token'))
+            .then(() =>
+            {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('current_user');
+                this.router.navigate(['/login']);
+            })
             .catch(error => console.log(error));
 
     }

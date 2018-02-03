@@ -27,6 +27,8 @@ export class ConnectionService
                            .append('Content-type', 'application/x-www-form-urlencoded')
                            .append('Authorization', 'Basic ' + btoa(`${connAuth.username}:${connAuth.password}`));
 
+                       localStorage.setItem("current_user", connAuth.username);
+
                        return this.http.post<OAuthTokenResponse>(`${this.urlPrefix}/oauth/token`, params, {headers: headers})
                                   .toPromise()
                                   .catch(error => Promise.reject(error));

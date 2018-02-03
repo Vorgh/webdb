@@ -1,6 +1,6 @@
 package rest.model.database;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Objects;
 
 public class Column
 {
@@ -10,6 +10,7 @@ public class Column
     private int position;
     private String defaultValue;
     private boolean isNullable;
+    private boolean isUnique;
     private String dataType;
     private int maxCharLength;
     private int octetLength;
@@ -18,8 +19,32 @@ public class Column
     private int datePrecision;
     private String charSet;
     private String columnType;
-    private String key;
-    private String extra;
+    private boolean primaryKey;
+    private boolean autoIncrement;
+
+    @Override
+    public String toString()
+    {
+        return "Column{" +
+                "tableSchema='" + tableSchema + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", name='" + name + '\'' +
+                ", position=" + position +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", isNullable=" + isNullable +
+                ", isUnique=" + isUnique +
+                ", dataType='" + dataType + '\'' +
+                ", maxCharLength=" + maxCharLength +
+                ", octetLength=" + octetLength +
+                ", numericPrecision=" + numericPrecision +
+                ", numericScale=" + numericScale +
+                ", datePrecision=" + datePrecision +
+                ", charSet='" + charSet + '\'' +
+                ", columnType='" + columnType + '\'' +
+                ", primaryKey=" + primaryKey +
+                ", autoIncrement=" + autoIncrement +
+                '}';
+    }
 
     public String getTableSchema()
     {
@@ -161,23 +186,33 @@ public class Column
         this.columnType = columnType;
     }
 
-    public String getKey()
+    public boolean isUnique()
     {
-        return key;
+        return isUnique;
     }
 
-    public void setKey(String key)
+    public void setUnique(boolean unique)
     {
-        this.key = key;
+        isUnique = unique;
     }
 
-    public String getExtra()
+    public boolean isPrimaryKey()
     {
-        return extra;
+        return primaryKey;
     }
 
-    public void setExtra(String extra)
+    public void setPrimaryKey(boolean primaryKey)
     {
-        this.extra = extra;
+        this.primaryKey = primaryKey;
+    }
+
+    public boolean isAutoIncrement()
+    {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement)
+    {
+        this.autoIncrement = autoIncrement;
     }
 }

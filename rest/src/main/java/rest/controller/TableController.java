@@ -7,11 +7,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import rest.model.connection.UserConnection;
 import rest.model.database.Column;
+import rest.model.database.Constraint;
+import rest.model.database.Index;
 import rest.model.database.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rest.model.request.MetadataRequest;
+import rest.model.request.table.alter.AlterTableRequest;
 import rest.model.request.RowRequest;
 import rest.service.TableService;
 
@@ -56,6 +58,26 @@ public class TableController
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @GetMapping("foreign")
+    public ResponseEntity<List<Constraint>> getForeignKeys(@RequestParam String schema,
+                                                                @RequestParam String table,
+                                                                @AuthenticationPrincipal UserConnection connection)
+    {
+        List<Constraint> list = tableService.getForeignKeys(schema, table, connection);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @GetMapping("indexes")
+    public ResponseEntity<List<Index>> getTableIndexes(@RequestParam String schema,
+                                                       @RequestParam String table,
+                                                       @AuthenticationPrincipal UserConnection connection)
+    {
+        List<Index> list = tableService.getTableIndexes(schema, table, connection);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
     @GetMapping("rows")
     public ResponseEntity<List<Map<String, Object>>> getRows(@RequestParam String schema,
                                                              @RequestParam String table,
@@ -74,6 +96,17 @@ public class TableController
         List<Map<String, Object>> list = tableService.getRowData(request.getSchemaName(), request.getTableName(), request.getColumnNames(), connection);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @PostMapping("alter")
+    public ResponseEntity<Void> alterTable(@RequestParam String schema,
+                                           @RequestParam String table,
+                                           @RequestBody AlterTableRequest request,
+                                           @AuthenticationPrincipal UserConnection connection)
+    {
+        tableService.alterTable(schema, table, request, connection);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /*@GetMapping("{name}/metadata")

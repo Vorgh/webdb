@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { AuthGuard, HttpInterceptorModule } from './shared';
 import {ConnectionService} from "./services/connection.service";
 import {DatabaseService} from "./services/database.service";
+import {PageHeaderService} from "./shared/modules/page-header/page-header.service";
 
 @NgModule({
     imports: [
@@ -20,7 +21,7 @@ import {DatabaseService} from "./services/database.service";
         HttpInterceptorModule
     ],
     declarations: [AppComponent],
-    providers: [AuthGuard, ConnectionService, DatabaseService],
+    providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService],
     bootstrap: [AppComponent]
 })
 export class AppModule {}

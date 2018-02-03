@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service;
 import rest.dao.TableDAO;
 import rest.model.connection.UserConnection;
 import rest.model.database.Column;
+import rest.model.database.Constraint;
+import rest.model.database.Index;
 import rest.model.database.Table;
-import rest.model.request.RowRequest;
+import rest.model.request.table.alter.AlterTableRequest;
 import rest.service.TableService;
 
 import java.util.List;
@@ -45,6 +47,22 @@ public class TableServiceImpl implements TableService
     }
 
     @Override
+    public List<Constraint> getForeignKeys(String schemaName, String tableName, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        return tableDAO.getForeignKeys(schemaName, tableName);
+    }
+
+    @Override
+    public List<Index> getTableIndexes(String schemaName, String tableName, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        return tableDAO.getTableIndexes(schemaName, tableName);
+    }
+
+    @Override
     public List<Map<String, Object>> getRowData(String schema, String table, String column, UserConnection connection)
     {
         TableDAO tableDAO = new TableDAO(connection);
@@ -58,5 +76,13 @@ public class TableServiceImpl implements TableService
         TableDAO tableDAO = new TableDAO(connection);
 
         return tableDAO.getRowData(schema, table, columns);
+    }
+
+    @Override
+    public void alterTable(String schema, String table, AlterTableRequest request, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        tableDAO.alterTable(schema, table, request);
     }
 }

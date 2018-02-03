@@ -1,7 +1,6 @@
 <nav class="sidebar" [ngClass]="{sidebarPushRight: isActive}">
     <div class="list-group">
-        <a *ngFor="let schema of schemas$ | async" [routerLink]="['/db', schema.name]" class="list-group-item"
-           [class.router-link-active]="selected === schema.name" (click)="setCurrentSchema(schema.name)">
+        <a *ngFor="let schema of schemas$ | async" [routerLink]="['/db', schema.name]" class="list-group-item">
             <i class="fa fa-fw fa-database"></i>&nbsp;{{schema.name}}
         </a>
         <div class="nested-menu">

@@ -1,22 +1,16 @@
-import {Injectable, isDevMode} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Table} from "../models/table";
-import {Schema} from "../models/schema";
-import {Observable} from "rxjs/Observable";
-import {Subject} from "rxjs/Subject";
-import {Column} from "../models/column";
-import {RowRequest} from "../models/request/row-request";
+import {Constraint, Index, Table} from "../models/rest-models";
+import {Schema} from "../models/rest-models";
+import {Column} from "../models/rest-models";
 
 @Injectable()
 export class DatabaseService
 {
     private urlPrefix: string = 'rest';
-    private _currentSchema: Subject<string>;
 
     constructor(private http: HttpClient)
-    {
-        this._currentSchema = new Subject<string>();
-    }
+    {}
 
     getAllSchemas(): Promise<Schema[]>
     {
@@ -32,6 +26,22 @@ export class DatabaseService
         return this.http.get<Table[]>(`${this.urlPrefix}/table/metadata/all`, {params: params})
                    .toPromise()
                    .catch(error => Promise.reject(error));
+    }
+
+    createTable(schema: string, tableName: string, columnDefs: Column[])
+    {
+
+    }
+
+    alterTable(schema: string, table: string, changes: any): Promise<any>
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('table', table);
+
+        return this.http.post(`${this.urlPrefix}/table/alter`, changes, {params: params})
+            .toPromise()
+            .catch(error => Promise.reject(error));
     }
 
     getTable(schema: string, table: string, isView: boolean = false)
@@ -54,6 +64,28 @@ export class DatabaseService
         return this.http.get<Column[]>(`${this.urlPrefix}/table/metadata/columns`, {params: params})
             .toPromise()
             .catch(error => Promise.reject(error));
+    }
+
+    getForeignKeys(schema: string, table: string): Promise<Constraint[]>
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('table', table);
+
+        return this.http.get<Constraint[]>(`${this.urlPrefix}/table/foreign`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getIndexes(schema: string, table: string): Promise<Index[]>
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('table', table);
+
+        return this.http.get<Index[]>(`${this.urlPrefix}/table/indexes`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
     }
 
     getRows(schema: string, table: string): Promise<any[]>
@@ -81,14 +113,4 @@ export class DatabaseService
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }*/
-
-    getCurrentSchemaObservable()
-    {
-        return this._currentSchema.asObservable();
-    }
-
-    setCurrentSchema(value: string)
-    {
-        this._currentSchema.next(value)
-    }
 }

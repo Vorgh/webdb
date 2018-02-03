@@ -27,8 +27,30 @@ public class ColumnDetailMapper implements RowMapper<Column>
         column.setDatePrecision(rs.getInt("datetime_precision"));
         column.setCharSet(rs.getString("character_set_name"));
         column.setColumnType(rs.getString("column_type"));
-        column.setKey(rs.getString("column_key"));
-        column.setExtra(rs.getString("extra"));
+        column.setAutoIncrement(rs.getString("extra").contains("auto_increment"));
+
+        String key = rs.getString("column_key");
+        switch (key)
+        {
+            case "PRI":
+            {
+                column.setPrimaryKey(true);
+                column.setUnique(false);
+                break;
+            }
+            case "UNI":
+            {
+                column.setPrimaryKey(false);
+                column.setUnique(true);
+                break;
+            }
+            default:
+            {
+                column.setPrimaryKey(false);
+                column.setUnique(false);
+                break;
+            }
+        }
 
         return column;
     }

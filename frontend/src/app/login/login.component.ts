@@ -38,6 +38,7 @@ export class LoginComponent implements OnInit
             .catch(error =>
             {
                 console.log(error);
+                localStorage.removeItem("current_user");
                 this.router.navigate(['/access-denied']);
             });
     }
