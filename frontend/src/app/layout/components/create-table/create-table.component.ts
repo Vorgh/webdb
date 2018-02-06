@@ -1,7 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
-import {Table} from "../../../models/rest-models";
+import {Column, Constraint, Table} from "../../../models/rest-models";
+import {isNullOrUndefined} from "util";
+import {Utils} from "../../../shared/util/utils";
+import {DatabaseService} from "../../../services/database.service";
 
 @Component({
     selector: 'create-table-modal',
@@ -10,12 +13,14 @@ import {Table} from "../../../models/rest-models";
 })
 export class CreateTableComponent implements OnInit
 {
-    @Input() tableList: Table[];
+    readonly CASCADE_OPTIONS = ["RESTRICT", "CASCADE", "SET NULL", "NO ACTION"];
+
+    @Input() schema: string;
     createTableForm: FormGroup;
-    FKStates: boolean[] = [];
 
     constructor(public activeModal: NgbActiveModal,
-                private formBuilder: FormBuilder)
+                private formBuilder: FormBuilder,
+                private databaseService: DatabaseService)
     {
     }
 
@@ -23,10 +28,10 @@ export class CreateTableComponent implements OnInit
     {
         this.createTableForm = this.formBuilder.group({
                 tableName: [''],
-                columns: this.formBuilder.array([])
+                columns: this.formBuilder.array([]),
+                constraints: this.formBuilder.array([])
             }
         );
-        this.addColumn();
     }
 
     get formColumns(): FormArray
@@ -34,36 +39,79 @@ export class CreateTableComponent implements OnInit
         return this.createTableForm.get('columns') as FormArray;
     }
 
-    get columnDef()
+    get formConstraints(): FormArray
     {
-        return {
-            columnName: [''],
-            type: [''],
-            default: [''],
-            PK: false,
-            UQ: false,
-            NN: false,
-            ZF: false,
-            AI: false,
-            FK: false,
-            refSelect: ['']
-        };
+        return this.createTableForm.get('constraints') as FormArray;
     }
 
-    addColumn()
+    addColumn(name, type, defaultValue, PK, UQ, NUL, AI)
     {
-        this.FKStates.push(false);
-        this.formColumns.push(this.formBuilder.group(this.columnDef));
+        let col = new Column();
+        col.tableSchema = this.schema;
+        col.name = name.value;
+        col.columnType = type.value;
+        col.defaultValue = defaultValue.value;
+        col.primaryKey = PK.checked;
+        col.unique = UQ.checked;
+        col.nullable = NUL.checked;
+        col.autoIncrement = AI.checked;
+
+        this.formColumns.push(this.formBuilder.group(col));
+
+        name.value = '';
+        type.value = '';
+        defaultValue.value = '';
+        PK.checked = false;
+        UQ.checked = false;
+        NUL.checked = true;
+        AI.checked = false;
+    }
+
+    addForeignKey(name, column, reference, updateRule, deleteRule)
+    {
+        let key: Constraint = new Constraint();
+        let parsedRef = Utils.parseReference(reference.value);
+
+        if (isNullOrUndefined(parsedRef)) return;
+
+        key.constraintName = name.value;
+        key.schema = this.schema;
+        key.column = column.value;
+        key.refSchema = parsedRef[0];
+        key.refTable = parsedRef[1];
+        key.refColumn = parsedRef[2];
+        key.updateRule = updateRule.value;
+        key.deleteRule = deleteRule.value;
+
+        this.formConstraints.push(this.formBuilder.group(key));
+
+        name.value = '';
+        column.value = '';
+        reference.value = '';
+        updateRule.value = this.CASCADE_OPTIONS[0];
+        deleteRule.value = this.CASCADE_OPTIONS[0];
     }
 
     removeColumn(index: number)
     {
         this.formColumns.removeAt(index);
-        this.FKStates.splice(index, 1);
     }
 
-    toggleFK(index: number)
+    removeForeignKey(index: number)
     {
-        this.FKStates[index] = !this.FKStates[index];
+        this.formColumns.removeAt(index);
+    }
+
+    submit()
+    {
+        this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
+            this.formColumns.value, this.formConstraints.value)
+            .then(() => this.activeModal.close())
+            .catch(error => console.log(error));
+    }
+
+    concatSchemaTableColumn(schema: string, table: string, column: string): string
+    {
+        return `${schema}.${table}(${column})`;
     }
 }

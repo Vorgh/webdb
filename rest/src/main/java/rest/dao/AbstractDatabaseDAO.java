@@ -24,4 +24,9 @@ public abstract class AbstractDatabaseDAO
         this.connection = connection;
         this.jdbcTemplate = connection.getJdbcTemplate();
     }
+
+    String quote(String s)
+    {
+        return "`" + s + "`";
+    }
 }

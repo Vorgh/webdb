@@ -8,6 +8,7 @@ import rest.model.database.Constraint;
 import rest.model.database.Index;
 import rest.model.database.Table;
 import rest.model.request.table.alter.AlterTableRequest;
+import rest.model.request.table.create.CreateTableRequest;
 import rest.service.TableService;
 
 import java.util.List;
@@ -84,5 +85,13 @@ public class TableServiceImpl implements TableService
         TableDAO tableDAO = new TableDAO(connection);
 
         tableDAO.alterTable(schema, table, request);
+    }
+
+    @Override
+    public void createTable(String schema, CreateTableRequest request, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        tableDAO.createTable(schema, request);
     }
 }

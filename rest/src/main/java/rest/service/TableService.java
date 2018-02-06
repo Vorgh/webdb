@@ -6,6 +6,7 @@ import rest.model.database.Constraint;
 import rest.model.database.Index;
 import rest.model.database.Table;
 import rest.model.request.table.alter.AlterTableRequest;
+import rest.model.request.table.create.CreateTableRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -20,4 +21,5 @@ public interface TableService
     List<Map<String, Object>> getRowData(String schema, String table, String column, UserConnection connection);
     List<Map<String, Object>> getRowData(String schema, String table, String[] columns, UserConnection connection);
     void alterTable(String schema, String table, AlterTableRequest request, UserConnection connection);
+    void createTable(String schema, CreateTableRequest request, UserConnection connection);
 }

@@ -28,9 +28,20 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    createTable(schema: string, tableName: string, columnDefs: Column[])
+    createTable(schema: string, tableName: string, columnDefs: Column[], foreignKeys: Constraint[]): Promise<any>
     {
+        let params = new HttpParams()
+            .append('schema', schema);
 
+        let body = {
+            tableName: tableName,
+            columns: columnDefs,
+            foreignKeys: foreignKeys
+        };
+
+        return this.http.post(`${this.urlPrefix}/table/create`, body, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
     }
 
     alterTable(schema: string, table: string, changes: any): Promise<any>

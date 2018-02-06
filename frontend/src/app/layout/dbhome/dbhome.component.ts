@@ -20,8 +20,6 @@ import {Column} from "../../models/rest-models";
 export class DBHomeComponent implements OnInit
 {
     schema: string;
-    tables: Table[];
-    columns: Column[];
 
     tables$: Promise<Table[]>;
 
@@ -41,8 +39,6 @@ export class DBHomeComponent implements OnInit
             {
                 this.schema = params['schema'];
                 this.tables$ = this.databaseService.getAllTables(this.schema);
-                this.tables$.then(tables => this.tables = tables);
-
                 this.pageHeaderService.addFragment(<HeaderElement>{
                     id: 'dbhome',
                     parent: this.pageHeaderService.getHeaderByID('home'),
@@ -54,19 +50,19 @@ export class DBHomeComponent implements OnInit
         });
     }
 
-    openTableModal()
+    createTableModal()
     {
         const modalRef = this.modalService.open(CreateTableComponent, {size: "lg", backdrop: "static"});
-        modalRef.componentInstance.tableList = this.tables;
+        modalRef.componentInstance.schema = this.schema;
 
     }
 
-    dropTable(table: Table)
+    dropTableModal(table: Table)
     {
         //TODO
     }
 
-    alterTable(table: Table)
+    alterTableModal(table: Table)
     {
         Promise.all([
             this.databaseService.getColumns(this.schema, table.name),

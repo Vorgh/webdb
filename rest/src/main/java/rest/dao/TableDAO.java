@@ -14,7 +14,9 @@ import rest.model.database.Index;
 import rest.model.database.Table;
 import rest.model.request.table.alter.AlterTableRequest;
 import rest.model.request.table.alter.Change;
+import rest.model.request.table.create.CreateTableRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,6 +122,40 @@ public class TableDAO extends AbstractDatabaseDAO
         String query = "SELECT " + String.join(",", columnNames) + " FROM " + schemaName + "." + tableName + ";";
 
         return jdbcTemplate.queryForList(query);
+    }
+
+    public void createTable(String schemaName, CreateTableRequest request)
+    {
+        StringBuilder query = new StringBuilder();
+        List<String> primaryKeys = new ArrayList<>();
+
+        query.append("CREATE TABLE ").append(quote(schemaName)).append(".").append(quote(request.tableName)).append("(");
+        for (Column col : request.columns)
+        {
+            if (col.isPrimaryKey())
+            {
+                primaryKeys.add(col.getName());
+            }
+
+            query.append(createColumnDefinition(col)).append(", ");
+        }
+
+        if (!primaryKeys.isEmpty())
+            query.append("PRIMARY KEY (").append(String.join(",", primaryKeys)).append("), \n");
+
+        for (Constraint key: request.foreignKeys)
+        {
+            query.append("INDEX ").append(quote(key.constraintName + "_idx")).append(" (").append(quote(key.column)).append("), \n");
+            query.append("FOREIGN KEY (").append(quote(key.column)).append(") ");
+            query.append("REFERENCES ").append(quote(key.refSchema)).append(".").append(quote(key.refTable)).append("(").append(quote(key.refColumn)).append(") ");
+            query.append("ON UPDATE ").append(key.updateRule).append(" ");
+            query.append("ON DELETE ").append(key.deleteRule).append(", \n");
+        }
+
+        query.append(")");
+        query.setCharAt(query.lastIndexOf(","), ';');
+
+        logger.info("Query executed: {}", query.toString());
     }
 
     public void alterTable(String schemaName, String tableName, AlterTableRequest request)
@@ -285,11 +321,6 @@ public class TableDAO extends AbstractDatabaseDAO
                         "WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema=? AND t.table_name=?;",
                 new Object[]{schemaName, tableName},
                 (resultSet, i) -> resultSet.getString("column_name"));
-    }
-
-    private String quote(String s)
-    {
-        return "`" + s + "`";
     }
 
     private String createColumnDefinition(Column col)

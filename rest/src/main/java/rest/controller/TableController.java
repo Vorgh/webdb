@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rest.model.request.table.alter.AlterTableRequest;
 import rest.model.request.RowRequest;
+import rest.model.request.table.create.CreateTableRequest;
 import rest.service.TableService;
 
 @RestController
@@ -98,6 +99,16 @@ public class TableController
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @PostMapping("create")
+    public ResponseEntity<Void> createTable(@RequestParam String schema,
+                                           @RequestBody CreateTableRequest request,
+                                           @AuthenticationPrincipal UserConnection connection)
+    {
+        tableService.createTable(schema, request, connection);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PostMapping("alter")
     public ResponseEntity<Void> alterTable(@RequestParam String schema,
                                            @RequestParam String table,
@@ -106,7 +117,7 @@ public class TableController
     {
         tableService.alterTable(schema, table, request, connection);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /*@GetMapping("{name}/metadata")

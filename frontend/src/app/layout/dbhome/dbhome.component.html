@@ -5,7 +5,7 @@
                 <div class="card-header d-flex">
                     <div>Tables</div>
                     <div class="ml-auto">
-                        <button class="btn btn-info new-table" (click)="openTableModal()">
+                        <button class="btn btn-info new-table" (click)="createTableModal(schema)">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                             <small>NEW</small>
                         </button>
@@ -30,10 +30,10 @@
                         <td>{{table.creationDate}}</td>
                         <td>{{table.collation}}</td>
                         <td class="d-flex justify-content-center">
-                            <button class="btn btn-info" (click)="alterTable(table)">
+                            <button class="btn btn-info" (click)="alterTableModal(table)">
                                 <i class="fa fa-pencil" aria-hidden="true"></i>
                             </button>
-                            <button class="btn btn-danger" (click)="dropTable(table)">
+                            <button class="btn btn-danger" (click)="dropTableModal(table)">
                                 <i class="fa fa-times" aria-hidden="true"></i>
                             </button>
                         </td>
