@@ -7,6 +7,34 @@
     text-align: center;
 }
 
-.operation-column {
-    max-width: 100px;
+.fade-in-ellipse {
+    transition: .5s ease;
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.fade-in-ellipse-text {
+    background-color: white;
+    color: black;
+    font-size: 32px;
+    padding: 16px 32px;
+}
+
+.long-text-col {
+    position: relative;
+    opacity: 1;
+    transition: .5s ease;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.long-text-col:hover .fade-in-ellipse {
+    opacity: 0.8;
 }

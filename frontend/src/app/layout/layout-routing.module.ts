@@ -11,6 +11,7 @@ const routes: Routes = [
             { path: 'home', loadChildren: './home/home.module#HomeModule' },
             { path: 'db', loadChildren: './dbhome/dbhome.module#DBHomeModule'},
             { path: 'table', loadChildren: './table/table.module#TableModule'},
+            { path: 'trigger', loadChildren: './trigger/trigger.module#TriggerModule'},
         ]
     }
 ];

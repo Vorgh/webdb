@@ -1,3 +1,27 @@
 .fs-12 {
     font-size: 12px;
 }
+
+.small-text {
+    font-size: 0.8em;
+}
+
+.xsmall-text {
+    font-size: 0.6em;
+}
+
+.col-form-label {
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.divider {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.operation-column {
+    max-width: 100px;
+    padding: 0;
+}

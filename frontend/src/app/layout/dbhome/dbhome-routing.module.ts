@@ -3,8 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { DBHomeComponent } from "./dbhome.component";
 
 const routes: Routes = [
-    { path: '', redirectTo: '/not-found', pathMatch: 'full' },
-    { path: ':schema', component: DBHomeComponent }
+    { path: '', component: DBHomeComponent }
 ];
 
 @NgModule({

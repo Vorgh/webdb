@@ -1,25 +1,52 @@
 <div [@routerTransition]>
-    <app-page-header [header]="header"></app-page-header>
     <div class="row">
         <div class="col col-lg-12">
             <div class="card mb-3">
                 <ngb-tabset>
                     <ngb-tab title="Rows">
                         <ng-template ngbTabContent>
-                            <div class="table-responsive">
-                                <table class="card-body table table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th *ngFor="let col of columns">{{col.name}}</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr *ngFor="let row of rows">
-                                        <td *ngFor="let key of row | keys">{{row[key]}}</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <div class="card-header d-flex justify-content-end">
+                                <button type="submit" class="btn btn-info" [disabled]="rowForm.pristine" (click)="onSubmit()">Save</button>
                             </div>
+                            <form [formGroup]="rowForm">
+                                <div class="table-responsive">
+                                    <table class="card-body table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th *ngFor="let col of columns">{{col.name}}</th>
+                                            <th class="operation-column"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr *ngFor="let row of rows; let i=index" [formGroupName]="i" [class.deleted]="row.deleted">
+                                            <td *ngFor="let col of columns">
+                                                <input type="text" class="form-control form-control-sm" [formControlName]="col.name" [placeholder]="col.name">
+                                            </td>
+                                            <td>
+                                                <button *ngIf="!row.deleted" type="button" class="btn btn-danger btn-sm" (click)="deleteRow(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                                                <button *ngIf="row.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoDeleteRow(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5" class="text-left">
+                                                <div class="xsmall-text text-info">Add new:</div>
+                                            </td>
+                                        </tr>
+                                        <tr formGroupName="newRow">
+                                            <td *ngFor="let col of columns">
+                                                <input type="text" class="form-control form-control-sm" [formControlName]="col.name" >
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-info btn-sm"
+                                                        (click)="addRow()">
+                                                    <i class="fa fa-plus" aria-hidden="true"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
                         </ng-template>
                     </ngb-tab>
                     <ngb-tab title="Columns">
@@ -40,7 +67,7 @@
                             </div>
                         </ng-template>
                     </ngb-tab>
-                    <ngb-tab title="Metadata">
+                    <ngb-tab *ngIf="metadata.type != 'VIEW'" title="Metadata">
                         <ng-template ngbTabContent>
                             <div class="table-responsive">
                                 <table class="card-body table table-hover">

@@ -1,4 +1,4 @@
-package rest.model.request.table.alter;
+package rest.model.request;
 
 public class Change<T>
 {

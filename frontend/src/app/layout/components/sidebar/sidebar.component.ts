@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router, NavigationEnd, ActivatedRoute} from '@angular/router';
+import {Router, NavigationEnd} from '@angular/router';
 import {DatabaseService} from "../../../services/database.service";
 import {Schema} from "../../../models/rest-models";
 import {ConnectionService} from "../../../services/connection.service";
@@ -14,7 +14,7 @@ export class SidebarComponent implements OnInit
     isActive: boolean = false;
     showMenu: string = '';
     pushRightClass: string = 'push-right';
-    schemas$: Promise<Schema[]>;
+    schemas: Schema[];
 
     constructor(private databaseService: DatabaseService,
                 private connectionService: ConnectionService,
@@ -35,7 +35,13 @@ export class SidebarComponent implements OnInit
 
     ngOnInit()
     {
-        this.schemas$ = this.databaseService.getAllSchemas();
+        this.databaseService.getAllSchemas()
+            .then(schemas => this.schemas = schemas)
+            .catch(promise =>
+            {
+                this.router.navigate(["/error"],
+                    {queryParams: {code: promise.status, message: promise.statusText}});
+            })
     }
 
     addExpandClass(element: any)

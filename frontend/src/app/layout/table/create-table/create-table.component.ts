@@ -1,13 +1,14 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {Component, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
 import {Column, Constraint, Table} from "../../../models/rest-models";
 import {isNullOrUndefined} from "util";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 
 @Component({
-    selector: 'create-table-modal',
+    selector: 'create-table',
     templateUrl: './create-table.component.html',
     styleUrls: ['./create-table.component.scss']
 })
@@ -15,17 +16,35 @@ export class CreateTableComponent implements OnInit
 {
     readonly CASCADE_OPTIONS = ["RESTRICT", "CASCADE", "SET NULL", "NO ACTION"];
 
-    @Input() schema: string;
+    schema: string;
     createTableForm: FormGroup;
+    types = Utils.dataTypes;
 
-    constructor(public activeModal: NgbActiveModal,
-                private formBuilder: FormBuilder,
-                private databaseService: DatabaseService)
+    constructor(private formBuilder: FormBuilder,
+                private databaseService: DatabaseService,
+                private pageHeaderService: PageHeaderService,
+                private router: Router,
+                private route: ActivatedRoute)
     {
     }
 
     ngOnInit()
     {
+        this.route.queryParams.subscribe(params =>
+        {
+            if (!isNullOrUndefined(params['schema']))
+            {
+                this.schema = params['schema'];
+
+                this.pageHeaderService.addFragment('create-table', this.pageHeaderService.getHeaderByID('dbhome'),
+                    this.router.url, 'New Table', 'fa-table');
+            }
+            else
+            {
+                this.router.navigate(['/not-found']);
+            }
+        });
+
         this.createTableForm = this.formBuilder.group({
                 tableName: [''],
                 columns: this.formBuilder.array([]),
@@ -70,7 +89,7 @@ export class CreateTableComponent implements OnInit
     addForeignKey(name, column, reference, updateRule, deleteRule)
     {
         let key: Constraint = new Constraint();
-        let parsedRef = Utils.parseReference(reference.value);
+        let parsedRef = Utils.parseColumnReference(reference.value);
 
         if (isNullOrUndefined(parsedRef)) return;
 
@@ -106,7 +125,7 @@ export class CreateTableComponent implements OnInit
     {
         this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
             this.formColumns.value, this.formConstraints.value)
-            .then(() => this.activeModal.close())
+            .then(() => this.router.navigate(['/db']))
             .catch(error => console.log(error));
     }
 

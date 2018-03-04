@@ -3,8 +3,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { TableComponent } from "./table.component";
 
 const routes: Routes = [
-    {path: '', redirectTo: '/not-found', pathMatch: 'full'},
-    {path: ':table', component: TableComponent}
+    {path: '', component: TableComponent},
+    {path: 'create', loadChildren: './create-table/create-table.module#CreateTableModule'},
+    {path: 'alter', loadChildren: './alter-table/alter-table.module#AlterTableModule'}
 ];
 
 @NgModule({

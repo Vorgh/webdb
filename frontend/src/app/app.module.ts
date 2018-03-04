@@ -10,6 +10,9 @@ import { AuthGuard, HttpInterceptorModule } from './shared';
 import {ConnectionService} from "./services/connection.service";
 import {DatabaseService} from "./services/database.service";
 import {PageHeaderService} from "./shared/modules/page-header/page-header.service";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import {AlterTableResolver} from "./layout/table/alter-table/alter-table-resolver.service";
+import {TriggerResolver} from "./layout/trigger/trigger-resolver.service";
 
 @NgModule({
     imports: [
@@ -18,10 +21,11 @@ import {PageHeaderService} from "./shared/modules/page-header/page-header.servic
         BrowserAnimationsModule,
         HttpClientModule,
         AppRoutingModule,
-        HttpInterceptorModule
+        HttpInterceptorModule,
+        NgbModule.forRoot()
     ],
     declarations: [AppComponent],
-    providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService],
+    providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService, AlterTableResolver, TriggerResolver],
     bootstrap: [AppComponent]
 })
 export class AppModule {}

@@ -3,6 +3,7 @@ package rest.model.request.table.alter;
 import rest.model.database.Column;
 import rest.model.database.Constraint;
 import rest.model.database.Index;
+import rest.model.request.Change;
 
 import java.util.List;
 

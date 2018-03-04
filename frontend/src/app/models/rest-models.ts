@@ -13,6 +13,13 @@ export class Table
     collation: String;
 }
 
+export class Row
+{
+    deleted?: boolean;
+    added?: boolean;
+    [key: string]: any;
+}
+
 export class Column
 {
     tableSchema: string;
@@ -80,4 +87,16 @@ export class Index
     nullable: boolean;
     deleted?: boolean;
     added?: boolean;
+}
+
+export class Trigger
+{
+    schema: string;
+    name: string;
+    eventType: string;
+    eventSchema: string;
+    eventTable: string;
+    triggerBody: string;
+    timing: string;
+    createdAt: Date;
 }

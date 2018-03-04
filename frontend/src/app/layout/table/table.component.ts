@@ -1,12 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Column} from "../../models/rest-models";
+import {Column, Row} from "../../models/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {isNullOrUndefined} from "util";
+import {isNullOrUndefined, isNumber} from "util";
 import {Table} from "../../models/rest-models";
-import {HeaderElement} from "../../models/header-element";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
+import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
 
 @Component({
     selector: 'app-table',
@@ -16,59 +16,222 @@ import {PageHeaderService} from "../../shared/modules/page-header/page-header.se
 })
 export class TableComponent implements OnInit
 {
-    header: HeaderElement;
-
     columns: Column[];
-    rows: any[];
+    rows: Row[];
     metadata: Table;
     schema: string;
     table: string;
+    rowForm: FormGroup;
+    newRowGroup: FormGroup;
 
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
-                private router: Router)
+                private router: Router,
+                private formBuilder: FormBuilder)
     {
+        this.columns = [];
+        this.rows = [];
+        this.metadata = new Table();
+        this.rowForm = this.formBuilder.group([]);
+        this.newRowGroup = this.formBuilder.group([]);
     }
 
     ngOnInit()
     {
+        this.rowForm.addControl("newRow", this.newRowGroup);
         this.route.queryParams.subscribe(params =>
         {
-            this.schema = params['schema'];
-        });
-
-        this.route.params.subscribe((params: Params) =>
-        {
-            if (isNullOrUndefined(this.schema))
+            if (!isNullOrUndefined(params['schema']) && !isNullOrUndefined(params['table']))
             {
-                this.router.navigate(['/home']);
-            }
-
-            if (this.table != params['table'] && !isNullOrUndefined(params['table']))
-            {
+                this.schema = params['schema'];
                 this.table = params['table'];
-                this.databaseService.getColumns(this.schema, this.table)
-                    .then(columns => this.columns = columns)
-                    .catch(error => console.log(error));
 
-                this.databaseService.getRows(this.schema, this.table)
-                    .then(rows => this.rows = rows)
-                    .catch(error => console.log(error));
+                Promise.all([
+                    this.databaseService.getColumns(this.schema, this.table),
+                    this.databaseService.getRows(this.schema, this.table),
+                    this.databaseService.getTable(this.schema, this.table)
+                ])
+                    .then(values =>
+                    {
+                        this.columns = values[0];
+                        this.rows = values[1];
+                        this.metadata = values[2];
 
-                this.databaseService.getTable(this.schema, this.table)
-                    .then(metadata => this.metadata = metadata)
-                    .catch(error => console.log(error));
+                        let index = 0;
+                        for (let row of this.rows)
+                        {
+                            let group: FormGroup = this.formBuilder.group({
+                                added: false,
+                                deleted: false
+                            });
+                            for (let col of this.columns)
+                            {
+                                if (!col.autoIncrement)
+                                    group.addControl(col.name, new FormControl(row[col.name]));
+                                else
+                                    group.addControl(col.name, new FormControl({value: row[col.name], disabled: true}));
+                            }
+                            this.rowForm.addControl(index.toString(), group);
+                            index++;
+                        }
 
-                this.header = <HeaderElement>{
-                    id: 'table',
-                    parent: this.pageHeaderService.getHeaderByID('dbhome'),
-                    link: this.router.url,
-                    title: this.table,
-                    icon: 'fa-table'
-                };
-                this.pageHeaderService.addFragment(this.header);
+                        for (let col of this.columns)
+                        {
+                            if (!col.autoIncrement)
+                                this.newRowGroup.addControl(col.name, new FormControl(""));
+                            else
+                                this.newRowGroup.addControl(col.name, new FormControl({value: "", disabled: true}));
+                        }
+                    })
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {
+                            queryParams: {
+                                code: promise.status,
+                                message: promise.statusText
+                            }
+                        });
+                    });
+
+                this.pageHeaderService.addFragment('table', this.pageHeaderService.getHeaderByID('dbhome'),
+                    this.router.url, this.table, 'fa-table');
+            }
+            else
+            {
+                this.router.navigate(['/not-found']);
             }
         });
+    }
+
+    addRow()
+    {
+        let group: FormGroup = this.formBuilder.group({
+            added: true,
+            deleted: false
+        });
+        group.markAsDirty();
+        let newRow: Row = new Row();
+        for (let col of this.columns)
+        {
+            if (col.autoIncrement)
+            {
+                let length: number = Object.keys(this.rowForm.value).length;
+                if (length > 1)
+                {
+                    const autoIndex = this.findMaxAutoIncrement(this.rowForm, col.name);
+                    this.newRowGroup.get(col.name).setValue(autoIndex + 1);
+                }
+                else
+                    this.newRowGroup.get(col.name).setValue(1);
+
+                group.addControl(col.name, new FormControl({value: this.newRowGroup.get(col.name).value, disabled: true}));
+            }
+            else
+            {
+                group.addControl(col.name, new FormControl(this.newRowGroup.get(col.name).value));
+            }
+            newRow[col.name] = this.newRowGroup.get(col.name).value;
+        }
+        newRow.added = true;
+        this.rowForm.addControl((Object.keys(this.rowForm.value).length-1).toString(), group);
+        this.rows.push(newRow);
+        this.newRowGroup.reset();
+    }
+
+    deleteRow(index: number)
+    {
+        if (this.rows[index].added)
+        {
+            this.rows.splice(index, 1);
+            this.rowForm.removeControl(index.toString());
+
+            let currentIndex = index;
+            Object.keys(this.rowForm.value)
+                  .filter(row => +row > index)
+                  .forEach(key =>
+                  {
+                      let control = new FormControl(this.rowForm.get(key));
+                      this.rowForm.removeControl(key);
+                      this.rowForm.addControl(currentIndex.toString(), control.value);
+                      currentIndex++;
+                  });
+        }
+        else
+        {
+            this.rows[index].deleted = true;
+            this.rowForm.get(index.toString()).patchValue({deleted: true});
+        }
+    }
+
+    undoDeleteRow(index: number)
+    {
+        this.rows[index].deleted = false;
+        this.rowForm.get(index.toString()).patchValue({deleted: false});
+    }
+
+    onSubmit()
+    {
+        let changeObj: {changes: any} = {changes: []};
+        this.newRowGroup.reset();
+
+        const rawFormValue = this.rowForm.getRawValue();
+        for (let key of Object.keys(rawFormValue))
+        {
+            let row = rawFormValue[key];
+
+            if (row.added)
+            {
+                changeObj.changes.push({from: null, to: this.buildChangeObject(row)});
+                continue;
+            }
+
+            if (row.deleted)
+            {
+                changeObj.changes.push({from: this.buildChangeObject(row), to: null});
+                continue;
+            }
+
+            if (this.rowForm.get(key).dirty)
+            {
+                let change = this.buildChangeObject(row);
+                changeObj.changes.push({from: change, to: change});
+            }
+        }
+
+        this.databaseService.modifyRows(this.schema, this.table, changeObj)
+            .catch(error => console.log(error));
+    }
+
+    private findMaxAutoIncrement(from: FormGroup, propertyKey: any): number
+    {
+        let max: number = -1;
+        const rawValue = from.getRawValue();
+        for (let key of Object.keys(rawValue))
+        {
+            let val = rawValue[key][propertyKey];
+            if (isNumber(val))
+            {
+                if (val > max)
+                    max = val;
+            }
+        }
+
+        return max;
+    }
+
+    private buildChangeObject(obj): any
+    {
+        let changeObj = {};
+
+        for (let key of Object.keys(obj))
+        {
+            if (key != "added" && key != "deleted")
+            {
+                changeObj[key] = obj[key];
+            }
+        }
+
+        return changeObj;
     }
 }

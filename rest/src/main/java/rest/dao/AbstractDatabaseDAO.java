@@ -29,4 +29,9 @@ public abstract class AbstractDatabaseDAO
     {
         return "`" + s + "`";
     }
+
+    String quoteValue(String s)
+    {
+        return "\"" + s + "\"";
+    }
 }

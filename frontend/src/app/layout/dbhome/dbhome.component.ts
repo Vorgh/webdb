@@ -1,14 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Table} from "../../models/rest-models";
+import {Table, Trigger} from "../../models/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
-import {CreateTableComponent} from "../components/create-table/create-table.component";
+import {CreateTableComponent} from "../table/create-table/create-table.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {HeaderElement} from "../../models/header-element";
-import {AlterTableComponent} from "../components/alter-table/alter-table.component";
+import {AlterTableComponent} from "../table/alter-table/alter-table.component";
 import {Column} from "../../models/rest-models";
 
 @Component({
@@ -22,6 +22,8 @@ export class DBHomeComponent implements OnInit
     schema: string;
 
     tables$: Promise<Table[]>;
+    views$: Promise<Table[]>;
+    triggers$: Promise<Trigger[]>;
 
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -33,50 +35,83 @@ export class DBHomeComponent implements OnInit
 
     ngOnInit()
     {
-        this.route.params.subscribe((params: Params) =>
+        this.route.queryParams.subscribe(params =>
         {
+            if (isNullOrUndefined(params['schema']))
+            {
+                this.router.navigate(['/not-found']);
+                return;
+            }
+
             if (this.schema != params['schema'] && !isNullOrUndefined(params['schema']))
             {
                 this.schema = params['schema'];
                 this.tables$ = this.databaseService.getAllTables(this.schema);
-                this.pageHeaderService.addFragment(<HeaderElement>{
-                    id: 'dbhome',
-                    parent: this.pageHeaderService.getHeaderByID('home'),
-                    link: this.router.url,
-                    title: this.schema,
-                    icon: 'fa-database'
-                });
+                this.tables$
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {replaceUrl: true,
+                            queryParams: {code: promise.status, message: promise.statusText}});
+                    });
+                this.views$ = this.databaseService.getAllTables(this.schema, true);
+                this.views$
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {replaceUrl: true,
+                            queryParams: {code: promise.status, message: promise.statusText}});
+                    });
+                this.triggers$ = this.databaseService.getAllTriggers(this.schema);
+                this.triggers$
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
+                    });
+
+                this.pageHeaderService.addFragment('dbhome', this.pageHeaderService.getHeaderByID('home'),
+                    this.router.url, this.schema, 'fa-database');
             }
         });
     }
 
-    createTableModal()
+    dropTable(table: Table)
     {
-        const modalRef = this.modalService.open(CreateTableComponent, {size: "lg", backdrop: "static"});
-        modalRef.componentInstance.schema = this.schema;
-
+        this.databaseService.dropTable(table.schema, table.name)
+            .then(() =>
+            {
+                this.tables$ = this.databaseService.getAllTables(this.schema);
+                this.tables$
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {replaceUrl: true,
+                            queryParams: {code: promise.status, message: promise.statusText}});
+                    });
+            })
+            .catch(promise =>
+            {
+                this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
+            });
     }
 
-    dropTableModal(table: Table)
+    dropTrigger(trigger: Trigger)
     {
-        //TODO
+        this.databaseService.dropTrigger(trigger.schema, trigger.name)
+            .then(() =>
+            {
+                this.triggers$ = this.databaseService.getAllTriggers(this.schema);
+                this.triggers$
+                    .catch(promise =>
+                    {
+                        this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
+                    });
+            })
+            .catch(promise =>
+            {
+                this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
+            });
     }
 
-    alterTableModal(table: Table)
+    showTriggerCode(template)
     {
-        Promise.all([
-            this.databaseService.getColumns(this.schema, table.name),
-            this.databaseService.getForeignKeys(this.schema, table.name),
-            this.databaseService.getIndexes(this.schema, table.name)
-        ])
-               .then(result =>
-               {
-                   const modalRef = this.modalService.open(AlterTableComponent, {size: "lg", backdrop: "static"});
-                   modalRef.componentInstance.table = table;
-                   modalRef.componentInstance.columnList = result[0];
-                   modalRef.componentInstance.foreignKeys = result[1];
-                   modalRef.componentInstance.indexList = result[2];
-               })
-               .catch(error => console.log(error));
+        this.modalService.open(template);
     }
 }

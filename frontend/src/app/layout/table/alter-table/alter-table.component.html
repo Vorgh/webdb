@@ -1,0 +1,201 @@
+<ng-template #newColumnRow>
+    <tr>
+        <td><input type="text" placeholder="Column name" class="form-control form-control-sm" #newColName></td>
+        <td>
+            <input list="type_list_new" type="text" placeholder="Column type" class="form-control form-control-sm" #newColType>
+            <datalist id="type_list_new">
+                <option *ngFor="let type of types">{{type}}</option>
+            </datalist>
+        </td>
+        <td><input type="text" placeholder="Default value" class="form-control form-control-sm" #newColDefault></td>
+        <td class="row m-0">
+            <div class="input-group justify-content-center">
+                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                    <label class="xsmall-text m-0" ngbTooltip="Primary Key">PK</label>
+                    <input type="checkbox" class="m-0" #newColPK>
+                </div>
+                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                    <label class="xsmall-text m-0" ngbTooltip="Unique">UQ</label>
+                    <input type="checkbox" class="m-0" #newColUQ>
+                </div>
+                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                    <label class="xsmall-text m-0" ngbTooltip="Nullable">NUL</label>
+                    <input type="checkbox" class="m-0" #newColNUL>
+                </div>
+                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                    <label class="xsmall-text m-0" ngbTooltip="Auto Increment">AI</label>
+                    <input type="checkbox" class="m-0" #newColAI>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="form-group align-content-end">
+                <button type="button" class="btn btn-info btn-sm"
+                        (click)="addColumn(newColName, newColType, newColDefault, newColPK, newColUQ, newColNUL, newColAI)">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+</ng-template>
+
+<div class="card-header">
+    <h4 class="card-title">Alter Table...</h4>
+</div>
+<div class="card-body">
+    <form class="p-4" [formGroup]="alterTableForm">
+        <div class="form-group row">
+            <label for="table-name" class="col-form-label col-sm-2">Table Name:</label>
+            <div class="col-sm-6">
+                <input id="table-name" type="text" class="form-control" formControlName="tableName">
+            </div>
+        </div>
+        <div class="col-form-label">Column Definitions:</div>
+        <div class="table-responsive" formArrayName="columns">
+            <table class="table table-sm m-0">
+                <thead>
+                <tr class="small-text">
+                    <th>Column Name</th>
+                    <th>Column Type</th>
+                    <th>Default value</th>
+                    <th>Flags</th>
+                    <th class="operation-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let column of formColumns.controls; let i=index" [formGroupName]="i" [class.deleted]="column.value.deleted">
+                    <td><input type="text" placeholder="Column name" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="name"></td>
+                    <td>
+                        <input list="type_list" type="text" placeholder="Column type" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="columnType">
+                        <datalist id="type_list">
+                            <option *ngFor="let type of types">{{type}}</option>
+                        </datalist>
+                    </td>
+                    <td><input type="text" placeholder="Default value" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="defaultValue"></td>
+                    <td class="m-0">
+                        <div class="input-group justify-content-center border-0">
+                            <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
+                                <label class="xsmall-text m-0" ngbTooltip="Primary Key">PK</label>
+                                <input type="checkbox" class="m-0" [attr.disabled]="column.value.deleted?'':null" formControlName="primaryKey">
+                            </div>
+                            <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
+                                <label class="xsmall-text m-0" ngbTooltip="Unique">UQ</label>
+                                <input type="checkbox" class="m-0" [attr.disabled]="column.value.deleted?'':null" formControlName="unique">
+                            </div>
+                            <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
+                                <label class="xsmall-text m-0" ngbTooltip="Nullable">NUL</label>
+                                <input type="checkbox" class="m-0" [attr.disabled]="column.value.deleted?'':null" formControlName="nullable">
+                            </div>
+                            <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
+                                <label class="xsmall-text m-0" ngbTooltip="Auto Increment">AI</label>
+                                <input type="checkbox" class="m-0" [attr.disabled]="column.value.deleted?'':null" formControlName="autoIncrement">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="align-content-end operation-column">
+                            <button *ngIf="!column.value.deleted" type="button" class="btn btn-danger btn-sm" (click)="removeColumn(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            <button *ngIf="column.value.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoRemoveColumn(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr><td colspan="5"><div class="xsmall-text text-info">Add new:</div></td></tr>
+                <ng-template [ngTemplateOutlet]="newColumnRow"></ng-template>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-form-label">Foreign Keys:</div>
+        <div class="row p-2 justify-content-center table-responsive" formArrayName="constraints">
+            <table class="table table-sm m-0">
+                <thead>
+                <tr class="small-text">
+                    <th>Constraint Name</th>
+                    <th>Column</th>
+                    <th>References</th>
+                    <th>ON_UPDATE</th>
+                    <th>ON_DELETE</th>
+                    <th>Operations</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let fkey of formConstraints.controls; let i=index" [formGroupName]="i" class="small-text" [class.deleted]="fkey.value.deleted">
+                    <td>{{fkey.value.constraintName}}</td>
+                    <td>{{fkey.value.column}}</td>
+                    <td>{{concatSchemaTableColumn(fkey.value.refSchema, fkey.value.refTable, fkey.value.refColumn)}}</td>
+                    <td>{{fkey.value.updateRule}}</td>
+                    <td>{{fkey.value.deleteRule}}</td>
+                    <td class="d-flex justify-content-end">
+                        <button *ngIf="!fkey.value.deleted" type="button" class="btn btn-danger btn-sm" (click)="removeForeignKey(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button *ngIf="fkey.value.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoRemoveForeignKey(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="form-control form-control-sm small-text" #newKeyName></td>
+                    <td>
+                        <select class="form-control form-control-sm small-text" [disabled]="activeFormColumns.length === 0" #newKeyColName>
+                            <option *ngFor="let col of activeFormColumns">{{col}}</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm small-text" placeholder="<schema>.<table>(<col>)" #newKeyRef>
+                    </td>
+                    <td>
+                        <select class="form-control form-control-sm small-text" #newKeyUpdate>
+                            <option *ngFor="let opt of CASCADE_OPTIONS" [value]="opt">{{opt}}</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control form-control-sm small-text" #newKeyDelete>
+                            <option *ngFor="let opt of CASCADE_OPTIONS" [value]="opt">{{opt}}</option>
+                        </select>
+                    </td>
+                    <td class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-info btn-sm"
+                                (click)="addForeignKey(newKeyName, newKeyColName, newKeyRef, newKeyUpdate, newKeyDelete)">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-form-label">Indexes:</div>
+        <div class="row p-2 justify-content-center table-responsive" formArrayName="indexes">
+            <table class="table table-sm m-0">
+                <thead>
+                <tr class="small-text">
+                    <th>Index Name</th>
+                    <th>Column</th>
+                    <th>Unique</th>
+                    <th>Nullable</th>
+                    <th>Operations</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let ind of formIndexes.controls; let i=index" [formGroupName]="i" class="small-text" [class.deleted]="ind.value.deleted">
+                    <td>{{ind.value.indexName}}</td>
+                    <td>{{concatSchemaTableColumn(ind.value.schema, ind.value.table, ind.value.column)}}</td>
+                    <td>{{ind.value.unique}}</td>
+                    <td>{{ind.value.nullable}}</td>
+                    <td class="d-flex justify-content-end">
+                        <button *ngIf="!ind.value.deleted" type="button" class="btn btn-danger btn-sm" [disabled]="ind.value.indexName == 'PRIMARY'" (click)="removeIndex(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button *ngIf="ind.value.deleted" type="button" class="btn btn-warning btn-sm" [disabled]="ind.value.indexName == 'PRIMARY'" (click)="undoRemoveIndex(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="form-control form-control-sm small-text" #newIndexName></td>
+                    <td><input type="text" class="form-control form-control-sm small-text" placeholder="<schema>.<table>(<col>)" #newIndexRef></td>
+                    <td><input type="checkbox" class="form-control form-control-sm" #newIndexUnique></td>
+                    <td><input type="checkbox" class="form-control form-control-sm" checked #newIndexNullable></td>
+                    <td class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-info btn-sm" (click)="addIndex(newIndexName, newIndexRef, newIndexUnique, newIndexNullable)"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
+<div class="card-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
+</div>

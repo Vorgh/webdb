@@ -1,15 +1,18 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {Component, OnInit} from '@angular/core';
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
 import {Column, Index} from "../../../models/rest-models";
 import {Table} from "../../../models/rest-models";
 import {Constraint} from "../../../models/rest-models";
 import {isNullOrUndefined} from "util";
 import {DatabaseService} from "../../../services/database.service";
 import {Utils} from "../../../shared/util/utils";
+import {ActivatedRoute, Router} from "@angular/router";
+import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
+import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
 
 @Component({
-    selector: 'alter-table-modal',
+    selector: 'alter-table',
     templateUrl: './alter-table.component.html',
     styleUrls: ['./alter-table.component.scss']
 })
@@ -17,23 +20,56 @@ export class AlterTableComponent implements OnInit
 {
     readonly CASCADE_OPTIONS = ["RESTRICT", "CASCADE", "SET NULL", "NO ACTION"];
 
-    @Input() table: Table;
-    @Input() columnList: Column[];
-    @Input() foreignKeys: Constraint[];
-    @Input() indexList: Index[];
+    schemaName: string;
+    table: Table;
+    columnList: Column[] = [];
+    foreignKeys: Constraint[] = [];
+    indexList: Index[] = [];
 
     alterTableForm: FormGroup;
     originalForm: FormGroup;
     changes: any;
+    types = Utils.dataTypes;
 
-    constructor(public activeModal: NgbActiveModal,
-                private formBuilder: FormBuilder,
-                private databaseService: DatabaseService)
+    constructor(private formBuilder: FormBuilder,
+                private databaseService: DatabaseService,
+                private pageHeaderService: PageHeaderService,
+                private router: Router,
+                private route: ActivatedRoute,
+                private modalService: NgbModal)
     {
     }
 
     ngOnInit()
     {
+        this.route.data.subscribe((data: {table: Table}) =>
+        {
+            this.table = data.table;
+            this.schemaName = data.table.schema;
+
+            Promise.all([
+                this.databaseService.getColumns(this.schemaName, this.table.name),
+                this.databaseService.getForeignKeys(this.schemaName, this.table.name),
+                this.databaseService.getIndexes(this.schemaName, this.table.name)])
+                   .then(result =>
+                   {
+                       this.columnList = result[0];
+                       this.foreignKeys = result[1];
+                       this.indexList = result[2];
+
+                       this.initFields();
+                       this.alterTableForm.valueChanges.subscribe(change =>
+                       {
+                           this.handleChange(change);
+                       });
+                   })
+                   .catch(promise =>
+                   {
+                       this.router.navigate(["/error"], {replaceUrl: true,
+                           queryParams: {code: promise.status, message: promise.statusText}});
+                   });
+        });
+
         this.originalForm = this.formBuilder.group({
                 tableName: [this.table.name],
                 columns: this.formBuilder.array([]),
@@ -48,12 +84,8 @@ export class AlterTableComponent implements OnInit
                 indexes: this.formBuilder.array([])
             }
         );
-        this.initFields();
 
-        this.alterTableForm.valueChanges.subscribe(change =>
-        {
-            this.handleChange(change);
-        })
+
     }
 
     private handleChange(change: any)
@@ -178,6 +210,21 @@ export class AlterTableComponent implements OnInit
         return this.alterTableForm.get('columns') as FormArray;
     }
 
+    get activeFormColumns(): Array<string>
+    {
+        let activeCols = [];
+        for (let key in this.formColumns.value)
+        {
+            let col = this.formColumns.value[key];
+            if (!col.deleted)
+            {
+                activeCols.push(col.name);
+            }
+        }
+
+        return activeCols;
+    }
+
     get formConstraints(): FormArray
     {
         return this.alterTableForm.get('constraints') as FormArray;
@@ -227,7 +274,7 @@ export class AlterTableComponent implements OnInit
 
     addColumn(name, type, defaultValue, PK, UQ, NUL, AI)
     {
-        let col = Column.defaultColumn(this.table.schema, this.table.name);
+        let col = Column.defaultColumn(this.schemaName, this.table.name);
         col.name = name.value;
         col.columnType = type.value;
         col.defaultValue = defaultValue.value;
@@ -250,12 +297,12 @@ export class AlterTableComponent implements OnInit
     addForeignKey(name, column, reference, updateRule, deleteRule)
     {
         let key: Constraint = new Constraint();
-        let parsedRef = Utils.parseReference(reference.value);
+        let parsedRef = Utils.parseColumnReference(reference.value);
 
         if (isNullOrUndefined(parsedRef)) return;
 
         key.constraintName = name.value;
-        key.schema = this.table.schema;
+        key.schema = this.schemaName;
         key.table = this.table.name;
         key.column = column.value;
         key.refSchema = parsedRef[0];
@@ -278,11 +325,11 @@ export class AlterTableComponent implements OnInit
     addIndex(name, reference, unique, nullable)
     {
         let index = new Index();
-        let parsedRef = Utils.parseReference(reference.value);
+        let parsedRef = Utils.parseColumnReference(reference.value);
 
         if (isNullOrUndefined(parsedRef)) return;
 
-        index.indexSchema = this.table.schema;
+        index.indexSchema = this.schemaName;
         index.indexName = name.value;
         index.schema = parsedRef[0];
         index.table = parsedRef[1];
@@ -339,10 +386,35 @@ export class AlterTableComponent implements OnInit
         }
     }
 
+    undoRemoveColumn(index: number)
+    {
+        this.formColumns.value[index].deleted = false;
+        this.handleChange(this.alterTableForm.value);
+    }
+
+    undoRemoveForeignKey(index: number)
+    {
+        this.formConstraints.value[index].deleted = false;
+        this.handleChange(this.alterTableForm.value);
+    }
+
+    undoRemoveIndex(index: number)
+    {
+        this.formIndexes.value[index].deleted = false;
+        this.handleChange(this.alterTableForm.value);
+    }
+
     submit()
     {
-        this.databaseService.alterTable(this.table.schema, this.table.name, this.changes)
-            .then(() => this.activeModal.close())
-            .catch(error => console.log(error));
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = this.table.name;
+
+        modalRef.result.then(result =>
+        {
+            this.databaseService.alterTable(this.schemaName, this.table.name, this.changes)
+                .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schemaName}}))
+                .catch(error => console.log(error));
+        })
+
     }
 }

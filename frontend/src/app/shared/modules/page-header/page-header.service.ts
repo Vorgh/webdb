@@ -13,8 +13,16 @@ export class PageHeaderService
         this.fragments.push(this.root);
     }
 
-    addFragment(header: HeaderElement)
+    addFragment(id: string, parent: HeaderElement, link: string, title: string, icon: string)
     {
+        let header = <HeaderElement>{
+            id: id,
+            parent: parent,
+            link: link,
+            title: title,
+            icon: icon
+        };
+
         let index = this.fragments.findIndex(elem => elem.id === header.id);
         if (index != -1)
             this.fragments[index] = header;

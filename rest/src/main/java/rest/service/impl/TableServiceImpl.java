@@ -9,6 +9,7 @@ import rest.model.database.Index;
 import rest.model.database.Table;
 import rest.model.request.table.alter.AlterTableRequest;
 import rest.model.request.table.create.CreateTableRequest;
+import rest.model.request.table.row.RowModifyRequest;
 import rest.service.TableService;
 
 import java.util.List;
@@ -18,25 +19,19 @@ import java.util.Map;
 public class TableServiceImpl implements TableService
 {
     @Override
-    public List<Table> getAllTablesMetadata(String schemaName, boolean isView, UserConnection connection) throws ClassCastException
+    public List<Table> getAllTablesMetadata(String schemaName, UserConnection connection) throws ClassCastException
     {
         TableDAO tableDAO = new TableDAO(connection);
 
-        if (!isView)
-            return tableDAO.getAllTablesMetadata(schemaName);
-        else
-            return tableDAO.getAllViewsMetadata(schemaName);
+        return tableDAO.getAllTablesMetadata(schemaName);
     }
 
     @Override
-    public Table getTableMetadata(String schemaName, String tableName, boolean isView, UserConnection connection)
+    public Table getTableMetadata(String schemaName, String tableName, UserConnection connection)
     {
         TableDAO tableDAO = new TableDAO(connection);
 
-        if (!isView)
-            return tableDAO.getTableMetadata(schemaName, tableName);
-        else
-            return tableDAO.getViewMetadata(schemaName, tableName);
+        return tableDAO.getTableMetadata(schemaName, tableName);
     }
 
     @Override
@@ -80,6 +75,14 @@ public class TableServiceImpl implements TableService
     }
 
     @Override
+    public void modifyRows(String schema, String table, RowModifyRequest request, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        tableDAO.modifyRows(schema, table, request);
+    }
+
+    @Override
     public void alterTable(String schema, String table, AlterTableRequest request, UserConnection connection)
     {
         TableDAO tableDAO = new TableDAO(connection);
@@ -93,5 +96,13 @@ public class TableServiceImpl implements TableService
         TableDAO tableDAO = new TableDAO(connection);
 
         tableDAO.createTable(schema, request);
+    }
+
+    @Override
+    public void dropTable(String schema, String table, UserConnection connection)
+    {
+        TableDAO tableDAO = new TableDAO(connection);
+
+        tableDAO.dropTable(schema, table);
     }
 }

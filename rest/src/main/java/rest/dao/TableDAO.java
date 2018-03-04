@@ -13,10 +13,12 @@ import rest.model.database.Constraint;
 import rest.model.database.Index;
 import rest.model.database.Table;
 import rest.model.request.table.alter.AlterTableRequest;
-import rest.model.request.table.alter.Change;
+import rest.model.request.Change;
 import rest.model.request.table.create.CreateTableRequest;
+import rest.model.request.table.row.RowModifyRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,7 +38,7 @@ public class TableDAO extends AbstractDatabaseDAO
         return jdbcTemplate.query(
                 "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
                         "FROM information_schema.tables " +
-                        "WHERE table_schema=? AND table_type='BASE TABLE';",
+                        "WHERE table_schema=?;",
                 new Object[]{schemaName},
                 new TableDetailMapper());
     }
@@ -46,28 +48,7 @@ public class TableDAO extends AbstractDatabaseDAO
         return jdbcTemplate.query(
                 "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
                         "FROM information_schema.tables " +
-                        "WHERE table_schema=? AND table_name=? AND table_type='BASE TABLE';",
-                new Object[]{schemaName, tableName},
-                new TableDetailMapper())
-                .get(0);
-    }
-
-    public List<Table> getAllViewsMetadata(String schemaName)
-    {
-        return jdbcTemplate.query(
-                "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
-                        "FROM information_schema.tables " +
-                        "WHERE table_schema=? AND table_type='VIEW';",
-                new Object[]{schemaName},
-                new TableDetailMapper());
-    }
-
-    public Table getViewMetadata(String schemaName, String tableName)
-    {
-        return jdbcTemplate.query(
-                "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
-                        "FROM information_schema.tables " +
-                        "WHERE table_schema=? AND table_name=? AND table_type='VIEW';",
+                        "WHERE table_schema=? AND table_name=?;",
                 new Object[]{schemaName, tableName},
                 new TableDetailMapper())
                 .get(0);
@@ -124,12 +105,107 @@ public class TableDAO extends AbstractDatabaseDAO
         return jdbcTemplate.queryForList(query);
     }
 
+    public void modifyRows(String schemaName, String tableName, RowModifyRequest request)
+    {
+        StringBuilder query = new StringBuilder();
+        List<String> columnList = new ArrayList<>();
+        List<String> primaryKeys = getPrimaryKeyColumns(schemaName, tableName);
+
+        for (Change<Map<String, Object>> change : request.changes)
+        {
+            List<String> inserts = new ArrayList<>();
+            List<String> updates = new ArrayList<>();
+            List<String> deletes = new ArrayList<>();
+
+            if (change.from == null)
+            {
+                if (columnList.isEmpty())
+                {
+                    columnList.addAll(change.to.keySet());
+                }
+
+                List<String> insertObjectStringList = new ArrayList<>();
+                for (Object item : change.to.values())
+                {
+                    if (!"".equals(item.toString()))
+                        insertObjectStringList.add(quoteValue(item.toString()));
+                    else
+                        insertObjectStringList.add("NULL");
+                }
+                inserts.add("(" + String.join(",", insertObjectStringList) + ")");
+            }
+
+            if (change.from != null && change.to != null)
+            {
+                if (columnList.isEmpty())
+                {
+                    columnList.addAll(change.to.keySet());
+                }
+
+                for (String col : columnList)
+                {
+                    updates.add(col + "=" + change.to.get(col));
+                }
+            }
+
+            if (change.to == null)
+            {
+                if (columnList.isEmpty())
+                {
+                    columnList.addAll(change.from.keySet());
+                }
+
+                List<String> deleteCondition = new ArrayList<>();
+                for (String key : primaryKeys)
+                {
+                    if (change.from.get(key) == null || change.from.get(key) instanceof Number)
+                        deleteCondition.add(key + "=" + change.from.get(key));
+                    else
+                        deleteCondition.add(key + "=" + quoteValue(change.from.get(key).toString()));
+                }
+                deletes.add(String.join(" AND ", deleteCondition));
+            }
+
+            if (!inserts.isEmpty())
+            {
+                query.append("INSERT INTO ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" (");
+                query.append(String.join(",", columnList)).append(") VALUES ").append(String.join(",", inserts)).append(";\n");
+            }
+
+            if (!updates.isEmpty())
+            {
+                List<String> conditions = new ArrayList<>();
+
+                query.append("UPDATE ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" ");
+                for (String key : primaryKeys)
+                {
+                    if (change.from.get(key) == null || change.from.get(key) instanceof Number)
+                        conditions.add(key + "=" + change.from.get(key));
+                    else
+                        conditions.add(key + "=" + quoteValue(change.from.get(key).toString()));
+                }
+
+                query.append("SET ").append(String.join(",", updates)).append(" \n");
+                query.append("WHERE ").append(String.join(" AND ", conditions)).append(";\n");
+            }
+
+            if (!deletes.isEmpty())
+            {
+                query.append("DELETE FROM ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" \n");
+                query.append("WHERE ").append(String.join(" OR ", deletes)).append(";\n");
+            }
+        }
+
+        logger.info("Query executed: {}", query.toString());
+        jdbcTemplate.execute(query.toString());
+    }
+
     public void createTable(String schemaName, CreateTableRequest request)
     {
         StringBuilder query = new StringBuilder();
         List<String> primaryKeys = new ArrayList<>();
 
-        query.append("CREATE TABLE ").append(quote(schemaName)).append(".").append(quote(request.tableName)).append("(");
+        query.append("CREATE TABLE IF NOT EXISTS ").append(quote(schemaName)).append(".").append(quote(request.tableName)).append("(");
         for (Column col : request.columns)
         {
             if (col.isPrimaryKey())
@@ -152,10 +228,17 @@ public class TableDAO extends AbstractDatabaseDAO
             query.append("ON DELETE ").append(key.deleteRule).append(", \n");
         }
 
-        query.append(")");
-        query.setCharAt(query.lastIndexOf(","), ';');
+        query.replace(query.lastIndexOf(","), query.lastIndexOf(",")+1, ");");
 
         logger.info("Query executed: {}", query.toString());
+        jdbcTemplate.execute(query.toString());
+    }
+
+    public void dropTable(String schemaName, String tableName)
+    {
+        String query = "DROP TABLE IF EXISTS " + quote(schemaName) + "." + quote(tableName) + ";";
+        logger.info("Query executed: {}", query);
+        jdbcTemplate.execute(query);
     }
 
     public void alterTable(String schemaName, String tableName, AlterTableRequest request)
@@ -242,7 +325,6 @@ public class TableDAO extends AbstractDatabaseDAO
                     {
                         query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
                         postAlterQuery.append("DROP INDEX ").append(quote(tmpList.get(0).indexName)).append(", \n");
-                        //postAlter = true;
                         continue;
                     }
 
@@ -253,7 +335,6 @@ public class TableDAO extends AbstractDatabaseDAO
                     {
                         query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
                         postAlterQuery.append("DROP INDEX ").append(quote(indexList.get(0).indexName)).append(", \n");
-                        //postAlter = true;
                         continue;
                     }
                 }
@@ -309,6 +390,7 @@ public class TableDAO extends AbstractDatabaseDAO
         }
 
         logger.info("Query executed: {}", query.toString());
+        jdbcTemplate.execute(query.toString());
     }
 
     private List<String> getPrimaryKeyColumns(String schemaName, String tableName)

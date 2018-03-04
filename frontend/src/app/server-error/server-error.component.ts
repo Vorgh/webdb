@@ -1,15 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
-  selector: 'app-server-error',
-  templateUrl: './server-error.component.html',
-  styleUrls: ['./server-error.component.scss']
+    selector: 'app-server-error',
+    templateUrl: './server-error.component.html',
+    styleUrls: ['./server-error.component.scss']
 })
-export class ServerErrorComponent implements OnInit {
+export class ServerErrorComponent implements OnInit
+{
+    code: string;
+    message: string;
 
-  constructor() { }
+    constructor(private route: ActivatedRoute)
+    {
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit()
+    {
+        this.route.queryParams.subscribe(params =>
+        {
+            this.code = params.code;
+            this.message = params.message
+        });
+    }
 
 }

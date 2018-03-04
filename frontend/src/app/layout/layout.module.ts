@@ -1,25 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {NgbDropdownModule, NgbModalModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { LayoutRoutingModule } from './layout-routing.module';
 import { LayoutComponent } from './layout.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
-import { CreateTableComponent } from './components/create-table/create-table.component';
-import { ReactiveFormsModule } from "@angular/forms";
-import {AlterTableComponent} from "./components/alter-table/alter-table.component";
+import { ConfirmdialogComponent } from './components/confirmdialog/confirmdialog.component';
 
 @NgModule({
     imports: [
         CommonModule,
         LayoutRoutingModule,
-        ReactiveFormsModule,
-        NgbDropdownModule.forRoot(),
-        NgbModalModule.forRoot(),
-        NgbTooltipModule.forRoot()
+        NgbModule
     ],
-    declarations: [LayoutComponent, SidebarComponent, HeaderComponent, CreateTableComponent, AlterTableComponent],
-    entryComponents: [CreateTableComponent, AlterTableComponent]
+    declarations: [LayoutComponent, SidebarComponent, HeaderComponent, ConfirmdialogComponent],
+    entryComponents: [ConfirmdialogComponent]
 })
 export class LayoutModule {}

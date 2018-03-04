@@ -1,5 +1,6 @@
 package rest.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +14,11 @@ import rest.model.database.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rest.model.request.Change;
 import rest.model.request.table.alter.AlterTableRequest;
 import rest.model.request.RowRequest;
 import rest.model.request.table.create.CreateTableRequest;
+import rest.model.request.table.row.RowModifyRequest;
 import rest.service.TableService;
 
 @RestController
@@ -26,24 +29,22 @@ public class TableController
     private TableService tableService;
 
     @GetMapping("metadata/all")
-    public ResponseEntity<List<Table>> getAllTablesMetadata(@RequestParam(value = "view", required = false) boolean isView,
-                                                            @RequestParam String schema,
+    public ResponseEntity<List<Table>> getAllTablesMetadata(@RequestParam String schema,
                                                             @AuthenticationPrincipal UserConnection connection)
     {
         List<Table> list;
-        list = tableService.getAllTablesMetadata(schema, isView, connection);
+        list = tableService.getAllTablesMetadata(schema, connection);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @GetMapping("metadata/single")
-    public ResponseEntity<Table> getTableMetadata(@RequestParam(value = "view", required = false) boolean isView,
-                                                         @RequestParam String schema,
-                                                         @RequestParam String table,
-                                                         @AuthenticationPrincipal UserConnection connection)
+    public ResponseEntity<Table> getTableMetadata(@RequestParam String schema,
+                                                  @RequestParam String table,
+                                                  @AuthenticationPrincipal UserConnection connection)
     {
         Table tableMetadata;
-        tableMetadata = tableService.getTableMetadata(schema, table, isView, connection);
+        tableMetadata = tableService.getTableMetadata(schema, table, connection);
 
         return new ResponseEntity<>(tableMetadata, HttpStatus.OK);
     }
@@ -61,8 +62,8 @@ public class TableController
 
     @GetMapping("foreign")
     public ResponseEntity<List<Constraint>> getForeignKeys(@RequestParam String schema,
-                                                                @RequestParam String table,
-                                                                @AuthenticationPrincipal UserConnection connection)
+                                                           @RequestParam String table,
+                                                           @AuthenticationPrincipal UserConnection connection)
     {
         List<Constraint> list = tableService.getForeignKeys(schema, table, connection);
 
@@ -101,21 +102,43 @@ public class TableController
 
     @PostMapping("create")
     public ResponseEntity<Void> createTable(@RequestParam String schema,
-                                           @RequestBody CreateTableRequest request,
-                                           @AuthenticationPrincipal UserConnection connection)
+                                            @RequestBody CreateTableRequest request,
+                                            @AuthenticationPrincipal UserConnection connection)
     {
         tableService.createTable(schema, request, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("alter")
+    @PutMapping("alter")
     public ResponseEntity<Void> alterTable(@RequestParam String schema,
                                            @RequestParam String table,
                                            @RequestBody AlterTableRequest request,
                                            @AuthenticationPrincipal UserConnection connection)
     {
         tableService.alterTable(schema, table, request, connection);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("drop")
+    public ResponseEntity<Void> deleteTable(@RequestParam String schema,
+                                            @RequestParam String table,
+                                            @AuthenticationPrincipal UserConnection connection)
+    {
+        tableService.dropTable(schema, table, connection);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("rows/modify")
+    public ResponseEntity<Void> modifyRows(@RequestParam String schema,
+                                          @RequestParam String table,
+                                          @RequestBody RowModifyRequest rowModifyRequest,
+                                          @AuthenticationPrincipal UserConnection connection)
+    {
+        System.out.println(rowModifyRequest);
+        tableService.modifyRows(schema, table, rowModifyRequest, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

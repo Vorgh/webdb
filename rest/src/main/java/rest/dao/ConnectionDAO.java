@@ -1,5 +1,7 @@
 package rest.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -14,11 +16,14 @@ import rest.auth.ClientConnectionDetailsService;
 import rest.model.connection.ConnectionAuthInfo;
 import rest.model.connection.UserConnection;
 
+import java.sql.SQLException;
 import java.util.*;
 
 @Repository
 public class ConnectionDAO
 {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionDAO.class);
+
     private BCryptPasswordEncoder passwordEncoder;
     private Map<String, UserConnection> connectedUsers;
     private ClientConnectionDetailsService clientDetailsService;
@@ -52,7 +57,7 @@ public class ConnectionDAO
 
         if (!testConnection(jdbcTemplate))
         {
-            throw new IllegalStateException("Couldn't access the database.");
+            throw new IllegalStateException("Couldn't access the database. Maybe wrong credentials?");
         }
 
         UserConnection userConnection = new UserConnection(url, username, passwordEncoder.encode(password), createUserAuthorities());
@@ -72,6 +77,7 @@ public class ConnectionDAO
         }
         catch (Exception e)
         {
+            logger.error(e.getMessage());
             return false;
         }
 

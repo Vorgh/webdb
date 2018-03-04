@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Constraint, Index, Table} from "../models/rest-models";
+import {Constraint, Index, Row, Table, Trigger} from "../models/rest-models";
 import {Schema} from "../models/rest-models";
 import {Column} from "../models/rest-models";
 
@@ -50,7 +50,7 @@ export class DatabaseService
             .append('schema', schema)
             .append('table', table);
 
-        return this.http.post(`${this.urlPrefix}/table/alter`, changes, {params: params})
+        return this.http.put(`${this.urlPrefix}/table/alter`, changes, {params: params})
             .toPromise()
             .catch(error => Promise.reject(error));
     }
@@ -62,6 +62,17 @@ export class DatabaseService
             .append('table', table);
 
         return this.http.get<Table>(`${this.urlPrefix}/table/metadata/single`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    dropTable(schema: string, table: string, isView: boolean = false)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('table', table);
+
+        return this.http.delete(`${this.urlPrefix}/table/drop`, {params: params})
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }
@@ -99,20 +110,82 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    getRows(schema: string, table: string): Promise<any[]>
+    getRows(schema: string, table: string): Promise<Row[]>
     {
         let params = new HttpParams()
             .append('schema', schema)
             .append('table', table)
             .append('column', '*');
 
-        return this.http.get<any[]>(`${this.urlPrefix}/table/rows`, {params: params})
+        return this.http.get<Row[]>(`${this.urlPrefix}/table/rows`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    modifyRows(schema: string, table: string, rowChanges: any)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('table', table);
+
+        return this.http.post(`${this.urlPrefix}/table/rows/modify`, rowChanges, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getAllTriggers(schema: string): Promise<Trigger[]>
+    {
+        let params = new HttpParams().append('schema', schema);
+
+        return this.http.get<Trigger[]>(`${this.urlPrefix}/trigger/all`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getTrigger(schema: string, trigger: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('trigger', trigger);
+
+        return this.http.get<Table>(`${this.urlPrefix}/trigger/single`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    createTrigger(schema: string, trigger: Trigger): Promise<any>
+    {
+        let params = new HttpParams()
+            .append('schema', schema);
+
+        return this.http.post(`${this.urlPrefix}/trigger/create`, trigger, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    modifyTrigger(schema: string, trigger: Trigger): Promise<any>
+    {
+        let params = new HttpParams()
+            .append('schema', schema);
+
+        return this.http.put(`${this.urlPrefix}/trigger/modify`, trigger, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    dropTrigger(schema: string, trigger: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('trigger', trigger);
+
+        return this.http.delete(`${this.urlPrefix}/trigger/drop`, {params: params})
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }
 
     //TODO: Deatiled row select
-    /*getRows(schema: string, table: string, columns: string[]): Promise<any[]>
+    /*getRows(schema: string, table: string, columns: string[]): Promise<Row[]>
     {
         let request: RowRequest = {
             schemaName: schema,
