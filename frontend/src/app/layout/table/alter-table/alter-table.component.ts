@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {Column, Index} from "../../../models/rest-models";
 import {Table} from "../../../models/rest-models";
 import {Constraint} from "../../../models/rest-models";
@@ -10,6 +10,8 @@ import {Utils} from "../../../shared/util/utils";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
+import {uniqueFields} from "../../../shared/validator/unique.validator";
+import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
 
 @Component({
     selector: 'alter-table',
@@ -78,116 +80,117 @@ export class AlterTableComponent implements OnInit
             }
         );
         this.alterTableForm = this.formBuilder.group({
-                tableName: [this.table.name],
+                tableName: [this.table.name, Validators.required],
                 columns: this.formBuilder.array([]),
                 constraints: this.formBuilder.array([]),
                 indexes: this.formBuilder.array([])
             }
         );
-
-
     }
 
     private handleChange(change: any)
     {
-        let changeObj: any = {};
-        if (this.originalForm.get('tableName').value !== change['tableName'])
+        if (this.alterTableForm.valid)
         {
-            changeObj.nameChange = change['tableName'];
-        }
-
-        changeObj.columnChange = [];
-        for (let key of Object.keys(this.formColumns.value))
-        {
-            if (this.formColumns.value[key].name === "" || this.formColumns.value[key].columnType === "")
-                continue;
-
-            if (this.formColumns.value[key].deleted)
+            let changeObj: any = {};
+            if (this.originalForm.get('tableName').value !== change['tableName'])
             {
-                changeObj.columnChange.push(
-                    {
-                        from: this.originalFormColumns.value[key],
-                        to: null
-                    }
-                );
-                continue;
+                changeObj.nameChange = change['tableName'];
             }
 
-            if (this.formColumns.value[key].added)
+            changeObj.columnChange = [];
+            for (let key of Object.keys(this.formColumns.value))
             {
-                changeObj.columnChange.push(
-                    {
-                        from: null,
-                        to: this.formColumns.value[key]
-                    }
-                );
-                continue;
-            }
+                if (this.formColumns.value[key].name === "" || this.formColumns.value[key].columnType === "")
+                    continue;
 
-            for (let key2 of Object.keys(this.formColumns.value[key]))
-            {
-                if (this.originalFormColumns.value[key][key2] !== this.formColumns.value[key][key2])
+                if (this.formColumns.value[key].deleted)
                 {
                     changeObj.columnChange.push(
                         {
                             from: this.originalFormColumns.value[key],
+                            to: null
+                        }
+                    );
+                    continue;
+                }
+
+                if (this.formColumns.value[key].added)
+                {
+                    changeObj.columnChange.push(
+                        {
+                            from: null,
                             to: this.formColumns.value[key]
-                        });
-                    break;
+                        }
+                    );
+                    continue;
+                }
+
+                for (let key2 of Object.keys(this.formColumns.value[key]))
+                {
+                    if (this.originalFormColumns.value[key][key2] !== this.formColumns.value[key][key2])
+                    {
+                        changeObj.columnChange.push(
+                            {
+                                from: this.originalFormColumns.value[key],
+                                to: this.formColumns.value[key]
+                            });
+                        break;
+                    }
                 }
             }
+
+            changeObj.constraintChange = [];
+            for (let key of Object.keys(this.formConstraints.value))
+            {
+                if (this.formConstraints.value[key].deleted)
+                {
+                    changeObj.constraintChange.push(
+                        {
+                            from: this.originalFormConstraints.value[key],
+                            to: null
+                        });
+                    continue;
+                }
+
+                if (this.formConstraints.value[key].added)
+                {
+                    changeObj.constraintChange.push(
+                        {
+                            from: null,
+                            to: this.formConstraints.value[key]
+                        }
+                    );
+                }
+            }
+
+            changeObj.indexChange = [];
+            for (let key of Object.keys(this.formIndexes.value))
+            {
+                if (this.formIndexes.value[key].deleted)
+                {
+                    changeObj.indexChange.push(
+                        {
+                            from: this.originalFormIndexes.value[key],
+                            to: null
+                        });
+                    continue;
+                }
+
+                if (this.formIndexes.value[key].added)
+                {
+                    changeObj.indexChange.push(
+                        {
+                            from: null,
+                            to: this.formIndexes.value[key]
+                        }
+                    );
+                }
+            }
+
+            this.changes = changeObj;
+            console.log(changeObj);
         }
-
-        changeObj.constraintChange = [];
-        for (let key of Object.keys(this.formConstraints.value))
-        {
-            if (this.formConstraints.value[key].deleted)
-            {
-                changeObj.constraintChange.push(
-                    {
-                        from: this.originalFormConstraints.value[key],
-                        to: null
-                    });
-                continue;
-            }
-
-            if (this.formConstraints.value[key].added)
-            {
-                changeObj.constraintChange.push(
-                    {
-                        from: null,
-                        to: this.formConstraints.value[key]
-                    }
-                );
-            }
-        }
-
-        changeObj.indexChange = [];
-        for (let key of Object.keys(this.formIndexes.value))
-        {
-            if (this.formIndexes.value[key].deleted)
-            {
-                changeObj.indexChange.push(
-                    {
-                        from: this.originalFormIndexes.value[key],
-                        to: null
-                    });
-                continue;
-            }
-
-            if (this.formIndexes.value[key].added)
-            {
-                changeObj.indexChange.push(
-                    {
-                        from: null,
-                        to: this.formIndexes.value[key]
-                    }
-                );
-            }
-        }
-
-        this.changes = changeObj;
-        console.log(changeObj);
     }
 
     get originalFormColumns(): FormArray
@@ -248,7 +251,22 @@ export class AlterTableComponent implements OnInit
             column.deleted = false;
             column.added = false;
 
-            this.formColumns.push(this.formBuilder.group(column));
+            let group: FormGroup = this.formBuilder.group(column);
+            for (let key of Object.keys(group.value))
+            {
+                let control = group.get(key);
+                switch (key)
+                {
+                    case "name":
+                        control.setValidators(Validators.required);
+                        break;
+                    case "columnType":
+                        control.setValidators([Validators.required, columnTypeValidator()]);
+                        break;
+                }
+            }
+
+            this.formColumns.push(group);
             this.originalFormColumns.push(this.formBuilder.group(column));
         });
 

@@ -64,14 +64,14 @@
                 </thead>
                 <tbody>
                 <tr *ngFor="let column of formColumns.controls; let i=index" [formGroupName]="i" [class.deleted]="column.value.deleted">
-                    <td><input type="text" placeholder="Column name" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="name"></td>
+                    <td><input type="text" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" [class.invalid]="!column.get('name').valid" formControlName="name"></td>
                     <td>
-                        <input list="type_list" type="text" placeholder="Column type" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="columnType">
+                        <input list="type_list" type="text" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" [class.invalid]="!column.get('columnType').valid" formControlName="columnType">
                         <datalist id="type_list">
                             <option *ngFor="let type of types">{{type}}</option>
                         </datalist>
                     </td>
-                    <td><input type="text" placeholder="Default value" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="defaultValue"></td>
+                    <td><input type="text" class="form-control form-control-sm" [attr.disabled]="column.value.deleted?'':null" formControlName="defaultValue"></td>
                     <td class="m-0">
                         <div class="input-group justify-content-center border-0">
                             <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
@@ -197,5 +197,5 @@
     </form>
 </div>
 <div class="card-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
+    <button type="button" class="btn btn-outline-dark" (click)="submit()" [disabled]="!alterTableForm.valid">Submit</button>
 </div>

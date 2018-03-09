@@ -25,3 +25,18 @@
     max-width: 100px;
     padding: 0;
 }
+
+.invalid {
+    border: 1px solid red;
+    box-shadow: 0px 0px 4px red;
+    -moz-box-shadow: 0px 0px 4px red;
+    -webkit-box-shadow: 0px 0px 4px red;
+}
+
+.invalid:focus {
+    outline: none;
+    border: 1px solid red;
+    box-shadow: 0px 0px 8px red;
+    -moz-box-shadow: 0px 0px 8px red;
+    -webkit-box-shadow: 0px 0px 8px red;
+}
