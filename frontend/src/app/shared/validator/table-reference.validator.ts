@@ -10,7 +10,7 @@ export function tableReferenceValidator(): ValidatorFn
         let regex = new RegExp('^[A-z]+[.][A-z]+');
         if (!regex.test(reference))
         {
-            return {tableReference: {valid: false}};
+            return {tableReference: {valid: false, message: "Invalid table reference format."}};
         }
 
         return null;

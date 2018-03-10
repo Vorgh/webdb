@@ -1,44 +1,61 @@
 <div class="card-header">
-    <h4 class="card-title">Modify Trigger...</h4>
+    <div class="row">
+        <h4 class="card-title col-sm-10">Modify Trigger...</h4>
+        <div class="col-sm-2 d-flex justify-content-center">
+            <button [disabled]="!triggerForm.valid" type="button" class="btn btn-success" (click)="submit()">Save</button>
+        </div>
+    </div>
 </div>
 <div class="card-body">
     <form class="p-4" [formGroup]="triggerForm">
         <div class="form-group row">
             <label for="trigger-name" class="col-form-label col-sm-2">Trigger Name:</label>
             <div class="col-sm-6">
-                <input id="trigger-name" type="text" class="form-control" formControlName="triggerName">
+                <input id="trigger-name" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerName').valid" formControlName="triggerName">
+            </div>
+            <div *ngIf="triggerForm.get('triggerName').hasError('required')" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-timing" class="col-form-label col-sm-2">Timing:</label>
             <div class="col-sm-6">
-                <select id="trigger-timing" type="text" class="form-control" formControlName="triggerTiming">
+                <select id="trigger-timing" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerTiming').valid" formControlName="triggerTiming">
                     <option *ngFor="let timing of TIMINGS">{{timing}}</option>
                 </select>
+            </div>
+            <div *ngIf="triggerForm.get('triggerTiming').hasError('required')" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-event" class="col-form-label col-sm-2">Event:</label>
             <div class="col-sm-6">
-                <select id="trigger-event" type="text" class="form-control" formControlName="triggerEvent">
+                <select id="trigger-event" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerEvent').valid" formControlName="triggerEvent">
                     <option *ngFor="let event of EVENTS">{{event}}</option>
                 </select>
+            </div>
+            <div *ngIf="triggerForm.get('triggerEvent').hasError('required')" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-event-target" class="col-form-label col-sm-2">Target:</label>
             <div class="col-sm-6">
-                <input id="trigger-event-target" placeholder="<schema>.<object>" type="text" class="form-control" formControlName="triggerEventTarget">
+                <input id="trigger-event-target" placeholder="<schema>.<object>" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerEventTarget').valid" formControlName="triggerEventTarget">
+            </div>
+            <div *ngIf="triggerForm.get('triggerEventTarget').hasError('tableReference')" class="text-danger col-sm my-auto">
+                {{triggerForm.get('triggerEventTarget').getError('tableReference').message}}
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-body" class="col-form-label col-sm-2">Trigger Body:</label>
             <div class="col-sm-6">
-                <textarea id="trigger-body" class="form-control" formControlName="triggerBody" rows="10" spellcheck="false"></textarea>
+                <textarea id="trigger-body" class="form-control" [class.invalid]="!triggerForm.get('triggerBody').valid" formControlName="triggerBody" rows="10" spellcheck="false"></textarea>
+            </div>
+            <div *ngIf="triggerForm.get('triggerBody').hasError('triggerBody')" class="text-danger col-sm my-auto">
+                {{triggerForm.get('triggerBody').getError('triggerBody').message}}
             </div>
         </div>
     </form>
-</div>
-<div class="card-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
 </div>

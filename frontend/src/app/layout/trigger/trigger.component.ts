@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {Table, Trigger} from "../../models/rest-models";
+import {Trigger} from "../../models/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DatabaseService} from "../../services/database.service";
-import {isNullOrUndefined} from "util";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../shared/util/utils";
+import {tableReferenceValidator} from "../../shared/validator/table-reference.validator";
+import {triggerBodyValidator} from "../../shared/validator/trigger-body.validator";
 
 @Component({
     selector: 'app-trigger',
@@ -41,11 +41,11 @@ export class TriggerComponent implements OnInit
                 this.router.url, 'Modify Trigger', 'fa-table');
 
             this.triggerForm = this.formBuilder.group({
-                    triggerName: [this.trigger.name],
-                    triggerTiming: [this.trigger.timing],
-                    triggerEvent: [this.trigger.eventType],
-                    triggerEventTarget: [this.trigger.eventSchema + "." + this.trigger.eventTable],
-                    triggerBody: [this.trigger.triggerBody],
+                    triggerName: [this.trigger.name, Validators.required],
+                    triggerTiming: [this.trigger.timing, Validators.required],
+                    triggerEvent: [this.trigger.eventType, Validators.required],
+                    triggerEventTarget: [this.trigger.eventSchema + "." + this.trigger.eventTable, tableReferenceValidator()],
+                    triggerBody: [this.trigger.triggerBody, triggerBodyValidator()],
                 }
             );
         });
@@ -54,6 +54,7 @@ export class TriggerComponent implements OnInit
     submit()
     {
         let trigger: Trigger = new Trigger();
+
         trigger.schema = this.schema;
         trigger.name = this.triggerForm.get('triggerName').value;
         trigger.timing = this.triggerForm.get('triggerTiming').value;
