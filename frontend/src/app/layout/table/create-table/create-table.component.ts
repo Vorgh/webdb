@@ -1,11 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Column, Constraint, Table} from "../../../models/rest-models";
 import {isNullOrUndefined} from "util";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
+import {newColumnValidator, newForeignKeyValidator} from "../../../shared/validator/add-new.validator";
+import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
 
 @Component({
     selector: 'create-table',
@@ -19,6 +21,8 @@ export class CreateTableComponent implements OnInit
     schema: string;
     createTableForm: FormGroup;
     types = Utils.dataTypes;
+    newColumnValidateMessage: string;
+    newForeignKeyValidateMessage: string;
 
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
@@ -46,7 +50,7 @@ export class CreateTableComponent implements OnInit
         });
 
         this.createTableForm = this.formBuilder.group({
-                tableName: [''],
+                tableName: ['', Validators.required],
                 columns: this.formBuilder.array([]),
                 constraints: this.formBuilder.array([])
             }
@@ -66,6 +70,13 @@ export class CreateTableComponent implements OnInit
     addColumn(name, type, defaultValue, PK, UQ, NUL, AI)
     {
         let col = new Column();
+
+        this.newColumnValidateMessage = newColumnValidator(name, type);
+        if (this.newColumnValidateMessage != null)
+        {
+            return;
+        }
+
         col.tableSchema = this.schema;
         col.name = name.value;
         col.columnType = type.value;
@@ -75,7 +86,7 @@ export class CreateTableComponent implements OnInit
         col.nullable = NUL.checked;
         col.autoIncrement = AI.checked;
 
-        this.formColumns.push(this.formBuilder.group(col));
+        this.addColumnControl(col);
 
         name.value = '';
         type.value = '';
@@ -86,13 +97,37 @@ export class CreateTableComponent implements OnInit
         AI.checked = false;
     }
 
+    private addColumnControl(col: Column)
+    {
+        let group: FormGroup = this.formBuilder.group(col);
+        for (let key of Object.keys(group.value))
+        {
+            let control = group.get(key);
+            switch (key)
+            {
+                case "name":
+                    control.setValidators(Validators.required);
+                    break;
+                case "columnType":
+                    control.setValidators([Validators.required, columnTypeValidator()]);
+                    break;
+            }
+        }
+
+        this.formColumns.push(group);
+    }
+
     addForeignKey(name, column, reference, updateRule, deleteRule)
     {
         let key: Constraint = new Constraint();
+
+        this.newForeignKeyValidateMessage = newForeignKeyValidator(name, column, reference, updateRule, deleteRule);
+        if (this.newForeignKeyValidateMessage != null)
+        {
+            return;
+        }
+
         let parsedRef = Utils.parseColumnReference(reference.value);
-
-        if (isNullOrUndefined(parsedRef)) return;
-
         key.constraintName = name.value;
         key.schema = this.schema;
         key.column = column.value;

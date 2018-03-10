@@ -12,6 +12,10 @@ import {PageHeaderService} from "../../../shared/modules/page-header/page-header
 import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
 import {uniqueFields} from "../../../shared/validator/unique.validator";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
+import {
+    newColumnValidator, newForeignKeyValidator,
+    newIndexValidator
+} from "../../../shared/validator/add-new.validator";
 
 @Component({
     selector: 'alter-table',
@@ -32,6 +36,10 @@ export class AlterTableComponent implements OnInit
     originalForm: FormGroup;
     changes: any;
     types = Utils.dataTypes;
+
+    newColumnValidateMessage: string;
+    newForeignKeyValidateMessage: string;
+    newIndexValidateMessage: string;
 
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
@@ -101,8 +109,8 @@ export class AlterTableComponent implements OnInit
             changeObj.columnChange = [];
             for (let key of Object.keys(this.formColumns.value))
             {
-                if (this.formColumns.value[key].name === "" || this.formColumns.value[key].columnType === "")
-                    continue;
+                /*if (this.formColumns.value[key].name === "" || this.formColumns.value[key].columnType === "")
+                    continue;*/
 
                 if (this.formColumns.value[key].deleted)
                 {
@@ -293,6 +301,13 @@ export class AlterTableComponent implements OnInit
     addColumn(name, type, defaultValue, PK, UQ, NUL, AI)
     {
         let col = Column.defaultColumn(this.schemaName, this.table.name);
+
+        this.newColumnValidateMessage = newColumnValidator(name, type);
+        if (this.newColumnValidateMessage != null)
+        {
+            return;
+        }
+
         col.name = name.value;
         col.columnType = type.value;
         col.defaultValue = defaultValue.value;
@@ -301,7 +316,7 @@ export class AlterTableComponent implements OnInit
         col.nullable = NUL.checked;
         col.autoIncrement = AI.checked;
 
-        this.formColumns.push(this.formBuilder.group(col));
+        this.addColumnControl(col);
 
         name.value = '';
         type.value = '';
@@ -312,13 +327,37 @@ export class AlterTableComponent implements OnInit
         AI.checked = false;
     }
 
+    private addColumnControl(col: Column)
+    {
+        let group: FormGroup = this.formBuilder.group(col);
+        for (let key of Object.keys(group.value))
+        {
+            let control = group.get(key);
+            switch (key)
+            {
+                case "name":
+                    control.setValidators(Validators.required);
+                    break;
+                case "columnType":
+                    control.setValidators([Validators.required, columnTypeValidator()]);
+                    break;
+            }
+        }
+
+        this.formColumns.push(group);
+    }
+
     addForeignKey(name, column, reference, updateRule, deleteRule)
     {
         let key: Constraint = new Constraint();
+
+        this.newForeignKeyValidateMessage = newForeignKeyValidator(name, column, reference, updateRule, deleteRule);
+        if (this.newForeignKeyValidateMessage != null)
+        {
+            return;
+        }
+
         let parsedRef = Utils.parseColumnReference(reference.value);
-
-        if (isNullOrUndefined(parsedRef)) return;
-
         key.constraintName = name.value;
         key.schema = this.schemaName;
         key.table = this.table.name;
@@ -343,10 +382,14 @@ export class AlterTableComponent implements OnInit
     addIndex(name, reference, unique, nullable)
     {
         let index = new Index();
+
+        this.newIndexValidateMessage = newIndexValidator(name, reference);
+        if (this.newIndexValidateMessage != null)
+        {
+            return;
+        }
+
         let parsedRef = Utils.parseColumnReference(reference.value);
-
-        if (isNullOrUndefined(parsedRef)) return;
-
         index.indexSchema = this.schemaName;
         index.indexName = name.value;
         index.schema = parsedRef[0];

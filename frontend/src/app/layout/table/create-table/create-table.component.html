@@ -1,5 +1,5 @@
 <ng-template #newColumnRow>
-    <tr>
+    <tr [class.invalid-group]="newColumnValidateMessage != null">
         <td><input type="text" placeholder="Column name" class="form-control form-control-sm" #newColName></td>
         <td>
             <input list="type_list_new" type="text" placeholder="Column type" class="form-control form-control-sm" #newColType>
@@ -8,8 +8,8 @@
             </datalist>
         </td>
         <td><input type="text" placeholder="Default value" class="form-control form-control-sm" #newColDefault></td>
-        <td class="row m-0">
-            <div class="input-group justify-content-center">
+        <td class="m-0">
+            <div class="input-group justify-content-center border-0">
                 <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
                     <label class="xsmall-text m-0" ngbTooltip="Primary Key">PK</label>
                     <input type="checkbox" class="m-0" #newColPK>
@@ -37,6 +37,11 @@
             </div>
         </td>
     </tr>
+    <tr *ngIf="newColumnValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+        <td colspan="5">
+            <div class="xsmall-text">{{newColumnValidateMessage}}</div>
+        </td>
+    </tr>
 </ng-template>
 
 <div class="card-header">
@@ -47,7 +52,7 @@
         <div class="form-group row">
             <label for="table-name" class="col-form-label col-sm-2">Table Name:</label>
             <div class="col-sm-6">
-                <input id="table-name" type="text" class="form-control" formControlName="tableName">
+                <input id="table-name" type="text" class="form-control" formControlName="tableName" [class.invalid]="!createTableForm.get('tableName').valid && !createTableForm.get('tableName').pristine">
             </div>
         </div>
         <div class="col-form-label">Column Definitions:</div>
@@ -64,14 +69,14 @@
                 </thead>
                 <tbody>
                 <tr *ngFor="let column of formColumns.controls; let i=index" [formGroupName]="i">
-                    <td><input type="text" placeholder="Column name" class="form-control form-control-sm" formControlName="name"></td>
+                    <td><input type="text" class="form-control form-control-sm" [class.invalid]="!column.get('name').valid" formControlName="name"></td>
                     <td>
-                        <input list="type_list" type="text" placeholder="Column type" class="form-control form-control-sm" formControlName="columnType">
+                        <input list="type_list" type="text" class="form-control form-control-sm" [class.invalid]="!column.get('columnType').valid" formControlName="columnType">
                         <datalist id="type_list">
                             <option *ngFor="let type of types">{{type}}</option>
                         </datalist>
                     </td>
-                    <td><input type="text" placeholder="Default value" class="form-control form-control-sm" formControlName="defaultValue"></td>
+                    <td><input type="text" class="form-control form-control-sm" formControlName="defaultValue"></td>
                     <td class="row m-0">
                         <div class="input-group justify-content-center">
                             <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
@@ -98,7 +103,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr><td colspan="5"><hr class="divider"></td></tr>
+                <tr><td colspan="5"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
                 <ng-template [ngTemplateOutlet]="newColumnRow"></ng-template>
                 </tbody>
             </table>
@@ -131,7 +136,8 @@
                         <button type="button" class="btn btn-danger btn-sm" (click)="removeForeignKey(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
                     </td>
                 </tr>
-                <tr>
+                <tr><td colspan="6"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
+                <tr [class.invalid-group]="newForeignKeyValidateMessage != null">
                     <td><input type="text" class="form-control form-control-sm small-text" #newKeyName></td>
                     <td>
                         <select class="form-control form-control-sm small-text" [disabled]="formColumns.controls.length == 0" #newKeyColName>
@@ -139,7 +145,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" class="form-control form-control-sm small-text" placeholder="<schema>.<table>(<col>)" #newKeyRef>
+                        <input type="text" class="form-control form-control-sm small-text" placeholder="'schema'.'table'('col')" #newKeyRef>
                     </td>
                     <td>
                         <select class="form-control form-control-sm small-text" #newKeyUpdate>
@@ -158,11 +164,16 @@
                         </button>
                     </td>
                 </tr>
+                <tr *ngIf="newForeignKeyValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+                    <td colspan="6">
+                        <div class="xsmall-text">{{newForeignKeyValidateMessage}}</div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
     </form>
 </div>
 <div class="card-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
+    <button [disabled]="!createTableForm.valid" type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
 </div>

@@ -1,5 +1,5 @@
 <ng-template #newColumnRow>
-    <tr>
+    <tr [class.invalid-group]="newColumnValidateMessage != null">
         <td><input type="text" placeholder="Column name" class="form-control form-control-sm" #newColName></td>
         <td>
             <input list="type_list_new" type="text" placeholder="Column type" class="form-control form-control-sm" #newColType>
@@ -37,6 +37,11 @@
             </div>
         </td>
     </tr>
+    <tr *ngIf="newColumnValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+        <td colspan="5">
+            <div class="xsmall-text">{{newColumnValidateMessage}}</div>
+        </td>
+    </tr>
 </ng-template>
 
 <div class="card-header">
@@ -47,7 +52,7 @@
         <div class="form-group row">
             <label for="table-name" class="col-form-label col-sm-2">Table Name:</label>
             <div class="col-sm-6">
-                <input id="table-name" type="text" class="form-control" formControlName="tableName">
+                <input id="table-name" type="text" class="form-control" formControlName="tableName" [class.invalid]="!alterTableForm.get('tableName').valid">
             </div>
         </div>
         <div class="col-form-label">Column Definitions:</div>
@@ -99,7 +104,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr><td colspan="5"><div class="xsmall-text text-info">Add new:</div></td></tr>
+                <tr><td colspan="5"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
                 <ng-template [ngTemplateOutlet]="newColumnRow"></ng-template>
                 </tbody>
             </table>
@@ -108,7 +113,7 @@
         <div class="row p-2 justify-content-center table-responsive" formArrayName="constraints">
             <table class="table table-sm m-0">
                 <thead>
-                <tr class="small-text">
+                <tr class="small-text border-bottom-0">
                     <th>Constraint Name</th>
                     <th>Column</th>
                     <th>References</th>
@@ -129,8 +134,11 @@
                         <button *ngIf="fkey.value.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoRemoveForeignKey(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                     </td>
                 </tr>
-                <tr>
-                    <td><input type="text" class="form-control form-control-sm small-text" #newKeyName></td>
+                <tr><td colspan="6"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
+                <tr [class.invalid-group]="newForeignKeyValidateMessage != null">
+                    <td>
+                        <input type="text" class="form-control form-control-sm small-text" #newKeyName>
+                    </td>
                     <td>
                         <select class="form-control form-control-sm small-text" [disabled]="activeFormColumns.length === 0" #newKeyColName>
                             <option *ngFor="let col of activeFormColumns">{{col}}</option>
@@ -154,6 +162,11 @@
                                 (click)="addForeignKey(newKeyName, newKeyColName, newKeyRef, newKeyUpdate, newKeyDelete)">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
+                    </td>
+                </tr>
+                <tr *ngIf="newForeignKeyValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+                    <td colspan="6">
+                        <div class="xsmall-text">{{newForeignKeyValidateMessage}}</div>
                     </td>
                 </tr>
                 </tbody>
@@ -182,13 +195,19 @@
                         <button *ngIf="ind.value.deleted" type="button" class="btn btn-warning btn-sm" [disabled]="ind.value.indexName == 'PRIMARY'" (click)="undoRemoveIndex(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                     </td>
                 </tr>
-                <tr>
+                <tr><td colspan="5"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
+                <tr [class.invalid-group]="newIndexValidateMessage != null">
                     <td><input type="text" class="form-control form-control-sm small-text" #newIndexName></td>
                     <td><input type="text" class="form-control form-control-sm small-text" placeholder="<schema>.<table>(<col>)" #newIndexRef></td>
                     <td><input type="checkbox" class="form-control form-control-sm" #newIndexUnique></td>
                     <td><input type="checkbox" class="form-control form-control-sm" checked #newIndexNullable></td>
                     <td class="d-flex justify-content-end">
                         <button type="button" class="btn btn-info btn-sm" (click)="addIndex(newIndexName, newIndexRef, newIndexUnique, newIndexNullable)"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    </td>
+                </tr>
+                <tr *ngIf="newIndexValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+                    <td colspan="6">
+                        <div class="xsmall-text">{{newIndexValidateMessage}}</div>
                     </td>
                 </tr>
                 </tbody>

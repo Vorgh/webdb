@@ -1,5 +1,9 @@
-thead {
+table {
     text-align: center;
+}
+
+thead tr th {
+    border-bottom: 0;
 }
 
 .deleted {
