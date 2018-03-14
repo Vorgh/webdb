@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-server-error',
@@ -8,10 +8,10 @@ import {ActivatedRoute} from "@angular/router";
 })
 export class ServerErrorComponent implements OnInit
 {
-    code: string;
+    code: number;
     message: string;
 
-    constructor(private route: ActivatedRoute)
+    constructor(private route: ActivatedRoute, private router: Router)
     {
     }
 
@@ -20,7 +20,14 @@ export class ServerErrorComponent implements OnInit
         this.route.queryParams.subscribe(params =>
         {
             this.code = params.code;
-            this.message = params.message
+            this.message = params.message;
+
+            if (this.code == 401)
+            {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('current_user');
+                this.router.navigate(['/login']);
+            }
         });
     }
 
