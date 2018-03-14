@@ -19,15 +19,11 @@ import java.util.LinkedHashMap;
 @Component
 public class UrlWithNameAuthenticationProvider implements AuthenticationProvider
 {
+    @Autowired
     private ConnectionDAO connectionDAO;
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UrlWithNameAuthenticationProvider(ConnectionDAO connectionDAO, BCryptPasswordEncoder passwordEncoder)
-    {
-        this.connectionDAO = connectionDAO;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException
