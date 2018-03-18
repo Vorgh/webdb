@@ -1,5 +1,4 @@
 import {AbstractControl, ValidatorFn} from "@angular/forms";
-import {Utils} from "../util/utils";
 import {isColumnTypeValid} from "./shared/utils";
 
 export function columnTypeValidator(): ValidatorFn

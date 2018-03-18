@@ -1,15 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Table, Trigger} from "../../models/rest-models";
+import {Procedure, Table, Trigger} from "../../models/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
-import {CreateTableComponent} from "../table/create-table/create-table.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbTab, NgbTabset} from "@ng-bootstrap/ng-bootstrap";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
-import {HeaderElement} from "../../models/header-element";
-import {AlterTableComponent} from "../table/alter-table/alter-table.component";
-import {Column} from "../../models/rest-models";
+import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-dbhome',
@@ -19,17 +16,22 @@ import {Column} from "../../models/rest-models";
 })
 export class DBHomeComponent implements OnInit
 {
-    schema: string;
+    @ViewChild(NgbTabset) tabset: NgbTabset;
+    @ViewChildren(NgbTab) tabs: QueryList<NgbTab>;
+    activeTabId: string;
 
+    schema: string;
     tables$: Promise<Table[]>;
     views$: Promise<Table[]>;
     triggers$: Promise<Trigger[]>;
+    procedures$: Promise<Procedure[]>;
 
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
                 private router: Router,
-                private modalService: NgbModal)
+                private modalService: NgbModal,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
@@ -46,26 +48,34 @@ export class DBHomeComponent implements OnInit
             if (this.schema != params['schema'] && !isNullOrUndefined(params['schema']))
             {
                 this.schema = params['schema'];
+
                 this.tables$ = this.databaseService.getAllTables(this.schema);
                 this.tables$
-                    .catch(promise =>
-                    {
-                        this.router.navigate(["/error"], {replaceUrl: true,
-                            queryParams: {code: promise.status, message: promise.statusText}});
-                    });
+                    .catch(this.errorHandler.handleError);
+
                 this.views$ = this.databaseService.getAllTables(this.schema, true);
                 this.views$
-                    .catch(promise =>
-                    {
-                        this.router.navigate(["/error"], {replaceUrl: true,
-                            queryParams: {code: promise.status, message: promise.statusText}});
-                    });
+                    .catch(this.errorHandler.handleError);
+
                 this.triggers$ = this.databaseService.getAllTriggers(this.schema);
                 this.triggers$
-                    .catch(promise =>
+                    .catch(this.errorHandler.handleError);
+
+                this.procedures$ = this.databaseService.getAllProcedures(this.schema);
+                this.procedures$
+                    .catch(this.errorHandler.handleError);
+
+                if (!isNullOrUndefined(params['tab']))
+                {
+                    switch (params['tab'])
                     {
-                        this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
-                    });
+                        case 'table': this.activeTabId = 'tab-tables'; break;
+                        case 'view': this.activeTabId = 'tab-views'; break;
+                        case 'trigger': this.activeTabId = 'tab-triggers'; break;
+                        case 'procedure': this.activeTabId = 'tab-procedures'; break;
+                        case 'function': this.activeTabId = 'tab-functions'; break;
+                    }
+                }
 
                 this.pageHeaderService.addFragment('dbhome', this.pageHeaderService.getHeaderByID('home'),
                     this.router.url, this.schema, 'fa-database');
@@ -80,16 +90,9 @@ export class DBHomeComponent implements OnInit
             {
                 this.tables$ = this.databaseService.getAllTables(this.schema);
                 this.tables$
-                    .catch(promise =>
-                    {
-                        this.router.navigate(["/error"], {replaceUrl: true,
-                            queryParams: {code: promise.status, message: promise.statusText}});
-                    });
+                    .catch(this.errorHandler.handleError);
             })
-            .catch(promise =>
-            {
-                this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
-            });
+            .catch(this.errorHandler.handleError);
     }
 
     dropTrigger(trigger: Trigger)
@@ -99,18 +102,24 @@ export class DBHomeComponent implements OnInit
             {
                 this.triggers$ = this.databaseService.getAllTriggers(this.schema);
                 this.triggers$
-                    .catch(promise =>
-                    {
-                        this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
-                    });
+                    .catch(this.errorHandler.handleError);
             })
-            .catch(promise =>
-            {
-                this.router.navigate(["/error"], {queryParams: {code: promise.status, message: promise.statusText}});
-            });
+            .catch(this.errorHandler.handleError);
     }
 
-    showTriggerCode(template)
+    dropProcedure(procedure: Procedure)
+    {
+        this.databaseService.dropProcedure(procedure.schema, procedure.name)
+            .then(() =>
+            {
+                this.procedures$ = this.databaseService.getAllProcedures(this.schema);
+                this.procedures$
+                    .catch(this.errorHandler.handleError);
+            })
+            .catch(this.errorHandler.handleError);
+    }
+
+    showCodeModal(template)
     {
         this.modalService.open(template);
     }

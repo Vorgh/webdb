@@ -3,10 +3,12 @@ import {Trigger} from "../../models/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DatabaseService} from "../../services/database.service";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../shared/util/utils";
 import {tableReferenceValidator} from "../../shared/validator/table-reference.validator";
-import {triggerBodyValidator} from "../../shared/validator/trigger-body.validator";
+import {bodyValidator} from "../../shared/validator/body.validator";
+import {ModifyTriggerRequest} from "../../models/request/request-models";
+import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-trigger',
@@ -18,15 +20,17 @@ export class TriggerComponent implements OnInit
     readonly TIMINGS = ["BEFORE", "AFTER"];
     readonly EVENTS = ["INSERT", "UPDATE", "DELETE"];
 
+    private originalTrigger: Trigger;
+
     schema: string;
-    trigger: Trigger;
     triggerForm: FormGroup;
 
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
-                private route: ActivatedRoute)
+                private route: ActivatedRoute,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
@@ -34,18 +38,18 @@ export class TriggerComponent implements OnInit
     {
         this.route.data.subscribe((data: {trigger: Trigger}) =>
         {
-            this.trigger = data.trigger;
+            this.originalTrigger = data.trigger;
             this.schema = data.trigger.schema;
 
             this.pageHeaderService.addFragment('modify-trigger', this.pageHeaderService.getHeaderByID('dbhome'),
                 this.router.url, 'Modify Trigger', 'fa-table');
 
             this.triggerForm = this.formBuilder.group({
-                    triggerName: [this.trigger.name, Validators.required],
-                    triggerTiming: [this.trigger.timing, Validators.required],
-                    triggerEvent: [this.trigger.eventType, Validators.required],
-                    triggerEventTarget: [this.trigger.eventSchema + "." + this.trigger.eventTable, tableReferenceValidator()],
-                    triggerBody: [this.trigger.triggerBody, triggerBodyValidator()],
+                    triggerName: [this.originalTrigger.name, Validators.required],
+                    triggerTiming: [this.originalTrigger.timing, Validators.required],
+                    triggerEvent: [this.originalTrigger.eventType, Validators.required],
+                    triggerEventTarget: [this.originalTrigger.eventSchema + "." + this.originalTrigger.eventTable, tableReferenceValidator()],
+                    triggerBody: [this.originalTrigger.triggerBody, bodyValidator()],
                 }
             );
         });
@@ -64,8 +68,14 @@ export class TriggerComponent implements OnInit
         trigger.eventTable = target[1];
         trigger.triggerBody = this.triggerForm.get('triggerBody').value;
 
-        this.databaseService.modifyTrigger(this.schema, trigger)
-            .then(() => this.router.navigate(['/db']))
-            .catch(error => console.log(error));
+        let request: ModifyTriggerRequest = new ModifyTriggerRequest(this.originalTrigger, trigger);
+        this.databaseService.modifyTrigger(request)
+            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
+            .catch(this.errorHandler.handleError);
+    }
+
+    getFormControl(name: string): AbstractControl
+    {
+        return this.triggerForm.get(name);
     }
 }

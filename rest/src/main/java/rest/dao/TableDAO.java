@@ -3,6 +3,11 @@ package rest.dao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
+import rest.sql.executor.BatchExecutor;
+import rest.sql.builder.DeleteQueryBuilder;
+import rest.sql.builder.InsertQueryBuilder;
+import rest.sql.builder.SelectQueryBuilder;
+import rest.sql.builder.UpdateQueryBuilder;
 import rest.mapper.ColumnDetailMapper;
 import rest.mapper.ConstraintMapper;
 import rest.mapper.IndexMapper;
@@ -12,15 +17,12 @@ import rest.model.database.Column;
 import rest.model.database.Constraint;
 import rest.model.database.Index;
 import rest.model.database.Table;
-import rest.model.request.table.alter.AlterTableRequest;
+import rest.model.request.table.AlterTableRequest;
 import rest.model.request.Change;
-import rest.model.request.table.create.CreateTableRequest;
-import rest.model.request.table.row.RowModifyRequest;
+import rest.model.request.table.CreateTableRequest;
+import rest.model.request.table.RowModifyRequest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -45,13 +47,12 @@ public class TableDAO extends AbstractDatabaseDAO
 
     public Table getTableMetadata(String schemaName, String tableName)
     {
-        return jdbcTemplate.query(
+        return jdbcTemplate.queryForObject(
                 "SELECT table_schema, table_name, table_type, engine, create_time, table_collation " +
                         "FROM information_schema.tables " +
                         "WHERE table_schema=? AND table_name=?;",
                 new Object[]{schemaName, tableName},
-                new TableDetailMapper())
-                .get(0);
+                new TableDetailMapper());
     }
 
     public List<Column> getAllColumnsMetadata(String schemaName, String tableName)
@@ -60,6 +61,7 @@ public class TableDAO extends AbstractDatabaseDAO
                 "cols.is_nullable, cols.data_type, cols.character_maximum_length, cols.character_octet_length, " +
                 "cols.numeric_precision, cols.numeric_scale, cols.datetime_precision, cols.character_set_name, " +
                 "cols.column_type, cols.column_key, cols.extra ";
+
         return jdbcTemplate.query(
                 "SELECT " + selectCols +
                         "FROM information_schema.columns cols " +
@@ -93,14 +95,22 @@ public class TableDAO extends AbstractDatabaseDAO
 
     public List<Map<String, Object>> getRowData(String schemaName, String tableName, String column)
     {
-        String query = "SELECT " + column + " FROM " + schemaName + "." + tableName + ";";
+        SelectQueryBuilder queryBuilder = new SelectQueryBuilder();
+        String query = queryBuilder
+                .select(column)
+                .from(schemaName, tableName)
+                .build();
 
         return jdbcTemplate.queryForList(query);
     }
 
     public List<Map<String, Object>> getRowData(String schemaName, String tableName, String[] columnNames)
     {
-        String query = "SELECT " + String.join(",", columnNames) + " FROM " + schemaName + "." + tableName + ";";
+        SelectQueryBuilder queryBuilder = new SelectQueryBuilder();
+        String query = queryBuilder
+                .select(Arrays.asList(columnNames))
+                .from(schemaName, tableName)
+                .build();
 
         return jdbcTemplate.queryForList(query);
     }
@@ -108,23 +118,34 @@ public class TableDAO extends AbstractDatabaseDAO
     public void modifyRows(String schemaName, String tableName, RowModifyRequest request)
     {
         StringBuilder query = new StringBuilder();
+        BatchExecutor batchExecutor = new BatchExecutor(jdbcTemplate);
+        List<String> insertQueries = new ArrayList<>();
+        List<String> updateQueries = new ArrayList<>();
+        List<String> deleteQueries = new ArrayList<>();
+
         List<String> columnList = new ArrayList<>();
         List<String> primaryKeys = getPrimaryKeyColumns(schemaName, tableName);
+
+        if (request.changes.get(0).from != null)
+        {
+            columnList.addAll(request.changes.get(0).from.keySet());
+        }
+        else
+        {
+            columnList.addAll(request.changes.get(0).to.keySet());
+        }
 
         for (Change<Map<String, Object>> change : request.changes)
         {
             List<String> inserts = new ArrayList<>();
-            List<String> updates = new ArrayList<>();
-            List<String> deletes = new ArrayList<>();
+            //List<String> updates = new ArrayList<>();
+            //List<String> deletes = new ArrayList<>();
+            Map<String, String> updates = new HashMap<>();
+            Map<String, String> deletes = new HashMap<>();
 
             if (change.from == null)
             {
-                if (columnList.isEmpty())
-                {
-                    columnList.addAll(change.to.keySet());
-                }
-
-                List<String> insertObjectStringList = new ArrayList<>();
+                /*List<String> insertObjectStringList = new ArrayList<>();
                 for (Object item : change.to.values())
                 {
                     if (!"".equals(item.toString()))
@@ -132,30 +153,33 @@ public class TableDAO extends AbstractDatabaseDAO
                     else
                         insertObjectStringList.add("NULL");
                 }
-                inserts.add("(" + String.join(",", insertObjectStringList) + ")");
+                inserts.add("(" + String.join(",", insertObjectStringList) + ")");*/
+
+                for (Object item : change.to.values())
+                {
+                    if (!"".equals(item.toString()))
+                    {
+                        inserts.add(item.toString());
+                    }
+                    else
+                    {
+                        inserts.add(null);
+                    }
+                }
             }
 
             if (change.from != null && change.to != null)
             {
-                if (columnList.isEmpty())
-                {
-                    columnList.addAll(change.to.keySet());
-                }
-
                 for (String col : columnList)
                 {
-                    updates.add(col + "=" + change.to.get(col));
+                    updates.put(col, change.to.get(col).toString());
+                    //updates.add(col + "=" + change.to.get(col));
                 }
             }
 
             if (change.to == null)
             {
-                if (columnList.isEmpty())
-                {
-                    columnList.addAll(change.from.keySet());
-                }
-
-                List<String> deleteCondition = new ArrayList<>();
+                /*List<String> deleteCondition = new ArrayList<>();
                 for (String key : primaryKeys)
                 {
                     if (change.from.get(key) == null || change.from.get(key) instanceof Number)
@@ -163,41 +187,103 @@ public class TableDAO extends AbstractDatabaseDAO
                     else
                         deleteCondition.add(key + "=" + quoteValue(change.from.get(key).toString()));
                 }
-                deletes.add(String.join(" AND ", deleteCondition));
+                deletes.add(String.join(" AND ", deleteCondition));*/
+
+                for (String key : primaryKeys)
+                {
+                    if (change.from.get(key) == null)
+                        deletes.put(key, null);
+                    else
+                        deletes.put(key, change.from.get(key).toString());
+                }
             }
 
             if (!inserts.isEmpty())
             {
-                query.append("INSERT INTO ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" (");
-                query.append(String.join(",", columnList)).append(") VALUES ").append(String.join(",", inserts)).append(";\n");
+                InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
+                String q = insertQueryBuilder
+                        .insertInto(schemaName, tableName)
+                        .columns(columnList)
+                        .values(inserts)
+                        .build();
+
+                //logger.info("Query executed: {}", q);
+                //jdbcTemplate.update(q);
+                insertQueries.add(q);
+
+                //query.append("INSERT INTO ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" (");
+                //query.append(String.join(",", columnList)).append(") VALUES ").append(String.join(",", inserts)).append(";\n");
             }
 
             if (!updates.isEmpty())
             {
-                List<String> conditions = new ArrayList<>();
+                Map<String, String> conditions = new HashMap<>();
+                //List<String> conditions = new ArrayList<>();
 
-                query.append("UPDATE ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" ");
+                /*query.append("UPDATE ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" ");
                 for (String key : primaryKeys)
                 {
                     if (change.from.get(key) == null || change.from.get(key) instanceof Number)
                         conditions.add(key + "=" + change.from.get(key));
                     else
                         conditions.add(key + "=" + quoteValue(change.from.get(key).toString()));
+                }*/
+
+                for (String key : primaryKeys)
+                {
+                    if (change.from.get(key) == null)
+                        conditions.put(key, null);
+                    else
+                        conditions.put(key, change.from.get(key).toString());
                 }
 
-                query.append("SET ").append(String.join(",", updates)).append(" \n");
-                query.append("WHERE ").append(String.join(" AND ", conditions)).append(";\n");
+                UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
+                String q = updateQueryBuilder
+                        .update(schemaName, tableName)
+                        .set(updates)
+                        .where(conditions)
+                        .build();
+
+                //logger.info("Query executed: {}", q);
+                //jdbcTemplate.update(q);
+                updateQueries.add(q);
+
+                /*query.append("SET ").append(String.join(",", updates)).append(" \n");
+                query.append("WHERE ").append(String.join(" AND ", conditions)).append(";\n");*/
             }
 
             if (!deletes.isEmpty())
             {
-                query.append("DELETE FROM ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" \n");
-                query.append("WHERE ").append(String.join(" OR ", deletes)).append(";\n");
+                //query.append("DELETE FROM ").append(quote(schemaName)).append(".").append(quote(tableName)).append(" \n");
+                //query.append("WHERE ").append(String.join(" OR ", deletes)).append(";\n");
+
+                DeleteQueryBuilder deleteQueryBuilder = new DeleteQueryBuilder();
+                String q = deleteQueryBuilder
+                        .from(schemaName, tableName)
+                        .where(deletes)
+                        .build();
+
+                //logger.info("Query executed: {}", q);
+                //jdbcTemplate.update(q);
+                deleteQueries.add(q);
             }
         }
 
-        logger.info("Query executed: {}", query.toString());
-        jdbcTemplate.execute(query.toString());
+        //logger.info("Query executed: {}", query.toString());
+        //jdbcTemplate.execute(query.toString());
+
+        if (!insertQueries.isEmpty())
+        {
+            batchExecutor.batchInsert(insertQueries.toArray(new String[insertQueries.size()]));
+        }
+        if (!updateQueries.isEmpty())
+        {
+            batchExecutor.batchUpdate(updateQueries.toArray(new String[updateQueries.size()]));
+        }
+        if (!deleteQueries.isEmpty())
+        {
+            batchExecutor.batchDelete(deleteQueries.toArray(new String[deleteQueries.size()]));
+        }
     }
 
     public void createTable(String schemaName, CreateTableRequest request)

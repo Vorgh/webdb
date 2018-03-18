@@ -1,6 +1,5 @@
 package rest.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +13,10 @@ import rest.model.database.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rest.model.request.Change;
-import rest.model.request.table.alter.AlterTableRequest;
+import rest.model.request.table.AlterTableRequest;
 import rest.model.request.RowRequest;
-import rest.model.request.table.create.CreateTableRequest;
-import rest.model.request.table.row.RowModifyRequest;
+import rest.model.request.table.CreateTableRequest;
+import rest.model.request.table.RowModifyRequest;
 import rest.service.TableService;
 
 @RestController

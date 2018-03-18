@@ -24,12 +24,7 @@
                                                 <button *ngIf="row.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoDeleteRow(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="5" class="text-left">
-                                                <div class="xsmall-text text-info">Add new:</div>
-                                            </td>
-                                        </tr>
-                                        <tr formGroupName="newRow">
+                                        <tr class="new-row" formGroupName="newRow">
                                             <td *ngFor="let col of columns">
                                                 <input type="text" class="form-control form-control-sm" [formControlName]="col.name" >
                                             </td>

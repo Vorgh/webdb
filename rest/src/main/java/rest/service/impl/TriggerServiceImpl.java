@@ -1,6 +1,9 @@
 package rest.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rest.model.request.Change;
+import rest.sql.util.SQLObjectBeginEndWrapper;
 import rest.dao.TriggerDAO;
 import rest.model.connection.UserConnection;
 import rest.model.database.Trigger;
@@ -11,6 +14,14 @@ import java.util.List;
 @Service
 public class TriggerServiceImpl implements TriggerService
 {
+    private SQLObjectBeginEndWrapper beginEndWrapper;
+
+    @Autowired
+    public TriggerServiceImpl(SQLObjectBeginEndWrapper beginEndWrapper)
+    {
+        this.beginEndWrapper = beginEndWrapper;
+    }
+
     @Override
     public List<Trigger> getAllTriggers(String schemaName, UserConnection connection)
     {
@@ -32,15 +43,17 @@ public class TriggerServiceImpl implements TriggerService
     {
         TriggerDAO triggerDAO = new TriggerDAO(connection);
 
-        triggerDAO.createTrigger(schemaName, requestTrigger);
+        requestTrigger.triggerBody = beginEndWrapper.wrap(requestTrigger.triggerBody);
+        triggerDAO.createTrigger(requestTrigger);
     }
 
     @Override
-    public void modifyTrigger(String schemaName, Trigger requestTrigger, UserConnection connection)
+    public void modifyTrigger(Change<Trigger> request, UserConnection connection)
     {
         TriggerDAO triggerDAO = new TriggerDAO(connection);
 
-        triggerDAO.modifyTrigger(schemaName, requestTrigger);
+        request.to.triggerBody = beginEndWrapper.wrap(request.to.triggerBody);
+        triggerDAO.modifyTrigger(request);
     }
 
     @Override

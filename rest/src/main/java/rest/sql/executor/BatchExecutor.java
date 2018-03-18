@@ -1,4 +1,4 @@
-package rest.sql;
+package rest.sql.executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,13 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public class BatchExecuter
+public class BatchExecutor
 {
-    private static final Logger logger = LoggerFactory.getLogger(BatchExecuter.class);
+    private static final Logger logger = LoggerFactory.getLogger(BatchExecutor.class);
 
     private JdbcTemplate jdbcTemplate;
 
-    public BatchExecuter(JdbcTemplate jdbcTemplate)
+    public BatchExecutor(JdbcTemplate jdbcTemplate)
     {
         this.jdbcTemplate = jdbcTemplate;
     }

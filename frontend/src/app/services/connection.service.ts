@@ -1,13 +1,17 @@
 import {Injectable, isDevMode} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {ConnectionAuthInfo, OAuthTokenResponse} from "../models/connection";
+import {Router} from "@angular/router";
+import {CookieService} from "ngx-cookie-service";
 
 @Injectable()
 export class ConnectionService
 {
     urlPrefix: string = 'rest';
 
-    constructor(private http: HttpClient)
+    constructor(private http: HttpClient,
+                private router: Router,
+                private cookieService: CookieService)
     {
     }
 
@@ -27,7 +31,7 @@ export class ConnectionService
                            .append('Content-type', 'application/x-www-form-urlencoded')
                            .append('Authorization', 'Basic ' + btoa(`${connAuth.username}:${connAuth.password}`));
 
-                       localStorage.setItem("current_user", connAuth.username);
+                       this.cookieService.set("current_user", connAuth.username, 3600);
 
                        return this.http.post<OAuthTokenResponse>(`${this.urlPrefix}/oauth/token`, params, {headers: headers})
                                   .toPromise()
@@ -36,10 +40,16 @@ export class ConnectionService
                    .catch(error => Promise.reject(error));
     }
 
-    logout(): Promise<any>
+    logout()
     {
-        return this.http.post(`${this.urlPrefix}/connection/logout`, [])
-                   .toPromise()
-                   .catch(error => Promise.reject(error));
+        this.http.post(`${this.urlPrefix}/connection/logout`, [])
+            .toPromise()
+            .then(() =>
+            {
+                this.cookieService.delete('access_token');
+                this.cookieService.delete('current_user');
+                this.router.navigate(['/login']);
+            })
+            .catch(error => Promise.reject(error));
     }
 }

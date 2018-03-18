@@ -7,9 +7,9 @@ import rest.model.database.Column;
 import rest.model.database.Constraint;
 import rest.model.database.Index;
 import rest.model.database.Table;
-import rest.model.request.table.alter.AlterTableRequest;
-import rest.model.request.table.create.CreateTableRequest;
-import rest.model.request.table.row.RowModifyRequest;
+import rest.model.request.table.AlterTableRequest;
+import rest.model.request.table.CreateTableRequest;
+import rest.model.request.table.RowModifyRequest;
 import rest.service.TableService;
 
 import java.util.List;

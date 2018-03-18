@@ -1,35 +1,35 @@
 <ng-template #newColumnRow>
-    <tr [class.invalid-group]="newColumnValidateMessage != null">
-        <td><input type="text" placeholder="Column name" class="form-control form-control-sm" #newColName></td>
+    <tr class="new-row" [class.invalid-group]="newColumnValidateMessage != null">
+        <td><input type="text" class="form-control form-control-sm" #newColName></td>
         <td>
-            <input list="type_list_new" type="text" placeholder="Column type" class="form-control form-control-sm" #newColType>
+            <input list="type_list_new" type="text" class="form-control form-control-sm" #newColType>
             <datalist id="type_list_new">
                 <option *ngFor="let type of types">{{type}}</option>
             </datalist>
         </td>
-        <td><input type="text" placeholder="Default value" class="form-control form-control-sm" #newColDefault></td>
-        <td class="row m-0">
+        <td><input type="text" class="form-control form-control-sm" #newColDefault></td>
+        <td class="m-0">
             <div class="input-group justify-content-center">
-                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
                     <label class="xsmall-text m-0" ngbTooltip="Primary Key">PK</label>
                     <input type="checkbox" class="m-0" #newColPK>
                 </div>
-                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
                     <label class="xsmall-text m-0" ngbTooltip="Unique">UQ</label>
                     <input type="checkbox" class="m-0" #newColUQ>
                 </div>
-                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
                     <label class="xsmall-text m-0" ngbTooltip="Nullable">NUL</label>
                     <input type="checkbox" class="m-0" #newColNUL>
                 </div>
-                <div class="d-flex form-group justify-content-center flex-column col-sm-3 col-lg-2">
+                <div class="d-flex justify-content-center flex-column col-sm-3 col-lg-2">
                     <label class="xsmall-text m-0" ngbTooltip="Auto Increment">AI</label>
                     <input type="checkbox" class="m-0" #newColAI>
                 </div>
             </div>
         </td>
         <td>
-            <div class="form-group align-content-end">
+            <div class="d-flex justify-content-end">
                 <button type="button" class="btn btn-info btn-sm"
                         (click)="addColumn(newColName, newColType, newColDefault, newColPK, newColUQ, newColNUL, newColAI)">
                     <i class="fa fa-plus" aria-hidden="true"></i>
@@ -56,7 +56,7 @@
             </div>
         </div>
         <div class="col-form-label">Column Definitions:</div>
-        <div class="table-responsive" formArrayName="columns">
+        <div class="row p-2 justify-content-center table-responsive" formArrayName="columns">
             <table class="table table-sm m-0">
                 <thead>
                 <tr class="small-text">
@@ -98,13 +98,12 @@
                         </div>
                     </td>
                     <td>
-                        <div class="align-content-end operation-column">
+                        <div class="d-flex justify-content-end">
                             <button *ngIf="!column.value.deleted" type="button" class="btn btn-danger btn-sm" (click)="removeColumn(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
                             <button *ngIf="column.value.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoRemoveColumn(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr><td colspan="5"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
                 <ng-template [ngTemplateOutlet]="newColumnRow"></ng-template>
                 </tbody>
             </table>
@@ -134,8 +133,7 @@
                         <button *ngIf="fkey.value.deleted" type="button" class="btn btn-warning btn-sm" (click)="undoRemoveForeignKey(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                     </td>
                 </tr>
-                <tr><td colspan="6"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
-                <tr [class.invalid-group]="newForeignKeyValidateMessage != null">
+                <tr class="new-row" [class.invalid-group]="newForeignKeyValidateMessage != null">
                     <td>
                         <input type="text" class="form-control form-control-sm small-text" #newKeyName>
                     </td>
@@ -195,8 +193,7 @@
                         <button *ngIf="ind.value.deleted" type="button" class="btn btn-warning btn-sm" [disabled]="ind.value.indexName == 'PRIMARY'" (click)="undoRemoveIndex(i)"><i class="fa fa-undo" aria-hidden="true"></i></button>
                     </td>
                 </tr>
-                <tr><td colspan="5"><div class="xsmall-text text-info d-flex justify-content-start">Add new:</div></td></tr>
-                <tr [class.invalid-group]="newIndexValidateMessage != null">
+                <tr class="new-row" [class.invalid-group]="newIndexValidateMessage != null">
                     <td><input type="text" class="form-control form-control-sm small-text" #newIndexName></td>
                     <td><input type="text" class="form-control form-control-sm small-text" placeholder="<schema>.<table>(<col>)" #newIndexRef></td>
                     <td><input type="checkbox" class="form-control form-control-sm" #newIndexUnique></td>

@@ -8,6 +8,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {newColumnValidator, newForeignKeyValidator} from "../../../shared/validator/add-new.validator";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
+import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'create-table',
@@ -28,7 +29,8 @@ export class CreateTableComponent implements OnInit
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
-                private route: ActivatedRoute)
+                private route: ActivatedRoute,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
@@ -160,8 +162,8 @@ export class CreateTableComponent implements OnInit
     {
         this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
             this.formColumns.value, this.formConstraints.value)
-            .then(() => this.router.navigate(['/db']))
-            .catch(error => console.log(error));
+            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+            .catch(this.errorHandler.handleError);
     }
 
     concatSchemaTableColumn(schema: string, table: string, column: string): string

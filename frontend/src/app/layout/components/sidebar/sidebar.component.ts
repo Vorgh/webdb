@@ -3,6 +3,7 @@ import {Router, NavigationEnd} from '@angular/router';
 import {DatabaseService} from "../../../services/database.service";
 import {Schema} from "../../../models/rest-models";
 import {ConnectionService} from "../../../services/connection.service";
+import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-sidebar',
@@ -18,7 +19,8 @@ export class SidebarComponent implements OnInit
 
     constructor(private databaseService: DatabaseService,
                 private connectionService: ConnectionService,
-                private router: Router)
+                private router: Router,
+                private errorHandler: GlobalErrorHandler)
     {
         this.router.events.subscribe(val =>
         {
@@ -37,11 +39,7 @@ export class SidebarComponent implements OnInit
     {
         this.databaseService.getAllSchemas()
             .then(schemas => this.schemas = schemas)
-            .catch(promise =>
-            {
-                this.router.navigate(["/error"],
-                    {queryParams: {code: promise.status, message: promise.statusText}});
-            })
+            .catch(this.errorHandler.handleError);;
     }
 
     addExpandClass(element: any)
@@ -70,8 +68,6 @@ export class SidebarComponent implements OnInit
 
     onLoggedout()
     {
-        this.connectionService.logout()
-            .then(() => localStorage.removeItem('access_token'))
-            .catch(error => console.log(error));
+        this.connectionService.logout();
     }
 }

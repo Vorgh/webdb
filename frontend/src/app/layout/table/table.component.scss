@@ -14,3 +14,15 @@ table {
 .deleted td {
     border-color: #ff161c;
 }
+
+.new-row td {
+    background-color: #FFFFE0;
+}
+
+.new-row input, .new-row select {
+    background-color: #f0eab8;
+}
+
+.new-row input[disabled] {
+    background-color: #dfdb9a;
+}

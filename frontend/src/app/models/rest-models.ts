@@ -100,3 +100,25 @@ export class Trigger
     timing: string;
     createdAt: Date;
 }
+
+export class Procedure
+{
+    schema: string;
+    name: string;
+    type: string;
+    returnType: string;
+    body: string;
+    modified: Date;
+    paramList: Parameter[];
+}
+
+export class Parameter
+{
+    schema: string;
+    procedureName: string;
+    mode: string;
+    name: string;
+    type: string;
+    deleted?: boolean;
+    added?: boolean;
+}

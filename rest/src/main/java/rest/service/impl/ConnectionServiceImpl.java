@@ -7,15 +7,19 @@ import rest.model.connection.ConnectionAuthInfo;
 import rest.model.connection.UserConnection;
 import rest.service.ConnectionService;
 
+import java.util.Map;
+
 @Service
 public class ConnectionServiceImpl implements ConnectionService
 {
     private ConnectionDAO connectionDAO;
+    private Map<String, UserConnection> connectedUsers;
 
     @Autowired
-    ConnectionServiceImpl(ConnectionDAO connectionDAO)
+    ConnectionServiceImpl(ConnectionDAO connectionDAO, Map<String, UserConnection> connectedUsers)
     {
         this.connectionDAO = connectionDAO;
+        this.connectedUsers = connectedUsers;
     }
 
     public void setConnectionAuthInfo(ConnectionAuthInfo connectionAuthInfo) throws IllegalStateException, IllegalArgumentException
@@ -25,6 +29,7 @@ public class ConnectionServiceImpl implements ConnectionService
 
     public void logout(UserConnection connection)
     {
-        connectionDAO.logout(connection);
+        String key = connection.getUsername()+"@"+connection.getUrl();
+        connectedUsers.remove(key);
     }
 }

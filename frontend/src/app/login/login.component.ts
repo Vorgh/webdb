@@ -4,6 +4,8 @@ import {routerTransition} from '../router.animations';
 import {ConnectionAuthInfo, OAuthTokenResponse} from "../models/connection";
 import {ConnectionService} from "../services/connection.service";
 import {isNullOrUndefined} from "util";
+import {CookieService} from "ngx-cookie-service";
+import {GlobalErrorHandler} from "../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-login',
@@ -15,13 +17,16 @@ export class LoginComponent implements OnInit
 {
     connAuth: ConnectionAuthInfo = new ConnectionAuthInfo();
 
-    constructor(private connectionService: ConnectionService, private router: Router)
+    constructor(private connectionService: ConnectionService,
+                private router: Router,
+                private cookieService: CookieService,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
     ngOnInit()
     {
-        if (!isNullOrUndefined(localStorage.getItem('access_token')))
+        if (this.cookieService.check('access_token'))
         {
             this.router.navigate(['/home']);
         }
@@ -32,14 +37,13 @@ export class LoginComponent implements OnInit
         this.connectionService.connect(this.connAuth)
             .then((response: OAuthTokenResponse) =>
             {
-                localStorage.setItem("access_token", response.access_token);
+                this.cookieService.set("access_token", response.access_token);
                 this.router.navigate(['/home']);
             })
             .catch(error =>
             {
-                console.log(error);
-                localStorage.removeItem("current_user");
-                this.router.navigate(['/access-denied']);
+                this.errorHandler.handleError(error);
+                this.cookieService.delete("current_user");
             });
     }
 }

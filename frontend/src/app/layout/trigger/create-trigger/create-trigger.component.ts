@@ -2,10 +2,13 @@ import {Component, OnInit} from '@angular/core';
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {isNullOrUndefined} from "util";
 import {ActivatedRoute, Router} from "@angular/router";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
 import {Trigger} from "../../../models/rest-models";
+import {tableReferenceValidator} from "../../../shared/validator/table-reference.validator";
+import {bodyValidator} from "../../../shared/validator/body.validator";
+import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-create-trigger',
@@ -24,7 +27,8 @@ export class CreateTriggerComponent implements OnInit
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
-                private route: ActivatedRoute)
+                private route: ActivatedRoute,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
@@ -41,16 +45,16 @@ export class CreateTriggerComponent implements OnInit
             }
             else
             {
-                this.router.navigate(['/not-found']);
+                this.router.navigate(['/home']);
             }
         });
 
         this.createTriggerForm = this.formBuilder.group({
-                triggerName: [''],
-                triggerTiming: [this.TIMINGS[0]],
-                triggerEvent: [this.EVENTS[0]],
-                triggerEventTarget: [''],
-                triggerBody: ['BEGIN\n\nEND;'],
+                triggerName: ['', Validators.required],
+                triggerTiming: [this.TIMINGS[0], Validators.required],
+                triggerEvent: [this.EVENTS[0], Validators.required],
+                triggerEventTarget: ['', tableReferenceValidator()],
+                triggerBody: ['BEGIN\n\nEND;', bodyValidator()],
             }
         );
     }
@@ -69,6 +73,11 @@ export class CreateTriggerComponent implements OnInit
 
         this.databaseService.createTrigger(this.schema, trigger)
             .then(() => this.router.navigate(['/db']))
-            .catch(error => console.log(error));
+            .catch(this.errorHandler.handleError);
+    }
+
+    getFormControl(name: string): AbstractControl
+    {
+        return this.createTriggerForm.get(name);
     }
 }

@@ -51,3 +51,12 @@ export function newIndexValidator(name, reference): string
 
     return null;
 }
+
+export function newParameterValidator(name, type): string
+{
+    if (name.value == "") return "Name is required.";
+    if (type.value == "") return "A type is required.";
+    if (!isColumnTypeValid(type.value)) return "Invalid type.";
+
+    return null;
+}

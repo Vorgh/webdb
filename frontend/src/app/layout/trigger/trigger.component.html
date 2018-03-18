@@ -11,50 +11,52 @@
         <div class="form-group row">
             <label for="trigger-name" class="col-form-label col-sm-2">Trigger Name:</label>
             <div class="col-sm-6">
-                <input id="trigger-name" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerName').valid" formControlName="triggerName">
+                <input id="trigger-name" type="text" class="form-control"
+                       [class.invalid]="!getFormControl('triggerName').valid && !getFormControl('triggerName').pristine" formControlName="triggerName">
             </div>
-            <div *ngIf="triggerForm.get('triggerName').hasError('required')" class="text-danger col-sm my-auto">
+            <div *ngIf="getFormControl('triggerName').hasError('required')" class="text-danger col-sm my-auto">
                 <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-timing" class="col-form-label col-sm-2">Timing:</label>
             <div class="col-sm-6">
-                <select id="trigger-timing" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerTiming').valid" formControlName="triggerTiming">
-                    <option *ngFor="let timing of TIMINGS">{{timing}}</option>
+                <select id="trigger-timing" type="text" class="form-control" [class.invalid]="!getFormControl('triggerTiming').valid" formControlName="triggerTiming">
+                    <option *ngFor="let timing of TIMINGS" [value]="timing">{{timing}}</option>
                 </select>
             </div>
-            <div *ngIf="triggerForm.get('triggerTiming').hasError('required')" class="text-danger col-sm my-auto">
+            <div *ngIf="getFormControl('triggerTiming').hasError('required')" class="text-danger col-sm my-auto">
                 <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-event" class="col-form-label col-sm-2">Event:</label>
             <div class="col-sm-6">
-                <select id="trigger-event" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerEvent').valid" formControlName="triggerEvent">
-                    <option *ngFor="let event of EVENTS">{{event}}</option>
+                <select id="trigger-event" type="text" class="form-control" [class.invalid]="!getFormControl('triggerEvent').valid" formControlName="triggerEvent">
+                    <option *ngFor="let event of EVENTS" [value]="event">{{event}}</option>
                 </select>
             </div>
-            <div *ngIf="triggerForm.get('triggerEvent').hasError('required')" class="text-danger col-sm my-auto">
+            <div *ngIf="getFormControl('triggerEvent').hasError('required')" class="text-danger col-sm my-auto">
                 <span>This field is required.</span>
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-event-target" class="col-form-label col-sm-2">Target:</label>
             <div class="col-sm-6">
-                <input id="trigger-event-target" placeholder="<schema>.<object>" type="text" class="form-control" [class.invalid]="!triggerForm.get('triggerEventTarget').valid" formControlName="triggerEventTarget">
+                <input id="trigger-event-target" placeholder="<schema>.<object>" type="text" class="form-control"
+                       [class.invalid]="!getFormControl('triggerEventTarget').valid && !getFormControl('triggerEventTarget').pristine" formControlName="triggerEventTarget">
             </div>
-            <div *ngIf="triggerForm.get('triggerEventTarget').hasError('tableReference')" class="text-danger col-sm my-auto">
-                {{triggerForm.get('triggerEventTarget').getError('tableReference').message}}
+            <div *ngIf="getFormControl('triggerEventTarget').hasError('tableReference')" class="text-danger col-sm my-auto">
+                {{getFormControl('triggerEventTarget').getError('tableReference').message}}
             </div>
         </div>
         <div class="form-group row">
             <label for="trigger-body" class="col-form-label col-sm-2">Trigger Body:</label>
             <div class="col-sm-6">
-                <textarea id="trigger-body" class="form-control" [class.invalid]="!triggerForm.get('triggerBody').valid" formControlName="triggerBody" rows="10" spellcheck="false"></textarea>
+                <textarea id="trigger-body" class="form-control" [class.invalid]="!getFormControl('triggerBody').valid" formControlName="triggerBody" rows="10" spellcheck="false"></textarea>
             </div>
-            <div *ngIf="triggerForm.get('triggerBody').hasError('triggerBody')" class="text-danger col-sm my-auto">
-                {{triggerForm.get('triggerBody').getError('triggerBody').message}}
+            <div *ngIf="getFormControl('triggerBody').hasError('body')" class="text-danger col-sm my-auto">
+                {{getFormControl('triggerBody').getError('body').message}}
             </div>
         </div>
     </form>

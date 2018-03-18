@@ -1,4 +1,4 @@
-package rest.model.request.table.alter;
+package rest.model.request.table;
 
 import rest.model.database.Column;
 import rest.model.database.Constraint;

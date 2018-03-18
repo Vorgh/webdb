@@ -7,6 +7,7 @@ import {isNullOrUndefined, isNumber} from "util";
 import {Table} from "../../models/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'app-table',
@@ -28,7 +29,8 @@ export class TableComponent implements OnInit
                 private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
                 private router: Router,
-                private formBuilder: FormBuilder)
+                private formBuilder: FormBuilder,
+                private errorHandler: GlobalErrorHandler)
     {
         this.columns = [];
         this.rows = [];
@@ -52,54 +54,49 @@ export class TableComponent implements OnInit
                     this.databaseService.getRows(this.schema, this.table),
                     this.databaseService.getTable(this.schema, this.table)
                 ])
-                    .then(values =>
-                    {
-                        this.columns = values[0];
-                        this.rows = values[1];
-                        this.metadata = values[2];
+                       .then(values =>
+                       {
+                           this.columns = values[0];
+                           this.rows = values[1];
+                           this.metadata = values[2];
 
-                        let index = 0;
-                        for (let row of this.rows)
-                        {
-                            let group: FormGroup = this.formBuilder.group({
-                                added: false,
-                                deleted: false
-                            });
-                            for (let col of this.columns)
-                            {
-                                if (!col.autoIncrement)
-                                    group.addControl(col.name, new FormControl(row[col.name]));
-                                else
-                                    group.addControl(col.name, new FormControl({value: row[col.name], disabled: true}));
-                            }
-                            this.rowForm.addControl(index.toString(), group);
-                            index++;
-                        }
+                           let index = 0;
+                           for (let row of this.rows)
+                           {
+                               let group: FormGroup = this.formBuilder.group({
+                                   added: false,
+                                   deleted: false
+                               });
+                               for (let col of this.columns)
+                               {
+                                   if (!col.autoIncrement)
+                                       group.addControl(col.name, new FormControl(row[col.name]));
+                                   else
+                                       group.addControl(col.name, new FormControl({
+                                           value: row[col.name],
+                                           disabled: true
+                                       }));
+                               }
+                               this.rowForm.addControl(index.toString(), group);
+                               index++;
+                           }
 
-                        for (let col of this.columns)
-                        {
-                            if (!col.autoIncrement)
-                                this.newRowGroup.addControl(col.name, new FormControl(""));
-                            else
-                                this.newRowGroup.addControl(col.name, new FormControl({value: "", disabled: true}));
-                        }
-                    })
-                    .catch(promise =>
-                    {
-                        this.router.navigate(["/error"], {
-                            queryParams: {
-                                code: promise.status,
-                                message: promise.statusText
-                            }
-                        });
-                    });
+                           for (let col of this.columns)
+                           {
+                               if (!col.autoIncrement)
+                                   this.newRowGroup.addControl(col.name, new FormControl(""));
+                               else
+                                   this.newRowGroup.addControl(col.name, new FormControl({value: "", disabled: true}));
+                           }
+                       })
+                       .catch(this.errorHandler.handleError);
 
                 this.pageHeaderService.addFragment('table', this.pageHeaderService.getHeaderByID('dbhome'),
                     this.router.url, this.table, 'fa-table');
             }
             else
             {
-                this.router.navigate(['/not-found']);
+                this.router.navigate(['/home']);
             }
         });
     }
@@ -120,12 +117,17 @@ export class TableComponent implements OnInit
                 if (length > 1)
                 {
                     const autoIndex = this.findMaxAutoIncrement(this.rowForm, col.name);
-                    this.newRowGroup.get(col.name).setValue(autoIndex + 1);
+                    this.newRowGroup.get(col.name)
+                        .setValue(autoIndex + 1);
                 }
                 else
-                    this.newRowGroup.get(col.name).setValue(1);
+                    this.newRowGroup.get(col.name)
+                        .setValue(1);
 
-                group.addControl(col.name, new FormControl({value: this.newRowGroup.get(col.name).value, disabled: true}));
+                group.addControl(col.name, new FormControl({
+                    value: this.newRowGroup.get(col.name).value,
+                    disabled: true
+                }));
             }
             else
             {
@@ -134,7 +136,7 @@ export class TableComponent implements OnInit
             newRow[col.name] = this.newRowGroup.get(col.name).value;
         }
         newRow.added = true;
-        this.rowForm.addControl((Object.keys(this.rowForm.value).length-1).toString(), group);
+        this.rowForm.addControl((Object.keys(this.rowForm.value).length - 1).toString(), group);
         this.rows.push(newRow);
         this.newRowGroup.reset();
     }
@@ -160,19 +162,23 @@ export class TableComponent implements OnInit
         else
         {
             this.rows[index].deleted = true;
-            this.rowForm.get(index.toString()).patchValue({deleted: true});
+            this.rowForm.get(index.toString())
+                .patchValue({deleted: true});
+            this.rowForm.get(index.toString())
+                .markAsDirty();
         }
     }
 
     undoDeleteRow(index: number)
     {
         this.rows[index].deleted = false;
-        this.rowForm.get(index.toString()).patchValue({deleted: false});
+        this.rowForm.get(index.toString())
+            .patchValue({deleted: false});
     }
 
     onSubmit()
     {
-        let changeObj: {changes: any} = {changes: []};
+        let changeObj: { changes: any } = {changes: []};
         this.newRowGroup.reset();
 
         const rawFormValue = this.rowForm.getRawValue();
@@ -200,7 +206,8 @@ export class TableComponent implements OnInit
         }
 
         this.databaseService.modifyRows(this.schema, this.table, changeObj)
-            .catch(error => console.log(error));
+            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+            .catch(this.errorHandler.handleError);
     }
 
     private findMaxAutoIncrement(from: FormGroup, propertyKey: any): number

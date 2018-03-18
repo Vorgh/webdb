@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import rest.model.connection.UserConnection;
 import rest.service.ConnectionService;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController

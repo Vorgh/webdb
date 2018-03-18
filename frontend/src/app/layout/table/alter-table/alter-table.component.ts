@@ -4,18 +4,14 @@ import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angul
 import {Column, Index} from "../../../models/rest-models";
 import {Table} from "../../../models/rest-models";
 import {Constraint} from "../../../models/rest-models";
-import {isNullOrUndefined} from "util";
 import {DatabaseService} from "../../../services/database.service";
 import {Utils} from "../../../shared/util/utils";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
-import {uniqueFields} from "../../../shared/validator/unique.validator";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
-import {
-    newColumnValidator, newForeignKeyValidator,
-    newIndexValidator
-} from "../../../shared/validator/add-new.validator";
+import {newColumnValidator, newForeignKeyValidator, newIndexValidator} from "../../../shared/validator/add-new.validator";
+import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
 
 @Component({
     selector: 'alter-table',
@@ -46,6 +42,7 @@ export class AlterTableComponent implements OnInit
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
                 private route: ActivatedRoute,
+                private errorHandler: GlobalErrorHandler,
                 private modalService: NgbModal)
     {
     }
@@ -73,11 +70,7 @@ export class AlterTableComponent implements OnInit
                            this.handleChange(change);
                        });
                    })
-                   .catch(promise =>
-                   {
-                       this.router.navigate(["/error"], {replaceUrl: true,
-                           queryParams: {code: promise.status, message: promise.statusText}});
-                   });
+                   .catch(this.errorHandler.handleError);
         });
 
         this.originalForm = this.formBuilder.group({
@@ -474,7 +467,7 @@ export class AlterTableComponent implements OnInit
         {
             this.databaseService.alterTable(this.schemaName, this.table.name, this.changes)
                 .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schemaName}}))
-                .catch(error => console.log(error));
+                .catch(this.errorHandler.handleError);
         })
 
     }

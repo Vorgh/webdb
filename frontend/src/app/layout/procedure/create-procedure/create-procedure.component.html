@@ -1,0 +1,111 @@
+<ng-template #newParameterRow>
+    <tr class="new-row" [class.invalid-group]="newParameterValidateMessage != null">
+        <td><input type="text" class="form-control form-control-sm" #newParamName></td>
+        <td>
+            <input list="new-type-list" type="text" class="form-control form-control-sm" #newParamType>
+            <datalist id="new-type-list">
+                <option *ngFor="let type of RETURN_TYPES" [value]="type">{{type}}</option>
+            </datalist>
+        </td>
+        <td>
+            <select class="form-control form-control-sm" #newParamMode>
+                <option *ngFor="let mode of PARAMETER_MODES" [value]="mode">{{mode}}</option>
+            </select>
+        </td>
+        <td>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-info btn-sm"
+                        (click)="addParameter(newParamName, newParamType, newParamMode)">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    <tr *ngIf="newParameterValidateMessage != null" class="text-danger d-flex justify-content-start m-0 p-0">
+        <td colspan="4">
+            <div class="xsmall-text">{{newParameterValidateMessage}}</div>
+        </td>
+    </tr>
+</ng-template>
+
+<div class="card-header">
+    <div class="row">
+        <h4 class="card-title col-sm-10">Create Procedure...</h4>
+        <div class="col-sm-2 d-flex justify-content-center">
+            <button [disabled]="!createProcedureForm.valid" type="button" class="btn btn-success" (click)="submit()">Save</button>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <form class="p-4" [formGroup]="createProcedureForm">
+        <div class="form-group row">
+            <label for="procedure-name" class="col-form-label col-sm-2">Procedure Name:</label>
+            <div class="col-sm-6">
+                <input id="procedure-name" type="text" class="form-control" [class.invalid]="!getFormControl('procedureName').valid && !getFormControl('procedureName').pristine" formControlName="procedureName">
+            </div>
+            <div *ngIf="getFormControl('procedureName').hasError('required') && !getFormControl('procedureName').pristine" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="procedure-return-type" class="col-form-label col-sm-2">Return Type:</label>
+            <div class="col-sm-6">
+                <input id="procedure-return-type" list="return-type-list" type="text" class="form-control form-control-sm" [class.invalid]="!getFormControl('procedureReturnType').valid"  formControlName="procedureReturnType">
+                <datalist id="return-type-list">
+                    <option *ngFor="let type of RETURN_TYPES" [value]="type">{{type}}</option>
+                </datalist>
+            </div>
+            <div *ngIf="getFormControl('procedureReturnType').hasError('procedureReturnType')" class="text-danger col-sm my-auto">
+                {{getFormControl('procedureReturnType').getError('procedureReturnType').message}}
+            </div>
+        </div>
+        <div class="form-group row my-4">
+            <label class="col-form-label col-sm-2">Parameters:</label>
+            <div class="col-sm-8 col-md-7 col-lg-6 justify-content-center table-responsive" formArrayName="procedureParameters">
+                <table class="table table-sm m-0">
+                    <thead>
+                    <tr class="small-text">
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Mode</th>
+                        <th class="operation-column"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let param of getFormArray('procedureParameters').controls let i=index" [formGroupName]="i" [class.deleted]="param.value.deleted">
+                        <td><input type="text" class="form-control form-control-sm" [class.invalid]="!param.get('name').valid" formControlName="name"></td>
+                        <td>
+                            <input list="type_list" type="text" class="form-control form-control-sm" [class.invalid]="!param.get('type').valid" formControlName="type">
+                            <datalist id="type_list">
+                                <option *ngFor="let type of RETURN_TYPES" [value]="type">{{type}}</option>
+                            </datalist>
+                        </td>
+                        <td>
+                            <select class="form-control form-control-sm" [attr.disabled]="param.get('mode').disabled ? '' : null" formControlName="mode">
+                                <option *ngFor="let mode of PARAMETER_MODES" [value]="mode">{{mode}}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-danger btn-sm" (click)="removeParameter(i)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <ng-template [ngTemplateOutlet]="newParameterRow"></ng-template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="procedure-body" class="col-form-label col-sm-2">Procedure Body:</label>
+            <div class="col-sm-6">
+                <textarea id="procedure-body" class="form-control" [class.invalid]="!getFormControl('procedureBody').valid" formControlName="procedureBody" rows="10" spellcheck="false"></textarea>
+            </div>
+            <div *ngIf="getFormControl('procedureBody').hasError('body')" class="text-danger col-sm my-auto">
+                {{getFormControl('procedureBody').getError('body').message}}
+            </div>
+        </div>
+    </form>
+</div>
+<div class="card-footer">
+</div>

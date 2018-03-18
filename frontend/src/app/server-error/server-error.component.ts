@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
     selector: 'app-server-error',
@@ -11,7 +12,7 @@ export class ServerErrorComponent implements OnInit
     code: number;
     message: string;
 
-    constructor(private route: ActivatedRoute, private router: Router)
+    constructor(private route: ActivatedRoute)
     {
     }
 
@@ -21,13 +22,6 @@ export class ServerErrorComponent implements OnInit
         {
             this.code = params.code;
             this.message = params.message;
-
-            if (this.code == 401)
-            {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('current_user');
-                this.router.navigate(['/login']);
-            }
         });
     }
 

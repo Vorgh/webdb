@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Constraint, Index, Row, Table, Trigger} from "../models/rest-models";
+import {Constraint, Index, Procedure, Row, Table, Trigger} from "../models/rest-models";
 import {Schema} from "../models/rest-models";
 import {Column} from "../models/rest-models";
+import {ModifyProcedureRequest, ModifyTriggerRequest} from "../models/request/request-models";
 
 @Injectable()
 export class DatabaseService
@@ -148,7 +149,7 @@ export class DatabaseService
             .append('schema', schema)
             .append('trigger', trigger);
 
-        return this.http.get<Table>(`${this.urlPrefix}/trigger/single`, {params: params})
+        return this.http.get<Trigger>(`${this.urlPrefix}/trigger/single`, {params: params})
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }
@@ -163,23 +164,65 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    modifyTrigger(schema: string, trigger: Trigger): Promise<any>
+    modifyTrigger(request: ModifyTriggerRequest): Promise<any>
     {
-        let params = new HttpParams()
-            .append('schema', schema);
-
-        return this.http.put(`${this.urlPrefix}/trigger/modify`, trigger, {params: params})
+        return this.http.put(`${this.urlPrefix}/trigger/modify`, request)
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }
 
-    dropTrigger(schema: string, trigger: string)
+    dropTrigger(schema: string, triggerName: string)
     {
         let params = new HttpParams()
             .append('schema', schema)
-            .append('trigger', trigger);
+            .append('trigger', triggerName);
 
         return this.http.delete(`${this.urlPrefix}/trigger/drop`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getAllProcedures(schema: string): Promise<Procedure[]>
+    {
+        let params = new HttpParams().append('schema', schema);
+
+        return this.http.get<Procedure[]>(`${this.urlPrefix}/procedure/all`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getProcedure(schema: string, procedure: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('procedure', procedure);
+
+        return this.http.get<Procedure>(`${this.urlPrefix}/procedure/single`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    createProcedure(procedure: Procedure): Promise<any>
+    {
+        return this.http.post(`${this.urlPrefix}/procedure/create`, procedure)
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    modifyProcedure(request: ModifyProcedureRequest): Promise<any>
+    {
+        return this.http.put(`${this.urlPrefix}/procedure/modify`, request)
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    dropProcedure(schema: string, procedure: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('procedure', procedure);
+
+        return this.http.delete(`${this.urlPrefix}/procedure/drop`, {params: params})
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }

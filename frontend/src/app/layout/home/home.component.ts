@@ -11,7 +11,7 @@ import {DatabaseService} from "../../services/database.service";
 })
 export class HomeComponent implements OnInit
 {
-    constructor(private databaseService: DatabaseService)
+    constructor()
     {
     }
 

@@ -3,13 +3,15 @@ import {Resolve, ActivatedRouteSnapshot, Router} from '@angular/router';
 import {Table} from "../../../models/rest-models";
 import {DatabaseService} from "../../../services/database.service";
 import {isNullOrUndefined} from "util";
+import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
 
 @Injectable()
 export class AlterTableResolver implements Resolve<Table>
 {
 
     constructor(private databaseService: DatabaseService,
-                private router: Router)
+                private router: Router,
+                private errorHandler: GlobalErrorHandler)
     {
     }
 
@@ -19,11 +21,11 @@ export class AlterTableResolver implements Resolve<Table>
         {
             return this.databaseService.getTable(route.queryParams['schema'], route.queryParams['table'])
                 .then(table => table)
-                .catch(()=>
+                .catch(error =>
                 {
-                    this.router.navigate(['/home']);
+                    this.errorHandler.handleError(error);
                     return null;
-                });
+                })
         }
         else
         {

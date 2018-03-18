@@ -1,4 +1,4 @@
-package rest.model.request.table.row;
+package rest.model.request.table;
 
 import rest.model.request.Change;
 

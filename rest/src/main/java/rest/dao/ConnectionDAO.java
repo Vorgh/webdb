@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import rest.auth.ClientConnectionDetailsService;
+import rest.exception.DatabaseConnectionException;
+import rest.exception.MissingAuthInfoException;
 import rest.model.connection.ConnectionAuthInfo;
 import rest.model.connection.UserConnection;
 
@@ -29,7 +31,7 @@ public class ConnectionDAO
     private ClientConnectionDetailsService clientDetailsService;
 
     @Autowired
-    ConnectionDAO(BCryptPasswordEncoder passwordEncoder,
+    public ConnectionDAO(BCryptPasswordEncoder passwordEncoder,
                   ClientConnectionDetailsService clientDetailsService,
                   Map<String, UserConnection> connectedUsers)
     {
@@ -46,10 +48,14 @@ public class ConnectionDAO
 
         if (url == null || username == null || url.equals("") || username.equals(""))
         {
-            throw new IllegalArgumentException("Missing url or username.");
+            throw new MissingAuthInfoException("Missing url or username.");
         }
 
+        Properties props = new Properties();
+        props.setProperty("rewriteBatchedStatements", "true");
         DriverManagerDataSource ds = new DriverManagerDataSource();
+        ds.setConnectionProperties(props);
+
         JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         ds.setUrl(url);
         ds.setUsername(username);
@@ -57,7 +63,7 @@ public class ConnectionDAO
 
         if (!testConnection(jdbcTemplate))
         {
-            throw new IllegalStateException("Couldn't access the database. Maybe wrong credentials?");
+            throw new DatabaseConnectionException("Couldn't access the database. Maybe wrong credentials?");
         }
 
         UserConnection userConnection = new UserConnection(url, username, passwordEncoder.encode(password), createUserAuthorities());
@@ -87,12 +93,6 @@ public class ConnectionDAO
     {
         String key = username+"@"+url;
         return connectedUsers.get(key);
-    }
-
-    public void logout(UserConnection userConnection)
-    {
-        String key = userConnection.getUsername()+"@"+userConnection.getUrl();
-        connectedUsers.remove(key);
     }
 
     private ClientDetails createClientDetails(String username, String password, Collection<? extends GrantedAuthority> authorities)

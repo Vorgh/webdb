@@ -1,6 +1,6 @@
 import {AbstractControl, ValidatorFn} from "@angular/forms";
 
-export function triggerBodyValidator(): ValidatorFn
+export function bodyValidator(): ValidatorFn
 {
     return (control: AbstractControl): {[key: string]: any} =>
     {
@@ -11,6 +11,6 @@ export function triggerBodyValidator(): ValidatorFn
             return null
         }
 
-        return {triggerBody: {valid: false, message: "Trigger body must start with 'BEGIN' and end with 'END'"}};
+        return {body: {valid: false, message: "The body must start with 'BEGIN' and end with 'END'"}};
     }
 }
