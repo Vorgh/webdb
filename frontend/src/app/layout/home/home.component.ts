@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Table} from "../../models/rest-models";
+import {Table} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
 
 @Component({

@@ -1,0 +1,23 @@
+.notification-container {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    width: auto;
+    height: auto;
+    z-index: 999;
+    transform: translateX(-40%);
+}
+
+.notification-body {
+    background-color: #B22222;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    font-size: 1em;
+    color: white;
+    border: 2px solid black;
+    -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
+}

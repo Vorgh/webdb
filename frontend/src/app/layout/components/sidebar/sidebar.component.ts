@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, NavigationEnd} from '@angular/router';
 import {DatabaseService} from "../../../services/database.service";
-import {Schema} from "../../../models/rest-models";
+import {Schema} from "../../../models/rest/rest-models";
 import {ConnectionService} from "../../../services/connection.service";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
 
 @Component({
     selector: 'app-sidebar',
@@ -39,7 +39,7 @@ export class SidebarComponent implements OnInit
     {
         this.databaseService.getAllSchemas()
             .then(schemas => this.schemas = schemas)
-            .catch(this.errorHandler.handleError);;
+            .catch(error => this.errorHandler.handleError(error));
     }
 
     addExpandClass(element: any)

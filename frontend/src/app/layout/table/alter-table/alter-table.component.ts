@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {Column, Index} from "../../../models/rest-models";
-import {Table} from "../../../models/rest-models";
-import {Constraint} from "../../../models/rest-models";
+import {Column, Index} from "../../../models/rest/rest-models";
+import {Table} from "../../../models/rest/rest-models";
+import {Constraint} from "../../../models/rest/rest-models";
 import {DatabaseService} from "../../../services/database.service";
 import {Utils} from "../../../shared/util/utils";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -11,7 +11,7 @@ import {PageHeaderService} from "../../../shared/modules/page-header/page-header
 import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
 import {newColumnValidator, newForeignKeyValidator, newIndexValidator} from "../../../shared/validator/add-new.validator";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
 
 @Component({
     selector: 'alter-table',
@@ -70,7 +70,7 @@ export class AlterTableComponent implements OnInit
                            this.handleChange(change);
                        });
                    })
-                   .catch(this.errorHandler.handleError);
+                   .catch(error => this.errorHandler.handleError(error));
         });
 
         this.originalForm = this.formBuilder.group({
@@ -462,12 +462,13 @@ export class AlterTableComponent implements OnInit
     {
         const modalRef = this.modalService.open(ConfirmdialogComponent);
         modalRef.componentInstance.dbObject = this.table.name;
+        modalRef.componentInstance.type = "modify";
 
-        modalRef.result.then(result =>
+        modalRef.result.then(() =>
         {
             this.databaseService.alterTable(this.schemaName, this.table.name, this.changes)
                 .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schemaName}}))
-                .catch(this.errorHandler.handleError);
+                .catch(error => this.errorHandler.handleError(error));
         })
 
     }

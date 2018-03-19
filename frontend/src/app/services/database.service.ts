@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Constraint, Index, Procedure, Row, Table, Trigger} from "../models/rest-models";
-import {Schema} from "../models/rest-models";
-import {Column} from "../models/rest-models";
+import {Constraint, Index, Procedure, Row, Table, Trigger} from "../models/rest/rest-models";
+import {Schema} from "../models/rest/rest-models";
+import {Column} from "../models/rest/rest-models";
 import {ModifyProcedureRequest, ModifyTriggerRequest} from "../models/request/request-models";
 
 @Injectable()

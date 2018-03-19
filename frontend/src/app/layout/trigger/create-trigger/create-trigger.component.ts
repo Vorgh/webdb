@@ -5,10 +5,12 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
-import {Trigger} from "../../../models/rest-models";
+import {Trigger} from "../../../models/rest/rest-models";
 import {tableReferenceValidator} from "../../../shared/validator/table-reference.validator";
 import {bodyValidator} from "../../../shared/validator/body.validator";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
+import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-create-trigger',
@@ -28,7 +30,8 @@ export class CreateTriggerComponent implements OnInit
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
                 private route: ActivatedRoute,
-                private errorHandler: GlobalErrorHandler)
+                private errorHandler: GlobalErrorHandler,
+                private modalService: NgbModal)
     {
     }
 
@@ -45,7 +48,7 @@ export class CreateTriggerComponent implements OnInit
             }
             else
             {
-                this.router.navigate(['/home']);
+                this.errorHandler.notFound();
             }
         });
 
@@ -71,9 +74,16 @@ export class CreateTriggerComponent implements OnInit
         trigger.eventTable = target[1];
         trigger.triggerBody = this.createTriggerForm.get('triggerBody').value;
 
-        this.databaseService.createTrigger(this.schema, trigger)
-            .then(() => this.router.navigate(['/db']))
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = trigger.name;
+        modalRef.componentInstance.type = "create";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.createTrigger(this.schema, trigger)
+                .then(() => this.router.navigate(['/db']))
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     getFormControl(name: string): AbstractControl

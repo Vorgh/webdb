@@ -43,6 +43,7 @@ public class TriggerQueryExecutor implements BaseExecutor<Trigger>
         catch (DataAccessException e)
         {
             create(change.from);
+            throw e;
         }
     }
 

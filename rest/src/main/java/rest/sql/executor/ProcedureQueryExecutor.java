@@ -53,6 +53,7 @@ public class ProcedureQueryExecutor implements BaseExecutor<Procedure>
         catch (Exception e)
         {
             create(change.from);
+            throw e;
         }
     }
 

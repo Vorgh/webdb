@@ -5,7 +5,9 @@
     </button>
 </div>
 <div class="modal-body">
-    <p>Are you sure you want to finalize the changes on {{dbObject}}? You may not be able to undo this operation!</p>
+    <p *ngIf="type == 'create'">This will create and save {{dbObject}}. Do you want to proceed?</p>
+    <p *ngIf="type == 'modify'">Are you sure you want to finalize the changes on {{dbObject}}? You may not be able to undo this operation!</p>
+    <p *ngIf="type == 'delete'">Are you sure you want to delete {{dbObject}}? You may not be able to undo this operation!</p>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="activeModal.close()">Submit</button>

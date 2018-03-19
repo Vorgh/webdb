@@ -15,7 +15,9 @@ import {AlterTableResolver} from "./layout/table/alter-table/alter-table-resolve
 import {TriggerResolver} from "./layout/trigger/trigger-resolver.service";
 import {ProcedureResolver} from "./layout/procedure/procedure-resolver.service";
 import {CookieService} from "ngx-cookie-service";
-import {GlobalErrorHandler} from "./shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "./services/error-handler.service";
+import {DBHomeResolver} from "./layout/dbhome/dbhome-resolver.service";
+import {NotificationService} from "./services/notification.service";
 
 @NgModule({
     imports: [
@@ -29,7 +31,8 @@ import {GlobalErrorHandler} from "./shared/error-handler/error-handler.service";
     ],
     declarations: [AppComponent],
     providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService, AlterTableResolver,
-        TriggerResolver, ProcedureResolver, CookieService, GlobalErrorHandler],
+        TriggerResolver, ProcedureResolver, DBHomeResolver, NotificationService,
+        CookieService, GlobalErrorHandler],
     bootstrap: [AppComponent]
 })
 export class AppModule

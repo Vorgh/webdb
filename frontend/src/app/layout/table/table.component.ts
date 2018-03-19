@@ -1,13 +1,15 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Column, Row} from "../../models/rest-models";
+import {Column, Row} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined, isNumber} from "util";
-import {Table} from "../../models/rest-models";
+import {Table} from "../../models/rest/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
-import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../services/error-handler.service";
+import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-table',
@@ -30,7 +32,8 @@ export class TableComponent implements OnInit
                 private route: ActivatedRoute,
                 private router: Router,
                 private formBuilder: FormBuilder,
-                private errorHandler: GlobalErrorHandler)
+                private errorHandler: GlobalErrorHandler,
+                private modalService: NgbModal)
     {
         this.columns = [];
         this.rows = [];
@@ -89,14 +92,14 @@ export class TableComponent implements OnInit
                                    this.newRowGroup.addControl(col.name, new FormControl({value: "", disabled: true}));
                            }
                        })
-                       .catch(this.errorHandler.handleError);
+                       .catch(error => this.errorHandler.handleError(error));
 
                 this.pageHeaderService.addFragment('table', this.pageHeaderService.getHeaderByID('dbhome'),
                     this.router.url, this.table, 'fa-table');
             }
             else
             {
-                this.router.navigate(['/home']);
+                this.errorHandler.notFound();
             }
         });
     }
@@ -178,36 +181,43 @@ export class TableComponent implements OnInit
 
     onSubmit()
     {
-        let changeObj: { changes: any } = {changes: []};
-        this.newRowGroup.reset();
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = this.table;
+        modalRef.componentInstance.type = "modify";
 
-        const rawFormValue = this.rowForm.getRawValue();
-        for (let key of Object.keys(rawFormValue))
+        modalRef.result.then(() =>
         {
-            let row = rawFormValue[key];
+            let changeObj: { changes: any } = {changes: []};
+            this.newRowGroup.reset();
 
-            if (row.added)
+            const rawFormValue = this.rowForm.getRawValue();
+            for (let key of Object.keys(rawFormValue))
             {
-                changeObj.changes.push({from: null, to: this.buildChangeObject(row)});
-                continue;
+                let row = rawFormValue[key];
+
+                if (row.added)
+                {
+                    changeObj.changes.push({from: null, to: this.buildChangeObject(row)});
+                    continue;
+                }
+
+                if (row.deleted)
+                {
+                    changeObj.changes.push({from: this.buildChangeObject(row), to: null});
+                    continue;
+                }
+
+                if (this.rowForm.get(key).dirty)
+                {
+                    let change = this.buildChangeObject(row);
+                    changeObj.changes.push({from: change, to: change});
+                }
             }
 
-            if (row.deleted)
-            {
-                changeObj.changes.push({from: this.buildChangeObject(row), to: null});
-                continue;
-            }
-
-            if (this.rowForm.get(key).dirty)
-            {
-                let change = this.buildChangeObject(row);
-                changeObj.changes.push({from: change, to: change});
-            }
-        }
-
-        this.databaseService.modifyRows(this.schema, this.table, changeObj)
-            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
-            .catch(this.errorHandler.handleError);
+            this.databaseService.modifyRows(this.schema, this.table, changeObj)
+                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     private findMaxAutoIncrement(from: FormGroup, propertyKey: any): number

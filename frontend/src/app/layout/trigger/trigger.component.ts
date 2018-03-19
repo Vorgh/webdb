@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Trigger} from "../../models/rest-models";
+import {Trigger} from "../../models/rest/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DatabaseService} from "../../services/database.service";
@@ -8,7 +8,9 @@ import {Utils} from "../../shared/util/utils";
 import {tableReferenceValidator} from "../../shared/validator/table-reference.validator";
 import {bodyValidator} from "../../shared/validator/body.validator";
 import {ModifyTriggerRequest} from "../../models/request/request-models";
-import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../services/error-handler.service";
+import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-trigger',
@@ -30,7 +32,8 @@ export class TriggerComponent implements OnInit
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
                 private route: ActivatedRoute,
-                private errorHandler: GlobalErrorHandler)
+                private errorHandler: GlobalErrorHandler,
+                private modalService: NgbModal)
     {
     }
 
@@ -68,10 +71,17 @@ export class TriggerComponent implements OnInit
         trigger.eventTable = target[1];
         trigger.triggerBody = this.triggerForm.get('triggerBody').value;
 
-        let request: ModifyTriggerRequest = new ModifyTriggerRequest(this.originalTrigger, trigger);
-        this.databaseService.modifyTrigger(request)
-            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = trigger.name;
+        modalRef.componentInstance.type = "modify";
+
+        modalRef.result.then(() =>
+        {
+            let request: ModifyTriggerRequest = new ModifyTriggerRequest(this.originalTrigger, trigger);
+            this.databaseService.modifyTrigger(request)
+                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     getFormControl(name: string): AbstractControl

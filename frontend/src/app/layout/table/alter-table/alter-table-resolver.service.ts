@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Resolve, ActivatedRouteSnapshot, Router} from '@angular/router';
-import {Table} from "../../../models/rest-models";
+import {Table} from "../../../models/rest/rest-models";
 import {DatabaseService} from "../../../services/database.service";
 import {isNullOrUndefined} from "util";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
 
 @Injectable()
 export class AlterTableResolver implements Resolve<Table>
@@ -29,7 +29,7 @@ export class AlterTableResolver implements Resolve<Table>
         }
         else
         {
-            this.router.navigate(['/home']);
+            this.errorHandler.notFound();
             return null;
         }
     }

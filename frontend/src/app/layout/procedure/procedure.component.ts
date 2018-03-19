@@ -4,14 +4,16 @@ import {Utils} from "../../shared/util/utils";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
-import {Column, Parameter, Procedure} from "../../models/rest-models";
+import {Column, Parameter, Procedure} from "../../models/rest/rest-models";
 import {bodyValidator} from "../../shared/validator/body.validator";
 import {isNullOrUndefined} from "util";
 import {newColumnValidator, newParameterValidator} from "../../shared/validator/add-new.validator";
 import {columnTypeValidator} from "../../shared/validator/column-type.validator";
-import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../services/error-handler.service";
 import {ModifyProcedureRequest} from "../../models/request/request-models";
 import {procedureReturnTypeValidator} from "../../shared/validator/procedure-return-type.validator";
+import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-procedure',
@@ -36,7 +38,8 @@ export class ProcedureComponent implements OnInit, AfterViewInit
                 private router: Router,
                 private route: ActivatedRoute,
                 private errorHandler: GlobalErrorHandler,
-                private changeDetector: ChangeDetectorRef)
+                private changeDetector: ChangeDetectorRef,
+                private modalService: NgbModal)
     {
     }
 
@@ -120,23 +123,30 @@ export class ProcedureComponent implements OnInit, AfterViewInit
         procedure.body = this.procedureForm.get('procedureBody').value;
         procedure.paramList = this.getFormArray('procedureParameters').controls.map(control => control.value);
 
-        let request: ModifyProcedureRequest = new ModifyProcedureRequest(this.originalProcedure, procedure);
-        this.databaseService.modifyProcedure(request)
-            .then(() =>
-            {
-                let redirectTab: string;
-                if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
-                {
-                    redirectTab = 'procedures';
-                }
-                else
-                {
-                    redirectTab = 'functions';
-                }
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = procedure.name;
+        modalRef.componentInstance.type = "modify";
 
-                this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
-            })
-            .catch(this.errorHandler.handleError);
+        modalRef.result.then(() =>
+        {
+            let request: ModifyProcedureRequest = new ModifyProcedureRequest(this.originalProcedure, procedure);
+            this.databaseService.modifyProcedure(request)
+                .then(() =>
+                {
+                    let redirectTab: string;
+                    if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
+                    {
+                        redirectTab = 'procedures';
+                    }
+                    else
+                    {
+                        redirectTab = 'functions';
+                    }
+
+                    this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     getFormControl(name: string): AbstractControl
@@ -197,7 +207,6 @@ export class ProcedureComponent implements OnInit, AfterViewInit
                     break;
             }
         }
-        console.log(group);
 
         this.getFormArray('procedureParameters').push(group);
     }

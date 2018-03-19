@@ -1,4 +1,4 @@
-import {Procedure, Trigger} from "../rest-models";
+import {Procedure, Trigger} from "../rest/rest-models";
 
 export class RowRequest
 {

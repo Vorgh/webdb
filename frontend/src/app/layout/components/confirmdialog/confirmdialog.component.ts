@@ -9,6 +9,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 export class ConfirmdialogComponent implements OnInit
 {
     @Input() dbObject: string = "this object";
+    @Input() type: "create" | "modify" | "delete" = "modify";
 
     constructor(public activeModal: NgbActiveModal)
     {

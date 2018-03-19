@@ -5,7 +5,7 @@ import {ConnectionAuthInfo, OAuthTokenResponse} from "../models/connection";
 import {ConnectionService} from "../services/connection.service";
 import {isNullOrUndefined} from "util";
 import {CookieService} from "ngx-cookie-service";
-import {GlobalErrorHandler} from "../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../services/error-handler.service";
 
 @Component({
     selector: 'app-login',

@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {Resolve, ActivatedRouteSnapshot, Router} from '@angular/router';
 import {DatabaseService} from "../../services/database.service";
 import {isNullOrUndefined} from "util";
-import {Trigger} from "../../models/rest-models";
-import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
+import {Trigger} from "../../models/rest/rest-models";
+import {GlobalErrorHandler} from "../../services/error-handler.service";
 
 @Injectable()
 export class TriggerResolver implements Resolve<Trigger>
@@ -29,7 +29,7 @@ export class TriggerResolver implements Resolve<Trigger>
         }
         else
         {
-            this.router.navigate(['/home']);
+            this.errorHandler.notFound();
             return null;
         }
     }

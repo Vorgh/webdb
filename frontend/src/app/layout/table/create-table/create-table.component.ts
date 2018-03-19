@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {Column, Constraint, Table} from "../../../models/rest-models";
+import {Column, Constraint, Table} from "../../../models/rest/rest-models";
 import {isNullOrUndefined} from "util";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
@@ -8,7 +8,9 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {newColumnValidator, newForeignKeyValidator} from "../../../shared/validator/add-new.validator";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
+import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'create-table',
@@ -30,7 +32,8 @@ export class CreateTableComponent implements OnInit
                 private pageHeaderService: PageHeaderService,
                 private router: Router,
                 private route: ActivatedRoute,
-                private errorHandler: GlobalErrorHandler)
+                private errorHandler: GlobalErrorHandler,
+                private modalService: NgbModal)
     {
     }
 
@@ -47,7 +50,7 @@ export class CreateTableComponent implements OnInit
             }
             else
             {
-                this.router.navigate(['/not-found']);
+                this.errorHandler.notFound();
             }
         });
 
@@ -160,10 +163,17 @@ export class CreateTableComponent implements OnInit
 
     submit()
     {
-        this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
-            this.formColumns.value, this.formConstraints.value)
-            .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = this.createTableForm.get('tableName').value;
+        modalRef.componentInstance.type = "create";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
+                this.formColumns.value, this.formConstraints.value)
+                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     concatSchemaTableColumn(schema: string, table: string, column: string): string

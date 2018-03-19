@@ -5,12 +5,14 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
-import {Parameter, Procedure} from "../../../models/rest-models";
+import {Parameter, Procedure} from "../../../models/rest/rest-models";
 import {bodyValidator} from "../../../shared/validator/body.validator";
 import {newParameterValidator} from "../../../shared/validator/add-new.validator";
 import {columnTypeValidator} from "../../../shared/validator/column-type.validator";
-import {GlobalErrorHandler} from "../../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../../services/error-handler.service";
 import {procedureReturnTypeValidator} from "../../../shared/validator/procedure-return-type.validator";
+import {ConfirmdialogComponent} from "../../components/confirmdialog/confirmdialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-create-procedure',
@@ -33,7 +35,8 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
                 private router: Router,
                 private route: ActivatedRoute,
                 private errorHandler: GlobalErrorHandler,
-                private changeDetector: ChangeDetectorRef)
+                private changeDetector: ChangeDetectorRef,
+                private modalService: NgbModal)
     {
     }
 
@@ -51,7 +54,7 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
             }
             else
             {
-                this.router.navigate(['/home']);
+                this.errorHandler.notFound();
             }
         });
 
@@ -107,22 +110,29 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
         procedure.body = this.createProcedureForm.get('procedureBody').value;
         procedure.paramList = this.getFormArray('procedureParameters').controls.map(control => control.value);
 
-        this.databaseService.createProcedure(procedure)
-            .then(() =>
-            {
-                let redirectTab: string;
-                if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
-                {
-                    redirectTab = 'procedures';
-                }
-                else
-                {
-                    redirectTab = 'functions';
-                }
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = procedure.name;
+        modalRef.componentInstance.type = "create";
 
-                this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
-            })
-            .catch(this.errorHandler.handleError);
+        modalRef.result.then(() =>
+        {
+            this.databaseService.createProcedure(procedure)
+                .then(() =>
+                {
+                    let redirectTab: string;
+                    if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
+                    {
+                        redirectTab = 'procedures';
+                    }
+                    else
+                    {
+                        redirectTab = 'functions';
+                    }
+
+                    this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     getFormControl(name: string): AbstractControl

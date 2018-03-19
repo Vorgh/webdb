@@ -101,6 +101,7 @@ public class TableDAO extends AbstractDatabaseDAO
                 .from(schemaName, tableName)
                 .build();
 
+        logger.info("Query executed: {}", query);
         return jdbcTemplate.queryForList(query);
     }
 

@@ -1,12 +1,14 @@
 import {AfterViewInit, Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {routerTransition} from '../../router.animations';
-import {Procedure, Table, Trigger} from "../../models/rest-models";
+import {Procedure, Table, Trigger} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
 import {NgbModal, NgbTab, NgbTabset} from "@ng-bootstrap/ng-bootstrap";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
-import {GlobalErrorHandler} from "../../shared/error-handler/error-handler.service";
+import {GlobalErrorHandler} from "../../services/error-handler.service";
+import {DbDataWrapper} from "../../models/rest/db-data-wrapper";
+import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
 
 @Component({
     selector: 'app-dbhome',
@@ -21,10 +23,9 @@ export class DBHomeComponent implements OnInit
     activeTabId: string;
 
     schema: string;
-    tables$: Promise<Table[]>;
-    views$: Promise<Table[]>;
-    triggers$: Promise<Trigger[]>;
-    procedures$: Promise<Procedure[]>;
+    tables: Table[];
+    triggers: Trigger[];
+    procedures: Procedure[];
 
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -37,86 +38,92 @@ export class DBHomeComponent implements OnInit
 
     ngOnInit()
     {
+        this.route.data.subscribe((data: {dbData: DbDataWrapper}) =>
+        {
+            let dbData = data.dbData;
+
+            this.schema = dbData.schema;
+            this.tables = dbData.tables;
+            this.triggers = dbData.triggers;
+            this.procedures = dbData.procedures;
+        });
+
         this.route.queryParams.subscribe(params =>
         {
-            if (isNullOrUndefined(params['schema']))
+            if (!isNullOrUndefined(params['tab']))
             {
-                this.router.navigate(['/not-found']);
-                return;
-            }
-
-            if (this.schema != params['schema'] && !isNullOrUndefined(params['schema']))
-            {
-                this.schema = params['schema'];
-
-                this.tables$ = this.databaseService.getAllTables(this.schema);
-                this.tables$
-                    .catch(this.errorHandler.handleError);
-
-                this.views$ = this.databaseService.getAllTables(this.schema, true);
-                this.views$
-                    .catch(this.errorHandler.handleError);
-
-                this.triggers$ = this.databaseService.getAllTriggers(this.schema);
-                this.triggers$
-                    .catch(this.errorHandler.handleError);
-
-                this.procedures$ = this.databaseService.getAllProcedures(this.schema);
-                this.procedures$
-                    .catch(this.errorHandler.handleError);
-
-                if (!isNullOrUndefined(params['tab']))
+                switch (params['tab'])
                 {
-                    switch (params['tab'])
-                    {
-                        case 'table': this.activeTabId = 'tab-tables'; break;
-                        case 'view': this.activeTabId = 'tab-views'; break;
-                        case 'trigger': this.activeTabId = 'tab-triggers'; break;
-                        case 'procedure': this.activeTabId = 'tab-procedures'; break;
-                        case 'function': this.activeTabId = 'tab-functions'; break;
-                    }
+                    case 'table': this.activeTabId = 'tab-tables'; break;
+                    case 'view': this.activeTabId = 'tab-views'; break;
+                    case 'trigger': this.activeTabId = 'tab-triggers'; break;
+                    case 'procedure': this.activeTabId = 'tab-procedures'; break;
+                    case 'function': this.activeTabId = 'tab-functions'; break;
                 }
-
-                this.pageHeaderService.addFragment('dbhome', this.pageHeaderService.getHeaderByID('home'),
-                    this.router.url, this.schema, 'fa-database');
             }
+
+            this.pageHeaderService.addFragment('dbhome', this.pageHeaderService.getHeaderByID('home'),
+                this.router.url, this.schema, 'fa-database');
+
         });
     }
 
     dropTable(table: Table)
     {
-        this.databaseService.dropTable(table.schema, table.name)
-            .then(() =>
-            {
-                this.tables$ = this.databaseService.getAllTables(this.schema);
-                this.tables$
-                    .catch(this.errorHandler.handleError);
-            })
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = table.name;
+        modalRef.componentInstance.type = "delete";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.dropTable(table.schema, table.name)
+                .then(() =>
+                {
+                    return this.databaseService.getAllTables(this.schema)
+                               .then(tables => this.tables = tables)
+                               .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     dropTrigger(trigger: Trigger)
     {
-        this.databaseService.dropTrigger(trigger.schema, trigger.name)
-            .then(() =>
-            {
-                this.triggers$ = this.databaseService.getAllTriggers(this.schema);
-                this.triggers$
-                    .catch(this.errorHandler.handleError);
-            })
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = trigger.name;
+        modalRef.componentInstance.type = "delete";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.dropTrigger(trigger.schema, trigger.name)
+                .then(() =>
+                {
+                    return this.databaseService.getAllTriggers(this.schema)
+                               .then(triggers => this.triggers = triggers)
+                               .catch(error => this.errorHandler.handleError(error))
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     dropProcedure(procedure: Procedure)
     {
-        this.databaseService.dropProcedure(procedure.schema, procedure.name)
-            .then(() =>
-            {
-                this.procedures$ = this.databaseService.getAllProcedures(this.schema);
-                this.procedures$
-                    .catch(this.errorHandler.handleError);
-            })
-            .catch(this.errorHandler.handleError);
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = procedure.name;
+        modalRef.componentInstance.type = "delete";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.dropProcedure(procedure.schema, procedure.name)
+                .then(() =>
+                {
+                    return this.databaseService.getAllProcedures(this.schema)
+                               .then(procedures => this.procedures = procedures)
+                               .catch(error => this.errorHandler.handleError(error))
+
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
     }
 
     showCodeModal(template)
