@@ -100,10 +100,9 @@ public class ConnectionDAO
         BaseClientDetails details = new BaseClientDetails();
         details.setClientId(username);
         details.setClientSecret(password);
-        details.setAuthorizedGrantTypes(Arrays.asList("client_credentials", "password") );
+        details.setAuthorizedGrantTypes(Arrays.asList("client_credentials", "password", "refresh_token") );
         details.setScope(Arrays.asList("read", "write", "trust"));
         details.setResourceIds(Arrays.asList("oauth2-resource"));
-        details.setAccessTokenValiditySeconds(3600);
         details.setAuthorities(authorities);
 
         return details;

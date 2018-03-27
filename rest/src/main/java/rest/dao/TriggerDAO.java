@@ -1,8 +1,5 @@
 package rest.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 import rest.mapper.TriggerMapper;
 import rest.model.connection.UserConnection;
 import rest.model.database.*;
@@ -13,11 +10,12 @@ import java.util.List;
 
 public class TriggerDAO extends AbstractDatabaseDAO
 {
-    private static final Logger logger = LoggerFactory.getLogger(TriggerDAO.class);
+    private TriggerQueryExecutor queryExecutor;
 
     public TriggerDAO(UserConnection connection)
     {
         super(connection);
+        this.queryExecutor = new TriggerQueryExecutor(connection.getJdbcTemplate());
     }
 
     public List<Trigger> getAllTriggers(String schemaName)
@@ -42,19 +40,16 @@ public class TriggerDAO extends AbstractDatabaseDAO
 
     public void createTrigger(Trigger requestTrigger)
     {
-        TriggerQueryExecutor queryExecutor = new TriggerQueryExecutor(jdbcTemplate);
         queryExecutor.create(requestTrigger);
     }
 
     public void modifyTrigger(Change<Trigger> request)
     {
-        TriggerQueryExecutor queryExecutor = new TriggerQueryExecutor(jdbcTemplate);
         queryExecutor.modify(request);
     }
 
     public void dropTrigger(String schemaName, String triggerName)
     {
-        TriggerQueryExecutor queryExecutor = new TriggerQueryExecutor(jdbcTemplate);
         queryExecutor.delete(schemaName, triggerName);
     }
 }

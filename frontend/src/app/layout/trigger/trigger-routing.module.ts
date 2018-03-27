@@ -4,7 +4,7 @@ import {TriggerComponent} from "./trigger.component";
 import {TriggerResolver} from "./trigger-resolver.service";
 
 const routes: Routes = [
-    {path: '', component: TriggerComponent, resolve: {trigger: TriggerResolver}},
+    {path: '', component: TriggerComponent, resolve: {trigger: TriggerResolver}, runGuardsAndResolvers: 'paramsOrQueryParamsChange'},
     {path: 'create', loadChildren: './create-trigger/create-trigger.module#CreateTriggerModule'},
 ];
 

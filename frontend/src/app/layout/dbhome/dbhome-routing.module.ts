@@ -4,7 +4,7 @@ import { DBHomeComponent } from "./dbhome.component";
 import {DBHomeResolver} from "./dbhome-resolver.service";
 
 const routes: Routes = [
-    { path: '', component: DBHomeComponent, resolve: {dbData: DBHomeResolver} }
+    { path: '', component: DBHomeComponent, resolve: {dbData: DBHomeResolver}, runGuardsAndResolvers: 'paramsOrQueryParamsChange' }
 ];
 
 @NgModule({

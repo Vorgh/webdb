@@ -1,5 +1,11 @@
 <div class="notification-container" [@notificationPopup]="notification">
-    <div *ngIf="notification" class="notification-body">
-        <p>{{notification}}</p>
+    <div *ngIf="notification" class="notification-body" #notificationBody>
+        <div class="col-sm-10">
+            <div class="row m-0 p-0 title large-text" *ngIf="notification.title">{{notification.title}}</div>
+            <div class="row m-0 p-0">{{notification.message}}</div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row m-0 p-0 close"><button class="btn btn-danger" (click)="onClose()"><i class="fa fa-times"></i></button></div>
+        </div>
     </div>
 </div>

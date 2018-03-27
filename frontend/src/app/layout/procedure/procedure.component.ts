@@ -4,13 +4,13 @@ import {Utils} from "../../shared/util/utils";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
-import {Column, Parameter, Procedure} from "../../models/rest/rest-models";
+import {Parameter, Procedure} from "../../models/rest/rest-models";
 import {bodyValidator} from "../../shared/validator/body.validator";
 import {isNullOrUndefined} from "util";
-import {newColumnValidator, newParameterValidator} from "../../shared/validator/add-new.validator";
+import {newParameterValidator} from "../../shared/validator/add-new.validator";
 import {columnTypeValidator} from "../../shared/validator/column-type.validator";
 import {GlobalErrorHandler} from "../../services/error-handler.service";
-import {ModifyProcedureRequest} from "../../models/request/request-models";
+import {ModifyRequest} from "../../models/request/request-models";
 import {procedureReturnTypeValidator} from "../../shared/validator/procedure-return-type.validator";
 import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -129,7 +129,7 @@ export class ProcedureComponent implements OnInit, AfterViewInit
 
         modalRef.result.then(() =>
         {
-            let request: ModifyProcedureRequest = new ModifyProcedureRequest(this.originalProcedure, procedure);
+            let request: ModifyRequest<Procedure> = new ModifyRequest<Procedure>(this.originalProcedure, procedure);
             this.databaseService.modifyProcedure(request)
                 .then(() =>
                 {

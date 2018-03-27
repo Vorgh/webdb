@@ -7,7 +7,7 @@ import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/form
 import {Utils} from "../../shared/util/utils";
 import {tableReferenceValidator} from "../../shared/validator/table-reference.validator";
 import {bodyValidator} from "../../shared/validator/body.validator";
-import {ModifyTriggerRequest} from "../../models/request/request-models";
+import {ModifyRequest} from "../../models/request/request-models";
 import {GlobalErrorHandler} from "../../services/error-handler.service";
 import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -77,7 +77,7 @@ export class TriggerComponent implements OnInit
 
         modalRef.result.then(() =>
         {
-            let request: ModifyTriggerRequest = new ModifyTriggerRequest(this.originalTrigger, trigger);
+            let request: ModifyRequest<Trigger> = new ModifyRequest<Trigger>(this.originalTrigger, trigger);
             this.databaseService.modifyTrigger(request)
                 .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
                 .catch(error => this.errorHandler.handleError(error));

@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {PageHeaderService} from "../../../shared/modules/page-header/page-header.service";
 import {isNullOrUndefined} from "util";
 import {ActivatedRoute, Router} from "@angular/router";
-import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Utils} from "../../../shared/util/utils";
 import {DatabaseService} from "../../../services/database.service";
 import {Trigger} from "../../../models/rest/rest-models";
@@ -81,7 +81,7 @@ export class CreateTriggerComponent implements OnInit
         modalRef.result.then(() =>
         {
             this.databaseService.createTrigger(this.schema, trigger)
-                .then(() => this.router.navigate(['/db']))
+                .then(() => this.router.navigate(['/db', {queryParams: {schema: this.schema, tab: 'trigger'}}]))
                 .catch(error => this.errorHandler.handleError(error));
         });
     }

@@ -87,6 +87,25 @@ export class DBHomeComponent implements OnInit
         });
     }
 
+    dropView(view: Table)
+    {
+        const modalRef = this.modalService.open(ConfirmdialogComponent);
+        modalRef.componentInstance.dbObject = view.name;
+        modalRef.componentInstance.type = "delete";
+
+        modalRef.result.then(() =>
+        {
+            this.databaseService.dropView(view.schema, view.name)
+                .then(() =>
+                {
+                    return this.databaseService.getAllTables(this.schema)
+                               .then(tables => this.tables = tables)
+                               .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(error => this.errorHandler.handleError(error));
+        });
+    }
+
     dropTrigger(trigger: Trigger)
     {
         const modalRef = this.modalService.open(ConfirmdialogComponent);

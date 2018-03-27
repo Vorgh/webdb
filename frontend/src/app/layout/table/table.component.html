@@ -5,9 +5,12 @@
                 <ngb-tabset>
                     <ngb-tab title="Rows">
                         <ng-template ngbTabContent>
+                            <div class="card-header d-flex justify-content-end">
+                                <button type="submit" class="btn btn-success" [disabled]="rowForm.pristine" (click)="onSubmit()">Save</button>
+                            </div>
                             <form [formGroup]="rowForm">
                                 <div class="table-responsive">
-                                    <table class="card-body table table-bordered">
+                                    <table class="card-body table table-bordered m-0">
                                         <thead>
                                         <tr>
                                             <th *ngFor="let col of columns">{{col.name}}</th>
@@ -39,9 +42,6 @@
                                     </table>
                                 </div>
                             </form>
-                            <div class="card-footer d-flex justify-content-end">
-                                <button type="submit" class="btn btn-success" [disabled]="rowForm.pristine" (click)="onSubmit()">Save</button>
-                            </div>
                         </ng-template>
                     </ngb-tab>
                     <ngb-tab title="Columns">

@@ -1,0 +1,30 @@
+<div class="card-header">
+    <div class="row">
+        <h4 class="card-title col-sm-10">Create View...</h4>
+        <div class="col-sm-2 d-flex justify-content-center">
+            <button [disabled]="!createViewForm.valid" type="button" class="btn btn-success" (click)="submit()">Save</button>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <form class="p-4" [formGroup]="createViewForm">
+        <div class="form-group row">
+            <label for="view-name" class="col-form-label col-sm-2">Name:</label>
+            <div class="col-sm-6">
+                <input id="view-name" type="text" class="form-control" [class.invalid]="!getFormControl('viewName').valid && !getFormControl('viewName').pristine" formControlName="viewName">
+            </div>
+            <div *ngIf="getFormControl('viewName').hasError('required') && !getFormControl('viewName').pristine" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="view-select-query" class="col-form-label col-sm-2">SELECT Query:</label>
+            <div class="col-sm-6">
+                <textarea id="view-select-query" class="form-control" [class.invalid]="!getFormControl('viewSelectQuery').valid" formControlName="viewSelectQuery" rows="10" spellcheck="false"></textarea>
+            </div>
+            <div *ngIf="getFormControl('viewSelectQuery').hasError('required') && !getFormControl('viewSelectQuery').pristine" class="text-danger col-sm my-auto">
+                <span>This field is required.</span>
+            </div>
+        </div>
+    </form>
+</div>

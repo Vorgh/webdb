@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {Constraint, Index, Procedure, Row, Table, Trigger} from "../models/rest/rest-models";
+import {Constraint, Index, Procedure, Row, Table, Trigger, View} from "../models/rest/rest-models";
 import {Schema} from "../models/rest/rest-models";
 import {Column} from "../models/rest/rest-models";
-import {ModifyProcedureRequest, ModifyTriggerRequest} from "../models/request/request-models";
+import {ModifyRequest} from "../models/request/request-models";
 
 @Injectable()
 export class DatabaseService
@@ -20,7 +20,7 @@ export class DatabaseService
             .catch(error => Promise.reject(error));
     }
 
-    getAllTables(schema: string, isView: boolean = false): Promise<Table[]>
+    getAllTables(schema: string): Promise<Table[]>
     {
         let params = new HttpParams().append('schema', schema);
 
@@ -56,7 +56,7 @@ export class DatabaseService
             .catch(error => Promise.reject(error));
     }
 
-    getTable(schema: string, table: string, isView: boolean = false)
+    getTable(schema: string, table: string)
     {
         let params = new HttpParams()
             .append('schema', schema)
@@ -67,7 +67,7 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    dropTable(schema: string, table: string, isView: boolean = false)
+    dropTable(schema: string, table: string)
     {
         let params = new HttpParams()
             .append('schema', schema)
@@ -134,6 +134,51 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
+    getAllViews(schema: string): Promise<View[]>
+    {
+        let params = new HttpParams().append('schema', schema);
+
+        return this.http.get<View[]>(`${this.urlPrefix}/view/metadata/all`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    getView(schema: string, view: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('view', view);
+
+        return this.http.get<View>(`${this.urlPrefix}/view/metadata/single`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    createView(request: View)
+    {
+        return this.http.post(`${this.urlPrefix}/view/create`, request)
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    alterView(request: ModifyRequest<View>)
+    {
+        return this.http.put(`${this.urlPrefix}/view/alter`, request)
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    dropView(schema: string, view: string)
+    {
+        let params = new HttpParams()
+            .append('schema', schema)
+            .append('view', view);
+
+        return this.http.delete(`${this.urlPrefix}/view/drop`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
     getAllTriggers(schema: string): Promise<Trigger[]>
     {
         let params = new HttpParams().append('schema', schema);
@@ -164,7 +209,7 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    modifyTrigger(request: ModifyTriggerRequest): Promise<any>
+    modifyTrigger(request: ModifyRequest<Trigger>): Promise<any>
     {
         return this.http.put(`${this.urlPrefix}/trigger/modify`, request)
                    .toPromise()
@@ -209,7 +254,7 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    modifyProcedure(request: ModifyProcedureRequest): Promise<any>
+    modifyProcedure(request: ModifyRequest<Procedure>): Promise<any>
     {
         return this.http.put(`${this.urlPrefix}/procedure/modify`, request)
                    .toPromise()

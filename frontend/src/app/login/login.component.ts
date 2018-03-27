@@ -3,7 +3,6 @@ import {Router} from '@angular/router';
 import {routerTransition} from '../router.animations';
 import {ConnectionAuthInfo, OAuthTokenResponse} from "../models/connection";
 import {ConnectionService} from "../services/connection.service";
-import {isNullOrUndefined} from "util";
 import {CookieService} from "ngx-cookie-service";
 import {GlobalErrorHandler} from "../services/error-handler.service";
 
@@ -35,15 +34,14 @@ export class LoginComponent implements OnInit
     onLoggedin()
     {
         this.connectionService.connect(this.connAuth)
-            .then((response: OAuthTokenResponse) =>
+            .then(() =>
             {
-                this.cookieService.set("access_token", response.access_token);
                 this.router.navigate(['/home']);
             })
             .catch(error =>
             {
                 this.errorHandler.handleError(error);
-                this.cookieService.delete("current_user");
+                //this.cookieService.delete("access_token");
             });
     }
 }

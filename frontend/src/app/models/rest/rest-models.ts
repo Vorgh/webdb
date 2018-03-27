@@ -13,6 +13,13 @@ export class Table
     collation: String;
 }
 
+export class View
+{
+    schema: string;
+    name: string;
+    selectQuery: string;
+}
+
 export class Row
 {
     deleted?: boolean;

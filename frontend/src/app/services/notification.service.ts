@@ -1,39 +1,44 @@
 import {Injectable} from "@angular/core";
 import {Subject} from "rxjs/Subject";
 import {Observable} from "rxjs/Observable";
+import {PushNotification} from "../models/notification";
 
 @Injectable()
 export class NotificationService
 {
-    private notificationSubject: Subject<String> = new Subject();
+    private notificationSubject: Subject<PushNotification> = new Subject();
 
     getNotification(): Observable<any>
     {
         return this.notificationSubject.asObservable();
     }
 
-    notify(message: string): void
+    notify(message: string, type: string, title=""): void
     {
-        this.notificationSubject.next(message)
+        this.notificationSubject.next(new PushNotification(message, type, title))
     }
 
-    info(message: string)
+    info(message: string, title="")
     {
-        this.notify(message);
+        let type = "info";
+        this.notify(message, type, title);
     }
 
-    success(message: string)
+    success(message: string, title="")
     {
-        this.notify(message);
+        let type = "success";
+        this.notify(message, type, title);
     }
 
-    warning(message: string)
+    warning(message: string, title="")
     {
-        this.notify(message);
+        let type = "warning";
+        this.notify(message, type, title);
     }
 
-    error(message: string)
+    error(message: string, title="")
     {
-        this.notify(message);
+        let type = "danger";
+        this.notify(message, type, title);
     }
 }

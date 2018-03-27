@@ -215,7 +215,7 @@ export class TableComponent implements OnInit
             }
 
             this.databaseService.modifyRows(this.schema, this.table, changeObj)
-                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
                 .catch(error => this.errorHandler.handleError(error));
         });
     }

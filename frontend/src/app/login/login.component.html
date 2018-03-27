@@ -12,10 +12,10 @@
                                placeholder="JDBC Url" required autocomplete="off"
                                [class.has-error]="urlInput.invalid && (urlInput.dirty || urlInput.touched)">
                         <div *ngIf="urlInput.invalid && (urlInput.dirty || urlInput.touched)" class="error-block">
-                            <small *ngIf="urlInput.errors.required">
+                            <small *ngIf="urlInput.hasError('required')">
                                 URL is required!
                             </small>
-                            <small *ngIf="urlInput.errors.pattern && !urlInput.errors.required">
+                            <small *ngIf="urlInput.hasError('pattern') && !urlInput.hasError('required')">
                                 Invalid URL!
                             </small>
                         </div>
@@ -26,7 +26,7 @@
                                placeholder="Username" required autocomplete="off"
                                [class.has-error]="userInput.invalid && (userInput.dirty || userInput.touched)">
                         <div *ngIf="userInput.invalid && (userInput.dirty || userInput.touched)" class="error-block">
-                            <small *ngIf="userInput.errors.required">
+                            <small *ngIf="userInput.hasError('required')">
                                 Username is required!
                             </small>
                         </div>
@@ -38,7 +38,7 @@
                                [class.has-error]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
                         <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
                              class="error-block">
-                            <small *ngIf="passwordInput.errors.required">
+                            <small *ngIf="passwordInput.hasError('required')">
                                 Password is required!
                             </small>
                         </div>

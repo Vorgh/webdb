@@ -1,3 +1,5 @@
+@import "../../../../styles/colors";
+
 .notification-container {
     position: fixed;
     top: 60px;
@@ -9,7 +11,8 @@
 }
 
 .notification-body {
-    background-color: #B22222;
+    position: relative;
+    background-color: #dc3545;
     height: 100%;
     display: flex;
     justify-content: center;
@@ -20,4 +23,8 @@
     -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
     -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
     box-shadow:0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.close {
+    color: #fff;
 }

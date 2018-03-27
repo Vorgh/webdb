@@ -1,7 +1,6 @@
 import {ErrorHandler, Injectable} from '@angular/core';
 import {Router} from "@angular/router";
 import {NotificationService} from "./notification.service";
-import {GeneralError} from "../models/rest/rest-errors";
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler
@@ -14,15 +13,15 @@ export class GlobalErrorHandler implements ErrorHandler
 
     handleError(httpErrorObj)
     {
-        console.log(httpErrorObj);
-        if (httpErrorObj.error.hasOwnProperty("name") && httpErrorObj.error.hasOwnProperty("message"))
+        console.error(httpErrorObj);
+        if (httpErrorObj != null && httpErrorObj.error != null &&
+            httpErrorObj.error.hasOwnProperty("name") && httpErrorObj.error.hasOwnProperty("message"))
         {
-            //let generalError: GeneralError = new GeneralError(error.name, error.message);
-            this.notificationService.error(httpErrorObj.error.name + ": " + httpErrorObj.error.message);
+            this.notificationService.error(httpErrorObj.error.message, httpErrorObj.error.name);
         }
         else
         {
-            this.notificationService.error("Unknown error");
+            this.notificationService.error("An unknown error occurred", "Unknown Error");
         }
     }
 

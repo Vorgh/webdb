@@ -4,7 +4,7 @@ import { AlterTableComponent } from "./alter-table.component";
 import {AlterTableResolver} from "./alter-table-resolver.service";
 
 const routes: Routes = [
-    {path: '', component: AlterTableComponent, resolve: {table: AlterTableResolver}}
+    {path: '', component: AlterTableComponent, resolve: {table: AlterTableResolver}, runGuardsAndResolvers: 'paramsOrQueryParamsChange'}
 ];
 
 @NgModule({

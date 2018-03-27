@@ -171,7 +171,7 @@ export class CreateTableComponent implements OnInit
         {
             this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
                 this.formColumns.value, this.formConstraints.value)
-                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema}}))
+                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
                 .catch(error => this.errorHandler.handleError(error));
         });
     }

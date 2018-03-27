@@ -467,7 +467,7 @@ export class AlterTableComponent implements OnInit
         modalRef.result.then(() =>
         {
             this.databaseService.alterTable(this.schemaName, this.table.name, this.changes)
-                .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schemaName}}))
+                .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schemaName, tab: 'table'}}))
                 .catch(error => this.errorHandler.handleError(error));
         })
 

@@ -1,12 +1,12 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {BrowserModule} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {AuthGuard, HttpRequestInterceptorModule} from './shared';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ConnectionService} from "./services/connection.service";
 import {DatabaseService} from "./services/database.service";
 import {PageHeaderService} from "./shared/modules/page-header/page-header.service";
@@ -18,6 +18,7 @@ import {CookieService} from "ngx-cookie-service";
 import {GlobalErrorHandler} from "./services/error-handler.service";
 import {DBHomeResolver} from "./layout/dbhome/dbhome-resolver.service";
 import {NotificationService} from "./services/notification.service";
+import {AlterViewResolver} from "./layout/view/alter-view/alter-view-resolver.service";
 
 @NgModule({
     imports: [
@@ -31,7 +32,7 @@ import {NotificationService} from "./services/notification.service";
     ],
     declarations: [AppComponent],
     providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService, AlterTableResolver,
-        TriggerResolver, ProcedureResolver, DBHomeResolver, NotificationService,
+        TriggerResolver, ProcedureResolver, AlterViewResolver, DBHomeResolver, NotificationService,
         CookieService, GlobalErrorHandler],
     bootstrap: [AppComponent]
 })

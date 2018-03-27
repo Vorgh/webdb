@@ -5,7 +5,24 @@
         <i class="fa fa-bars text-muted" aria-hidden="true"></i>
     </button>
     <div class="collapse navbar-collapse">
-        <li class="nav-item dropdown ml-auto" ngbDropdown>
+        <div class="dropdown ml-auto bell-container" ngbDropdown [placement]="'left-top'" autoClose="outside">
+            <div class="notification show-count" ngbDropdownToggle>
+                <span class="counter">{{notificationList.length}}</span>
+            </div>
+            <div *ngIf="notificationList.length > 0" class="dropdown-menu" ngbDropdownMenu>
+                <div *ngFor="let notif of notificationList, let i=index" class="dropdown-item px-2" [ngClass]="getColorClass(notif.type)">
+                    <div class="d-flex">
+                        <div class="col-sm-8 large-text list-notification-title">{{notif.title}}</div>
+                        <div class="col-sm-1 small-text list-notification-date">{{getHourMinFromDate(notif.date)}}</div>
+                        <div class="col-sm-1 list-notification-close ml-auto">
+                            <button class="btn btn-danger btn-sm" (click)="removeNotification(i)"><i class="fa fa-times-circle"></i></button>
+                        </div>
+                    </div>
+                    <div class="list-notification-message">{{notif.message}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-item dropdown" ngbDropdown>
             <a href="javascript:void(0)" class="nav-link" ngbDropdownToggle>
                 <i class="fa fa-user"></i> John Smith <b class="caret"></b>
             </a>
@@ -14,6 +31,6 @@
                     <i class="fa fa-fw fa-power-off"></i> Log Out
                 </a>
             </div>
-        </li>
+        </div>
     </div>
 </nav>

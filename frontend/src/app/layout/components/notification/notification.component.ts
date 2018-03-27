@@ -1,5 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {NotificationService} from "../../../services/notification.service";
+import {PushNotification} from "../../../models/notification";
 import {animate, keyframes, query, style, transition, trigger} from "@angular/animations";
 
 @Component({
@@ -29,8 +30,9 @@ export class NotificationComponent implements OnInit
 {
     private readonly TIMEOUT: number = 10000;
 
+    @ViewChild('notificationBody') notificationBody: ElementRef;
     private timer;
-    notification: Notification;
+    notification: PushNotification;
 
     constructor(private notificationService: NotificationService)
     {
@@ -38,12 +40,13 @@ export class NotificationComponent implements OnInit
 
     ngOnInit()
     {
-        this.notificationService.getNotification().subscribe((notification: Notification) =>
+        this.notificationService.getNotification().subscribe((notification: PushNotification) =>
         {
             if (!notification)
             {
                 return;
             }
+
             this.notification = notification;
 
             if (this.timer) clearTimeout(this.timer);

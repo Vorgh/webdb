@@ -56,7 +56,7 @@
                         <div class="card mb-3">
                             <div class="card-header d-flex">
                                 <div class="ml-auto">
-                                    <a class="btn btn-info new-table" [routerLink]="['/table/create']" [queryParams]="{schema: schema}">
+                                    <a class="btn btn-info new-table" [routerLink]="['/view/create']" [queryParams]="{schema: schema}">
                                         <i class="fa fa-plus" aria-hidden="true"></i>
                                         <small>NEW</small>
                                     </a>
@@ -71,14 +71,14 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr *ngFor="let table of tables">
-                                        <ng-template [ngIf]="table.type === 'VIEW'">
-                                            <th scope="row"><a [routerLink]="['/table']" [queryParams]="{schema: schema, table: table.name}">{{table.name}}</a></th>
+                                    <tr *ngFor="let view of tables">
+                                        <ng-template [ngIf]="view.type === 'VIEW'">
+                                            <th scope="row"><a [routerLink]="['/view']" [queryParams]="{schema: schema, view: view.name}">{{view.name}}</a></th>
                                             <td class="d-flex justify-content-end">
-                                                <button class="btn btn-info" [routerLink]="['/table/alter']" [queryParams]="{schema: schema, table: table.name}">
+                                                <button class="btn btn-info" [routerLink]="['/view/alter']" [queryParams]="{schema: schema, view: view.name}">
                                                     <i class="fa fa-pencil" aria-hidden="true"></i>
                                                 </button>
-                                                <button class="btn btn-danger" (click)="dropTable(table)">
+                                                <button class="btn btn-danger" (click)="dropView(view)">
                                                     <i class="fa fa-times" aria-hidden="true"></i>
                                                 </button>
                                             </td>
