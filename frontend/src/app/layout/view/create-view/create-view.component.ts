@@ -19,6 +19,18 @@ export class CreateViewComponent implements OnInit
     schema: string;
     createViewForm: FormGroup;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true,
+        lineNumbers: "off"};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -37,8 +49,7 @@ export class CreateViewComponent implements OnInit
             {
                 this.schema = params['schema'];
 
-                this.pageHeaderService.addFragment('create-view', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, 'New View', 'fa-table');
+                this.pageHeaderPath = this.pageHeaderService.getPathFromID('create-view', this.schema);
             }
             else
             {

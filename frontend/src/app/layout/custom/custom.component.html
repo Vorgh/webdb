@@ -1,0 +1,38 @@
+<app-page-header [path]="pageHeaderPath"></app-page-header>
+<div class="card-header">
+    <div class="row">
+        <div class="card-title mr-auto">Custom SQL</div>
+        <div class="d-flex mx-1">
+            <button type="button" class="btn btn-info image-text-button p-1" (click)="execute()">
+                <i class="fa fa-bolt button-icon yellow"></i>
+                <div class="mini-text">Execute</div>
+            </button>
+        </div>
+        <div class="d-flex mx-1">
+            <button type="button" class="btn btn-info image-text-button p-1" (click)="executeSelected()">
+                <i class="fa fa-bolt button-icon yellow"></i>
+                <div class="mini-text">Selected</div>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="card-body monaco-container">
+    <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" (onInit)="monacoInit($event)"></ngx-monaco-editor>
+</div>
+<div *ngIf="results.length > 0" class="results-container">
+    <div class="small-text results-returned">Results: {{results.length}} rows returned.</div>
+    <div  class="table-responsive result-table-container">
+        <table class="table table-bordered result-table">
+            <thead>
+            <tr>
+                <th *ngFor="let col of results[0] | keys">{{col}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let row of results">
+                <td *ngFor="let r of row | keys">{{row[r]}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

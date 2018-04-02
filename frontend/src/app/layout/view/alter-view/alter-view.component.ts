@@ -19,6 +19,18 @@ export class AlterViewComponent implements OnInit
     originalView: View;
     alterViewForm: FormGroup;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true,
+        lineNumbers: "off"};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -40,8 +52,7 @@ export class AlterViewComponent implements OnInit
                 viewSelectQuery: [this.originalView.selectQuery, Validators.required],
             });
 
-            this.pageHeaderService.addFragment('alter-view', this.pageHeaderService.getHeaderByID('dbhome'),
-                this.router.url, 'Modify View', 'fa-table');
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('modify-view', null, this.originalView);
         });
     }
 

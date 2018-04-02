@@ -1,3 +1,4 @@
+<app-page-header [path]="pageHeaderPath"></app-page-header>
 <div class="card-header">
     <div class="row">
         <h4 class="card-title col-sm-10">Modify View...</h4>
@@ -20,7 +21,7 @@
         <div class="form-group row">
             <label for="view-select-query" class="col-form-label col-sm-2">SELECT Query:</label>
             <div class="col-sm-6">
-                <textarea id="view-select-query" class="form-control" [class.invalid]="!getFormControl('viewSelectQuery').valid" formControlName="viewSelectQuery" rows="10" spellcheck="false"></textarea>
+                <ngx-monaco-editor id="view-select-query" [options]="editorOptions" [class.invalid]="getFormControl('viewSelectQuery').invalid && (getFormControl('viewSelectQuery').dirty || getFormControl('viewSelectQuery').touched)" formControlName="viewSelectQuery"></ngx-monaco-editor>
             </div>
             <div *ngIf="getFormControl('viewSelectQuery').hasError('required') && !getFormControl('viewSelectQuery').pristine" class="text-danger col-sm my-auto">
                 <span>This field is required.</span>

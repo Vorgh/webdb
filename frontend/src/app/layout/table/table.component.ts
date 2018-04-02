@@ -27,6 +27,8 @@ export class TableComponent implements OnInit
     rowForm: FormGroup;
     newRowGroup: FormGroup;
 
+    pageHeaderPath = [];
+
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
@@ -63,6 +65,8 @@ export class TableComponent implements OnInit
                            this.rows = values[1];
                            this.metadata = values[2];
 
+                           this.pageHeaderPath = this.pageHeaderService.getPathFromID('table', null, this.metadata);
+
                            let index = 0;
                            for (let row of this.rows)
                            {
@@ -93,9 +97,6 @@ export class TableComponent implements OnInit
                            }
                        })
                        .catch(error => this.errorHandler.handleError(error));
-
-                this.pageHeaderService.addFragment('table', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, this.table, 'fa-table');
             }
             else
             {

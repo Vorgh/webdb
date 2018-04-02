@@ -27,6 +27,18 @@ export class TriggerComponent implements OnInit
     schema: string;
     triggerForm: FormGroup;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true,
+        lineNumbers: "off"};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -44,8 +56,7 @@ export class TriggerComponent implements OnInit
             this.originalTrigger = data.trigger;
             this.schema = data.trigger.schema;
 
-            this.pageHeaderService.addFragment('modify-trigger', this.pageHeaderService.getHeaderByID('dbhome'),
-                this.router.url, 'Modify Trigger', 'fa-table');
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('modify-trigger', null, this.originalTrigger);
 
             this.triggerForm = this.formBuilder.group({
                     triggerName: [this.originalTrigger.name, Validators.required],

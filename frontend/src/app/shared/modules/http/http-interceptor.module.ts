@@ -38,59 +38,59 @@ export class HttpRequestInterceptor implements HttpInterceptor
 
     addToken(req: HttpRequest<any>, token: string): HttpRequest<any>
     {
-        /*if (this.cookieService.check("access_token"))
-        {
-            this.headers = this.headers.set('Authorization', 'Bearer ' + token);
-        }*/
         this.headers = this.headers.set('Authorization', 'Bearer ' + token);
         return req.clone({headers: this.headers});
     }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>
     {
-        if (req.url.startsWith("rest/oauth/") || req.url == "rest/connection/connectionAuth")
+        if (req.url == "rest/connection/connectionAuth" ||
+            (req.url == "rest/oauth/token" && !this.cookieService.check('refresh_token')))
+        {
             return next.handle(req);
+        }
+
+        if (req.url == "rest/oauth/token" && this.cookieService.check('refresh_token'))
+        {
+            return next.handle(req)
+                .catch(err =>
+                {
+                    return this.handleError(req, next, err)
+                })
+        }
 
         if (req.url == "rest/connection/logout")
         {
             return next.handle(this.addToken(req, this.cookieService.get("access_token")))
-                .catch(err =>
-                {
-                    this.errorHandler.handleError(err);
-                    this.router.navigate(['/login']);
-                    return Observable.throw(err);
-                })
+                       .catch(err =>
+                       {
+                           this.errorHandler.handleError(err);
+                           this.router.navigate(['/login']);
+                           return Observable.throw(err);
+                       })
         }
 
         return next.handle(this.addToken(req, this.cookieService.get("access_token")))
                    .catch(err =>
                    {
-                       if (err instanceof HttpErrorResponse)
-                       {
-                           switch (err.status)
-                           {
-                               case 400: return this.handle400Error(err);
-                               case 401: return this.handle401Error(req, next);
-                           }
-                           /*return this.connectionService.refreshConnection()
-                                      .then(response =>
-                                      {
-                                          console.log("refresh_token");
-                                          this.cookieService.set("access_token", response.access_token, 60);
-                                          return next.handle(dupReq);
-                                      })
-                                      .catch(error =>
-                                      {
-                                          console.log("refresh_token_fail");
-                                          this.cookieService.delete("access_token");
-                                          this.router.navigate(['/login']);
-
-                                          return Promise.reject(error);
-                                      })*/
-                       }
-
-                       return Observable.throw(err);
+                       return this.handleError(req, next, err)
                    });
+    }
+
+    private handleError(req, next, err)
+    {
+        if (err instanceof HttpErrorResponse)
+        {
+            switch (err.status)
+            {
+                case 400:
+                    return this.handle400Error(err);
+                case 401:
+                    return this.handle401Error(req, next);
+            }
+        }
+
+        return Observable.throw(err);
     }
 
     private handle400Error(error)
@@ -118,8 +118,8 @@ export class HttpRequestInterceptor implements HttpInterceptor
                        {
                            if (newTokenRes.access_token)
                            {
-                               this.tokenSubject.next(newTokenRes.access_token);
                                this.cookieService.set("access_token", newTokenRes.access_token, 1800, "/", environment.domain);
+                               this.tokenSubject.next(newTokenRes.access_token);
                                return next.handle(this.addToken(req, newTokenRes.access_token));
                            }
 
@@ -129,6 +129,7 @@ export class HttpRequestInterceptor implements HttpInterceptor
                        .catch(() =>
                        {
                            // If there is an exception calling 'refreshToken', bad news so logout.
+                           console.error("Refresh token error.");
                            return this.logout();
                        })
                        .finally(() =>
@@ -144,7 +145,7 @@ export class HttpRequestInterceptor implements HttpInterceptor
                        .switchMap(token =>
                        {
                            return next.handle(this.addToken(req, token));
-                       });
+                       })
         }
     }
 
@@ -152,6 +153,7 @@ export class HttpRequestInterceptor implements HttpInterceptor
     {
         this.cookieService.delete("access_token");
         this.cookieService.delete("refresh_token");
+        this.cookieService.delete("auth_id");
         this.router.navigate(['/login']);
 
         return Observable.throw(new GeneralError("Refresh Token Error", "Couldn't refresh the access token."));

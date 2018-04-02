@@ -1,0 +1,58 @@
+@import "../../../styles/table";
+
+.monaco-container {
+    height: 60vh;
+}
+
+ngx-monaco-editor {
+    height: 100%;
+    overflow: hidden;
+}
+
+.image-text-button {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-icon {
+    font-size: 1em;
+}
+
+.mini-text {
+    font-size: 8px;
+}
+
+.yellow {
+    color: #f8ff00;
+}
+
+.card-header .row {
+    padding: 0 1.5rem 0 1.5rem;
+}
+
+.card-title {
+    font-size: 1.5em;
+}
+
+ngx-monaco-editor {
+    border: 1px solid #919191;
+}
+
+.results-container {
+    padding: 0 1.25em 0 1.25em;
+}
+
+.results-returned {
+    background-color: #d2a63e;
+    color: white;
+}
+
+.result-table-container {
+    max-height: 30vh;
+    overflow-y: scroll;
+}
+
+.result-table td {
+    padding: 0.2em;
+    font-size: 0.8em;
+}

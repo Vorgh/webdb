@@ -37,6 +37,8 @@ export class AlterTableComponent implements OnInit
     newForeignKeyValidateMessage: string;
     newIndexValidateMessage: string;
 
+    pageHeaderPath = [];
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -53,6 +55,8 @@ export class AlterTableComponent implements OnInit
         {
             this.table = data.table;
             this.schemaName = data.table.schema;
+
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('modify-table', null, this.table);
 
             Promise.all([
                 this.databaseService.getColumns(this.schemaName, this.table.name),

@@ -25,6 +25,18 @@ export class CreateTriggerComponent implements OnInit
     schema: string;
     createTriggerForm: FormGroup;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true,
+        lineNumbers: "off"};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -43,8 +55,7 @@ export class CreateTriggerComponent implements OnInit
             {
                 this.schema = params['schema'];
 
-                this.pageHeaderService.addFragment('create-trigger', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, 'New Trigger', 'fa-table');
+                this.pageHeaderPath = this.pageHeaderService.getPathFromID('create-trigger', this.schema);
             }
             else
             {

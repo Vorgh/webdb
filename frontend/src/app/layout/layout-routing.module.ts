@@ -13,7 +13,8 @@ const routes: Routes = [
             { path: 'table', loadChildren: './table/table.module#TableModule'},
             { path: 'view', loadChildren: './view/view.module#ViewModule'},
             { path: 'trigger', loadChildren: './trigger/trigger.module#TriggerModule'},
-            { path: 'procedure', loadChildren: './procedure/procedure.module#ProcedureModule'}
+            { path: 'procedure', loadChildren: './procedure/procedure.module#ProcedureModule'},
+            { path: 'custom', loadChildren: './custom/custom.module#CustomModule'}
         ]
     }
 ];

@@ -27,6 +27,8 @@ export class CreateTableComponent implements OnInit
     newColumnValidateMessage: string;
     newForeignKeyValidateMessage: string;
 
+    pageHeaderPath = [];
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -45,8 +47,7 @@ export class CreateTableComponent implements OnInit
             {
                 this.schema = params['schema'];
 
-                this.pageHeaderService.addFragment('create-table', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, 'New Table', 'fa-table');
+                this.pageHeaderPath = this.pageHeaderService.getPathFromID('create-table', this.schema);
             }
             else
             {

@@ -216,7 +216,7 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    dropTrigger(schema: string, triggerName: string)
+    dropTrigger(schema: string, triggerName: string): Promise<any>
     {
         let params = new HttpParams()
             .append('schema', schema)
@@ -236,7 +236,7 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    getProcedure(schema: string, procedure: string)
+    getProcedure(schema: string, procedure: string): Promise<Procedure>
     {
         let params = new HttpParams()
             .append('schema', schema)
@@ -261,13 +261,20 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    dropProcedure(schema: string, procedure: string)
+    dropProcedure(schema: string, procedure: string): Promise<any>
     {
         let params = new HttpParams()
             .append('schema', schema)
             .append('procedure', procedure);
 
         return this.http.delete(`${this.urlPrefix}/procedure/drop`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    executeCustomSql(sql: string): Promise<Row[]>
+    {
+        return this.http.post<Row[]>(`${this.urlPrefix}/custom`, sql)
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }

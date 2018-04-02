@@ -8,21 +8,11 @@ import {isNullOrUndefined} from "util";
     templateUrl: './page-header.component.html',
     styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent implements OnChanges
+export class PageHeaderComponent
 {
-    @Input() header: HeaderElement;
-    path: HeaderElement[];
+    @Input() path: HeaderElement[];
 
-    constructor(private pageHeaderService: PageHeaderService)
+    constructor()
     {
-    }
-
-    ngOnChanges()
-    {
-        if (!isNullOrUndefined(this.header))
-        {
-            console.log(this.header);
-            this.path = this.pageHeaderService.getPathFromHeader(this.header);
-        }
     }
 }

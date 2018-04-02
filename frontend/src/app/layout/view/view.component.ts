@@ -20,6 +20,8 @@ export class ViewComponent implements OnInit
     schema: string;
     viewName: string;
 
+    pageHeaderPath = [];
+
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
                 private route: ActivatedRoute,
@@ -48,11 +50,10 @@ export class ViewComponent implements OnInit
                            this.columns = values[0];
                            this.rows = values[1];
                            this.metadata = values[2];
+
+                           this.pageHeaderPath = this.pageHeaderService.getPathFromID('view', null, this.metadata);
                        })
                        .catch(error => this.errorHandler.handleError(error));
-
-                this.pageHeaderService.addFragment('view', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, this.viewName, 'fa-table');
             }
             else
             {

@@ -1,13 +1,10 @@
 <div class="row">
     <div class="col-xl-12">
-        <h2 class="page-header">
-            {{header.title}}
-        </h2>
         <ol class="breadcrumb">
-            <li *ngFor="let head of path" class="breadcrumb-item" [class.active]="head.id === header.id">
-                <i class="fa {{head.icon}}"></i>
-                <a *ngIf="head.id !== header.id" [routerLink]="head.link">{{head.title}}</a>
-                <a *ngIf="head.id === header.id">{{head.title}}</a>
+            <li *ngFor="let header of path; let i=index" class="breadcrumb-item" [class.active]="i == path.length-1">
+                <i class="fa {{header.icon}}"></i>
+                <a *ngIf="header.link != null" [routerLink]="header.link" [queryParams]="header.queryParams">{{header.title}}</a>
+                <span *ngIf="header.link == null">{{header.title}}</span>
             </li>
         </ol>
     </div>

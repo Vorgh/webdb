@@ -28,6 +28,7 @@
     </tr>
 </ng-template>
 
+<app-page-header [path]="pageHeaderPath"></app-page-header>
 <div class="card-header">
     <div class="row">
         <h4 class="card-title col-sm-10">Modify Procedure...</h4>
@@ -101,7 +102,7 @@
         <div class="form-group row">
             <label for="procedure-body" class="col-form-label col-sm-2">Body:</label>
             <div class="col-sm-8 col-md-7 col-lg-6">
-                <textarea id="procedure-body" class="form-control" [class.invalid]="!getFormControl('procedureBody').valid" formControlName="procedureBody" rows="10" spellcheck="false"></textarea>
+                <ngx-monaco-editor id="procedure-body" [options]="editorOptions" [class.invalid]="!getFormControl('procedureBody').valid" formControlName="procedureBody"></ngx-monaco-editor>
             </div>
             <div *ngIf="getFormControl('procedureBody').hasError('body')" class="text-danger col-sm my-auto">
                 {{getFormControl('procedureBody').getError('body').message}}

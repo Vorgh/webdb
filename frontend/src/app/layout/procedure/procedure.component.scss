@@ -1,1 +1,5 @@
 @import "../../../styles/table";
+
+ngx-monaco-editor:not(.invalid) {
+    border: 1px solid #ced4da;
+}

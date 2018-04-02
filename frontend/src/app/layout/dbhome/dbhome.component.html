@@ -1,5 +1,6 @@
 <div [@routerTransition]>
-    <ngb-tabset [activeId]="activeTabId" type="pills">
+    <app-page-header [path]="pageHeaderPath"></app-page-header>
+    <ngb-tabset [activeId]="activeTabId" type="pills" (tabChange)="beforeTabChange($event)">
         <ngb-tab id="tab-tables" title="Tables">
             <ng-template ngbTabContent>
                 <div class="row">
@@ -280,5 +281,6 @@
                 </div>
             </ng-template>
         </ngb-tab>
+        <ngb-tab id="tab-custom" title="Custom..."></ngb-tab>
     </ngb-tabset>
 </div>

@@ -1,8 +1,9 @@
 export class HeaderElement
 {
     id: string;
-    parent: HeaderElement;
+    parent: string;
     title: string;
     link: string;
     icon: string;
+    queryParams?: any;
 }

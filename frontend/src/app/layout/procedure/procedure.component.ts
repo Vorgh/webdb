@@ -32,6 +32,17 @@ export class ProcedureComponent implements OnInit, AfterViewInit
     procedureForm: FormGroup;
     newParameterValidateMessage: string;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -51,8 +62,7 @@ export class ProcedureComponent implements OnInit, AfterViewInit
             this.schema = data.procedure.schema;
             this.originalParamCount = isNullOrUndefined(this.originalProcedure.paramList) ? 0 : this.originalProcedure.paramList.length;
 
-            this.pageHeaderService.addFragment('modify-procedure', this.pageHeaderService.getHeaderByID('dbhome'),
-                this.router.url, 'Modify Procedure', 'fa-table');
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('modify-procedure', null, this.originalProcedure);
 
             let procedureReturnType = this.originalProcedure.returnType != null ?
                 this.originalProcedure.returnType: '';

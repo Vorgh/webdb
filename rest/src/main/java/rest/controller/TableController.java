@@ -135,7 +135,6 @@ public class TableController
                                           @RequestBody RowModifyRequest rowModifyRequest,
                                           @AuthenticationPrincipal UserConnection connection)
     {
-        System.out.println(rowModifyRequest);
         tableService.modifyRows(schema, table, rowModifyRequest, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

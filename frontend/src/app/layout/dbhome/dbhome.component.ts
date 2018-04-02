@@ -4,7 +4,7 @@ import {Procedure, Table, Trigger} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
-import {NgbModal, NgbTab, NgbTabset} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbTab, NgbTabChangeEvent, NgbTabset} from "@ng-bootstrap/ng-bootstrap";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {GlobalErrorHandler} from "../../services/error-handler.service";
 import {DbDataWrapper} from "../../models/rest/db-data-wrapper";
@@ -26,6 +26,8 @@ export class DBHomeComponent implements OnInit
     tables: Table[];
     triggers: Trigger[];
     procedures: Procedure[];
+
+    pageHeaderPath = [];
 
     constructor(private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -62,9 +64,7 @@ export class DBHomeComponent implements OnInit
                 }
             }
 
-            this.pageHeaderService.addFragment('dbhome', this.pageHeaderService.getHeaderByID('home'),
-                this.router.url, this.schema, 'fa-database');
-
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('dbhome', this.schema);
         });
     }
 
@@ -148,5 +148,13 @@ export class DBHomeComponent implements OnInit
     showCodeModal(template)
     {
         this.modalService.open(template);
+    }
+
+    beforeTabChange(event: NgbTabChangeEvent)
+    {
+        if (event.nextId === 'tab-custom') {
+            event.preventDefault();
+            this.router.navigate(['/custom'])
+        }
     }
 }

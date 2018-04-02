@@ -1,20 +1,19 @@
 package rest.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import rest.auth.PostTokenFilter;
+import rest.auth.filter.AuthFilter;
 
 @Configuration
 public class FilterConfig
 {
     /*@Bean
-    public FilterRegistrationBean PostTokenFilterRegistrationBean() {
+    public FilterRegistrationBean AuthFilterRegistrationBean() {
         FilterRegistrationBean regBean = new FilterRegistrationBean();
-        regBean.setFilter(new PostTokenFilter());
+        regBean.setFilter(new AuthFilter());
         regBean.setOrder(999);
-        regBean.addUrlPatterns("/oauth/token");
+        regBean.addUrlPatterns("/connection/connectionAuth");
 
         return regBean;
     }*/

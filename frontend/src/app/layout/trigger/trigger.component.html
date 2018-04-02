@@ -1,3 +1,4 @@
+<app-page-header [path]="pageHeaderPath"></app-page-header>
 <div class="card-header">
     <div class="row">
         <h4 class="card-title col-sm-10">Modify Trigger...</h4>
@@ -53,7 +54,7 @@
         <div class="form-group row">
             <label for="trigger-body" class="col-form-label col-sm-2">Trigger Body:</label>
             <div class="col-sm-6">
-                <textarea id="trigger-body" class="form-control" [class.invalid]="!getFormControl('triggerBody').valid" formControlName="triggerBody" rows="10" spellcheck="false"></textarea>
+                <ngx-monaco-editor id="trigger-body" [options]="editorOptions" [class.invalid]="!getFormControl('triggerBody').valid" formControlName="triggerBody"></ngx-monaco-editor>
             </div>
             <div *ngIf="getFormControl('triggerBody').hasError('body')" class="text-danger col-sm my-auto">
                 {{getFormControl('triggerBody').getError('body').message}}

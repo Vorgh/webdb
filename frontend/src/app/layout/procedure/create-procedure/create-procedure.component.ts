@@ -29,6 +29,17 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
     createProcedureForm: FormGroup;
     newParameterValidateMessage: string;
 
+    pageHeaderPath = [];
+    editorOptions = {
+        theme: 'mysqlTheme',
+        language: 'mysql',
+        autocomplete: true,
+        automaticLayout: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: 16,
+        formatOnPaste: true};
+
     constructor(private formBuilder: FormBuilder,
                 private databaseService: DatabaseService,
                 private pageHeaderService: PageHeaderService,
@@ -49,8 +60,7 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
                 this.schema = params['schema'];
                 this.procedureName = params['procedure'];
 
-                this.pageHeaderService.addFragment('create-procedure', this.pageHeaderService.getHeaderByID('dbhome'),
-                    this.router.url, 'New Procedure', 'fa-table');
+                this.pageHeaderPath = this.pageHeaderService.getPathFromID('create-procedure', this.schema);
             }
             else
             {

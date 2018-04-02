@@ -36,8 +36,8 @@ export class ConnectionService
                            .append('grant_type', 'password');
 
                        let headers = new HttpHeaders()
-                               .append('Content-type', 'application/x-www-form-urlencoded')
-                               .append('Authorization', 'Basic ' + this.basicAuth);
+                           .append('Content-type', 'application/x-www-form-urlencoded')
+                           .append('Authorization', 'Basic ' + this.basicAuth);
 
                        return this.http.post<OAuthTokenResponse>(`${this.urlPrefix}/oauth/token`, params, {headers: headers})
                                   .toPromise()
@@ -45,6 +45,7 @@ export class ConnectionService
                                   {
                                       this.cookieService.set("access_token", response.access_token, 1800, "/", environment.domain);
                                       this.cookieService.set("refresh_token", response.refresh_token, 43200, "/", environment.domain);
+                                      this.cookieService.set("auth_id", this.basicAuth, 43200, "/", environment.domain);
                                       return response;
                                   })
                                   .catch(error => Promise.reject(error));
@@ -54,6 +55,12 @@ export class ConnectionService
 
     refreshConnection(): Observable<OAuthTokenResponse>
     {
+        if (!this.cookieService.check("auth_id") || this.cookieService.get("auth_id") == null ||
+            !this.cookieService.check("refresh_token") || this.cookieService.get("refresh_token") == null)
+        {
+            return Observable.throw("Error during refresh token process.");
+        }
+
         let params = new HttpParams()
             .append('refresh_token', this.cookieService.get("refresh_token"))
             .append('grant_type', 'refresh_token');
@@ -61,22 +68,34 @@ export class ConnectionService
         let headers;
         headers = new HttpHeaders()
             .append('Content-type', 'application/x-www-form-urlencoded')
-            .append('Authorization', 'Basic ' + this.basicAuth);
+            .append('Authorization', 'Basic ' + this.cookieService.get('auth_id'));
+
 
         return this.http.post<OAuthTokenResponse>(`${this.urlPrefix}/oauth/token`, params, {headers: headers})
-                   .catch(error => Observable.throw(error));
+                   .catch(error =>
+                   {
+                       return Observable.throw(error)
+                   });
     }
 
     logout(): Promise<any>
     {
         return this.http.post(`${this.urlPrefix}/connection/logout`, [])
-            .toPromise()
-            .then(() =>
-            {
-                this.cookieService.delete('access_token');
-                this.cookieService.delete('refresh_token');
-                this.router.navigate(['/login']);
-            })
-            .catch(error => Promise.reject(error));
+                   .toPromise()
+                   .then(() =>
+                   {
+                       this.cookieService.delete('access_token');
+                       this.cookieService.delete('refresh_token');
+                       this.cookieService.delete('auth_id');
+                       this.router.navigate(['/login']);
+                   })
+                   .catch(error =>
+                   {
+                       this.cookieService.delete('access_token');
+                       this.cookieService.delete('refresh_token');
+                       this.cookieService.delete('auth_id');
+                       this.router.navigate(['/login']);
+                       return Promise.reject(error)
+                   });
     }
 }
