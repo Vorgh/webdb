@@ -4,11 +4,12 @@ import {Constraint, Index, Procedure, Row, Table, Trigger, View} from "../models
 import {Schema} from "../models/rest/rest-models";
 import {Column} from "../models/rest/rest-models";
 import {ModifyRequest} from "../models/request/request-models";
+import {environment} from "../../environments/environment";
 
 @Injectable()
 export class DatabaseService
 {
-    private urlPrefix: string = 'rest';
+    private urlPrefix: string = environment.apiPrefix;
 
     constructor(private http: HttpClient)
     {}
@@ -18,6 +19,24 @@ export class DatabaseService
         return this.http.get<Schema[]>(`${this.urlPrefix}/schema/all`)
             .toPromise()
             .catch(error => Promise.reject(error));
+    }
+
+    createSchema(schema: string): Promise<any>
+    {
+        let params = new HttpParams().append('schema', schema);
+
+        return this.http.post(`${this.urlPrefix}/schema/create`, null, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
+    }
+
+    dropSchema(schema: string): Promise<any>
+    {
+        let params = new HttpParams().append('schema', schema);
+
+        return this.http.delete(`${this.urlPrefix}/schema/drop`, {params: params})
+                   .toPromise()
+                   .catch(error => Promise.reject(error));
     }
 
     getAllTables(schema: string): Promise<Table[]>
@@ -31,16 +50,14 @@ export class DatabaseService
 
     createTable(schema: string, tableName: string, columnDefs: Column[], foreignKeys: Constraint[]): Promise<any>
     {
-        let params = new HttpParams()
-            .append('schema', schema);
-
         let body = {
+            schemaName: schema,
             tableName: tableName,
             columns: columnDefs,
             foreignKeys: foreignKeys
         };
 
-        return this.http.post(`${this.urlPrefix}/table/create`, body, {params: params})
+        return this.http.post(`${this.urlPrefix}/table/create`, body)
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }

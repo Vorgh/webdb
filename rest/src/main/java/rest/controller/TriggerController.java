@@ -46,11 +46,10 @@ public class TriggerController
     }
 
     @PostMapping("create")
-    public ResponseEntity<Void> createTrigger(@RequestParam String schema,
-                                              @RequestBody Trigger requestTrigger,
+    public ResponseEntity<Void> createTrigger(@RequestBody Trigger requestTrigger,
                                               @AuthenticationPrincipal UserConnection connection)
     {
-        triggerService.createTrigger(schema, requestTrigger, connection);
+        triggerService.createTrigger(requestTrigger, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

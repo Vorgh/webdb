@@ -23,6 +23,7 @@ export class AlterTableResolver implements Resolve<Table>
                 .then(table => table)
                 .catch(error =>
                 {
+                    this.router.navigate(["/home"]);
                     this.errorHandler.handleError(error);
                     return null;
                 })

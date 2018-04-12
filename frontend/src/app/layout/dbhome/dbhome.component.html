@@ -1,5 +1,5 @@
 <div [@routerTransition]>
-    <app-page-header [path]="pageHeaderPath"></app-page-header>
+    <app-page-header [path]="pageHeaderPath" [showDropButton]="true" [dropButtonSchema]="schema"></app-page-header>
     <ngb-tabset [activeId]="activeTabId" type="pills" (tabChange)="beforeTabChange($event)">
         <ngb-tab id="tab-tables" title="Tables">
             <ng-template ngbTabContent>

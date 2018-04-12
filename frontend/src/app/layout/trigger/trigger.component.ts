@@ -86,13 +86,15 @@ export class TriggerComponent implements OnInit
         modalRef.componentInstance.dbObject = trigger.name;
         modalRef.componentInstance.type = "modify";
 
-        modalRef.result.then(() =>
-        {
-            let request: ModifyRequest<Trigger> = new ModifyRequest<Trigger>(this.originalTrigger, trigger);
-            this.databaseService.modifyTrigger(request)
-                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+        modalRef.result
+                .then(() =>
+                {
+                    let request: ModifyRequest<Trigger> = new ModifyRequest<Trigger>(this.originalTrigger, trigger);
+                    this.databaseService.modifyTrigger(request)
+                        .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'trigger'}}))
+                        .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

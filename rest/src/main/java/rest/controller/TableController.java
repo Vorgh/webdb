@@ -99,11 +99,10 @@ public class TableController
     }
 
     @PostMapping("create")
-    public ResponseEntity<Void> createTable(@RequestParam String schema,
-                                            @RequestBody CreateTableRequest request,
+    public ResponseEntity<Void> createTable(@RequestBody CreateTableRequest request,
                                             @AuthenticationPrincipal UserConnection connection)
     {
-        tableService.createTable(schema, request, connection);
+        tableService.createTable(request, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

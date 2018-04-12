@@ -1,10 +1,7 @@
 package rest.model.database;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.sql.Date;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Table
 {
     private String schema;

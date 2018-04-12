@@ -4,6 +4,7 @@ import {ConnectionService} from "../../../services/connection.service";
 import {NotificationService} from "../../../services/notification.service";
 import {PushNotification} from "../../../models/notification";
 import {animate, keyframes, query, style, transition, trigger} from "@angular/animations";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
     selector: 'app-header',
@@ -33,9 +34,11 @@ export class HeaderComponent implements OnInit
     pushRightClass: string = 'push-right';
     notificationList: PushNotification[] = [];
     //isNotificationsShowing = false;
+    user: string;
 
     constructor(private connectionService: ConnectionService,
                 private notificationService: NotificationService,
+                private cookieService: CookieService,
                 private router: Router)
     {
         this.router.events.subscribe(val =>
@@ -56,6 +59,7 @@ export class HeaderComponent implements OnInit
                 this.notificationList.push(notification);
             }
         });
+        this.user = this.cookieService.check("user") ? this.cookieService.get("user") : "User";
     }
 
     isToggled(): boolean

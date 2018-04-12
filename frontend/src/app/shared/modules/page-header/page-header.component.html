@@ -1,10 +1,16 @@
 <div class="row">
-    <div class="col-xl-12">
+    <div class="col-xl-12 align-items-center">
         <ol class="breadcrumb">
-            <li *ngFor="let header of path; let i=index" class="breadcrumb-item" [class.active]="i == path.length-1">
-                <i class="fa {{header.icon}}"></i>
+            <li *ngFor="let header of path; let i=index" class="breadcrumb-item d-flex align-items-center" [class.active]="i == path.length-1">
+                <i class="fa {{header.icon}}"></i>&nbsp;
                 <a *ngIf="header.link != null" [routerLink]="header.link" [queryParams]="header.queryParams">{{header.title}}</a>
                 <span *ngIf="header.link == null">{{header.title}}</span>
+            </li>
+            <li *ngIf="showDropButton" class="d-flex ml-auto">
+                <button class="btn btn-danger" (click)="dropDatabase()">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                    <small>DROP SCHEMA</small>
+                </button>
             </li>
         </ol>
     </div>

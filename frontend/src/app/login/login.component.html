@@ -3,10 +3,11 @@
         <div class="col-md-4">
             <img src="assets/images/logo.png" width="150px" class="user-avatar"/>
             <h1>WebDB Login</h1>
+            <div class="server-error">{{loginErrorMessage}}</div>
             <form role="form" #loginForm>
                 <div class="form-content">
                     <div class="form-group">
-                        <span class="url-example"><small>(ex.: jdbc:mysql://localhost:3306/webdb)</small></span>
+                        <span class="url-example"><small>(ex.: jdbc:mysql://localhost:3306)</small></span>
                         <input [(ngModel)]="connAuth.url" #urlInput="ngModel" type="url"
                                class="form-control input-underline input-lg" id="urlInput" name="urlInput"
                                placeholder="JDBC Url" required autocomplete="off"

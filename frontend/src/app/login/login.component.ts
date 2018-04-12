@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {routerTransition} from '../router.animations';
-import {ConnectionAuthInfo, OAuthTokenResponse} from "../models/connection";
+import {ConnectionAuthInfo} from "../models/connection";
 import {ConnectionService} from "../services/connection.service";
 import {CookieService} from "ngx-cookie-service";
 import {GlobalErrorHandler} from "../services/error-handler.service";
@@ -15,6 +15,7 @@ import {GlobalErrorHandler} from "../services/error-handler.service";
 export class LoginComponent implements OnInit
 {
     connAuth: ConnectionAuthInfo = new ConnectionAuthInfo();
+    loginErrorMessage: string;
 
     constructor(private connectionService: ConnectionService,
                 private router: Router,
@@ -37,10 +38,11 @@ export class LoginComponent implements OnInit
             .then(() =>
             {
                 this.router.navigate(['/home']);
+                this.cookieService.set("user", this.connAuth.username)
             })
             .catch(error =>
             {
-                this.errorHandler.handleError(error);
+                this.loginErrorMessage = this.errorHandler.getErrorMessage(error)
                 //this.cookieService.delete("access_token");
             });
     }

@@ -67,13 +67,15 @@ export class AlterViewComponent implements OnInit
         modalRef.componentInstance.dbObject = newView.name;
         modalRef.componentInstance.type = "modify";
 
-        modalRef.result.then(() =>
-        {
-            let request: ModifyRequest<View> = new ModifyRequest<View>(this.originalView, newView);
-            this.databaseService.alterView(request)
-                .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.originalView.schema, tab: 'view'}}))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+        modalRef.result
+                .then(() =>
+                {
+                    let request: ModifyRequest<View> = new ModifyRequest<View>(this.originalView, newView);
+                    this.databaseService.alterView(request)
+                        .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.originalView.schema, tab: 'view'}}))
+                        .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

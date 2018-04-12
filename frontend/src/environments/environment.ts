@@ -5,5 +5,6 @@
 
 export const environment = {
     production: false,
-    domain: "localhost"
+    domain: "localhost",
+    apiPrefix: "rest"
 };

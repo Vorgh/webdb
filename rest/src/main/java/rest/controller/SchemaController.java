@@ -1,7 +1,9 @@
 package rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +17,13 @@ import java.util.List;
 @RequestMapping("schema")
 public class SchemaController
 {
-    @Autowired
     private SchemaService schemaService;
+
+    @Autowired
+    public SchemaController(SchemaService schemaService)
+    {
+        this.schemaService = schemaService;
+    }
 
     @GetMapping("all")
     public ResponseEntity<List<Schema>> getAllSchemaMetadata(@AuthenticationPrincipal UserConnection connection)
@@ -24,5 +31,23 @@ public class SchemaController
         List<Schema> list = schemaService.getAllSchemasMetadata(connection);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @PostMapping("create")
+    public ResponseEntity<Void> createSchema(@RequestParam String schema,
+                                                @AuthenticationPrincipal UserConnection connection)
+    {
+        schemaService.createSchema(schema, connection);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("drop")
+    public ResponseEntity<Void> dropSchema(@RequestParam String schema,
+                                           @AuthenticationPrincipal UserConnection connection)
+    {
+        schemaService.dropSchema(schema, connection);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

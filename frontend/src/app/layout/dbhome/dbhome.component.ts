@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {routerTransition} from '../../router.animations';
 import {Procedure, Table, Trigger} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
@@ -9,6 +9,8 @@ import {PageHeaderService} from "../../shared/modules/page-header/page-header.se
 import {GlobalErrorHandler} from "../../services/error-handler.service";
 import {DbDataWrapper} from "../../models/rest/db-data-wrapper";
 import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
+import {DropDbComponent} from "../components/db-dialog/drop-db/drop-db.component";
+import {DbModalService} from "../../services/db-modal.service";
 
 @Component({
     selector: 'app-dbhome',
@@ -48,6 +50,8 @@ export class DBHomeComponent implements OnInit
             this.tables = dbData.tables;
             this.triggers = dbData.triggers;
             this.procedures = dbData.procedures;
+
+            this.pageHeaderPath = this.pageHeaderService.getPathFromID('dbhome', this.schema);
         });
 
         this.route.queryParams.subscribe(params =>
@@ -63,8 +67,6 @@ export class DBHomeComponent implements OnInit
                     case 'function': this.activeTabId = 'tab-functions'; break;
                 }
             }
-
-            this.pageHeaderPath = this.pageHeaderService.getPathFromID('dbhome', this.schema);
         });
     }
 
@@ -74,17 +76,19 @@ export class DBHomeComponent implements OnInit
         modalRef.componentInstance.dbObject = table.name;
         modalRef.componentInstance.type = "delete";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.dropTable(table.schema, table.name)
+        modalRef.result
                 .then(() =>
                 {
-                    return this.databaseService.getAllTables(this.schema)
-                               .then(tables => this.tables = tables)
-                               .catch(error => this.errorHandler.handleError(error));
+                    this.databaseService.dropTable(table.schema, table.name)
+                        .then(() =>
+                        {
+                            return this.databaseService.getAllTables(this.schema)
+                                       .then(tables => this.tables = tables)
+                                       .catch(error => this.errorHandler.handleError(error));
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     dropView(view: Table)
@@ -93,17 +97,19 @@ export class DBHomeComponent implements OnInit
         modalRef.componentInstance.dbObject = view.name;
         modalRef.componentInstance.type = "delete";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.dropView(view.schema, view.name)
+        modalRef.result
                 .then(() =>
                 {
-                    return this.databaseService.getAllTables(this.schema)
-                               .then(tables => this.tables = tables)
-                               .catch(error => this.errorHandler.handleError(error));
+                    this.databaseService.dropView(view.schema, view.name)
+                        .then(() =>
+                        {
+                            return this.databaseService.getAllTables(this.schema)
+                                       .then(tables => this.tables = tables)
+                                       .catch(error => this.errorHandler.handleError(error));
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     dropTrigger(trigger: Trigger)
@@ -112,17 +118,19 @@ export class DBHomeComponent implements OnInit
         modalRef.componentInstance.dbObject = trigger.name;
         modalRef.componentInstance.type = "delete";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.dropTrigger(trigger.schema, trigger.name)
+        modalRef.result
                 .then(() =>
                 {
-                    return this.databaseService.getAllTriggers(this.schema)
-                               .then(triggers => this.triggers = triggers)
-                               .catch(error => this.errorHandler.handleError(error))
+                    this.databaseService.dropTrigger(trigger.schema, trigger.name)
+                        .then(() =>
+                        {
+                            return this.databaseService.getAllTriggers(this.schema)
+                                       .then(triggers => this.triggers = triggers)
+                                       .catch(error => this.errorHandler.handleError(error))
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     dropProcedure(procedure: Procedure)
@@ -131,18 +139,20 @@ export class DBHomeComponent implements OnInit
         modalRef.componentInstance.dbObject = procedure.name;
         modalRef.componentInstance.type = "delete";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.dropProcedure(procedure.schema, procedure.name)
+        modalRef.result
                 .then(() =>
                 {
-                    return this.databaseService.getAllProcedures(this.schema)
-                               .then(procedures => this.procedures = procedures)
-                               .catch(error => this.errorHandler.handleError(error))
+                    this.databaseService.dropProcedure(procedure.schema, procedure.name)
+                        .then(() =>
+                        {
+                            return this.databaseService.getAllProcedures(this.schema)
+                                       .then(procedures => this.procedures = procedures)
+                                       .catch(error => this.errorHandler.handleError(error))
 
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     showCodeModal(template)

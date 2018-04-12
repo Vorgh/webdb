@@ -2,22 +2,28 @@ package rest.sql.util;
 
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
+
 @Component
 public class SQLObjectBeginEndWrapper
 {
-    public String wrap(String input)
+    public String wrap(@NotNull String input)
     {
-        String body = input;
-        if (body.toUpperCase().startsWith("BEGIN") && body.toUpperCase().endsWith("END"))
+        if (!(input.toUpperCase().startsWith("BEGIN") && input.toUpperCase().endsWith("END")))
         {
-            body = body + ";";
+            return "BEGIN\n" + input.trim() + "\nEND";
         }
 
-        if (!(body.toUpperCase().startsWith("BEGIN") && body.toUpperCase().endsWith("END;")))
+        return input;
+    }
+
+    public String unwrap(@NotNull String input)
+    {
+        if (input.toUpperCase().startsWith("BEGIN") && input.toUpperCase().endsWith("END"))
         {
-            body = "BEGIN\n" + body + "\nEND;";
+            return input.trim().replaceAll("BEGIN\\s+|\\s+END", "");
         }
 
-        return body;
+        return input;
     }
 }

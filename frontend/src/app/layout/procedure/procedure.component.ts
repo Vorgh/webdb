@@ -137,26 +137,28 @@ export class ProcedureComponent implements OnInit, AfterViewInit
         modalRef.componentInstance.dbObject = procedure.name;
         modalRef.componentInstance.type = "modify";
 
-        modalRef.result.then(() =>
-        {
-            let request: ModifyRequest<Procedure> = new ModifyRequest<Procedure>(this.originalProcedure, procedure);
-            this.databaseService.modifyProcedure(request)
+        modalRef.result
                 .then(() =>
                 {
-                    let redirectTab: string;
-                    if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
-                    {
-                        redirectTab = 'procedures';
-                    }
-                    else
-                    {
-                        redirectTab = 'functions';
-                    }
+                    let request: ModifyRequest<Procedure> = new ModifyRequest<Procedure>(this.originalProcedure, procedure);
+                    this.databaseService.modifyProcedure(request)
+                        .then(() =>
+                        {
+                            let redirectTab: string;
+                            if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
+                            {
+                                redirectTab = 'procedures';
+                            }
+                            else
+                            {
+                                redirectTab = 'functions';
+                            }
 
-                    this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                            this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

@@ -154,6 +154,7 @@ export class HttpRequestInterceptor implements HttpInterceptor
         this.cookieService.delete("access_token");
         this.cookieService.delete("refresh_token");
         this.cookieService.delete("auth_id");
+        this.cookieService.delete("user");
         this.router.navigate(['/login']);
 
         return Observable.throw(new GeneralError("Refresh Token Error", "Couldn't refresh the access token."));

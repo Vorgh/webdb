@@ -1,0 +1,13 @@
+.home-page {
+    display: flex;
+    flex-direction: column;
+
+    div {
+        text-align: center;
+    }
+
+    .title {
+        font-size: 3em;
+        padding-bottom: 1em;
+    }
+}

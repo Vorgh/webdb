@@ -22,9 +22,9 @@
                 </div>
             </div>
         </div>
-        <div class="nav-item dropdown" ngbDropdown>
+        <div class="nav-item dropdown" ngbDropdown placement="bottom-right">
             <a href="javascript:void(0)" class="nav-link" ngbDropdownToggle>
-                <i class="fa fa-user"></i> John Smith <b class="caret"></b>
+                <i class="fa fa-user"></i> {{user}} <b class="caret"></b>
             </a>
             <div class="dropdown-menu-right" ngbDropdownMenu>
                 <a class="dropdown-item" (click)="onLoggedout()">

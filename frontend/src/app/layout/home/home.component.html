@@ -1,3 +1,5 @@
-<div [@routerTransition]>
-    Select an object from the sidebar.
+<div [@routerTransition] class="home-page">
+    <div class="title">Welcome, {{user}}</div>
+    <div class="large-text">Start your work by selecting a schema from the sidebar.</div>
+    <div>Alternatively, You can <a href="#" (click)="newDatabase($event)">create a new one</a></div>
 </div>

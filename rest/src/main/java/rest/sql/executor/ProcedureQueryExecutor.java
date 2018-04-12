@@ -1,16 +1,13 @@
 package rest.sql.executor;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import rest.model.database.Procedure;
 import rest.model.request.Change;
 import static rest.sql.util.SqlStringUtils.bquote;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +15,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ProcedureQueryExecutor implements BaseExecutor<Procedure>
 {
-    private static final Logger logger = LoggerFactory.getLogger(TriggerQueryExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcedureQueryExecutor.class);
 
     private JdbcTemplate jdbcTemplate;
     private boolean isFunction;
@@ -94,21 +91,25 @@ public class ProcedureQueryExecutor implements BaseExecutor<Procedure>
         sb.append(bquote(procedure.getSchema())).append(".").append(bquote(procedure.getName()));
 
         sb.append("(");
-        List<String> paramTriplets = procedure.getParamList().stream()
-                .map(param ->
-                {
-                    List<String> paramParts = new ArrayList<>();
-                    if (procedure.getType().equals("PROCEDURE"))
+        if (procedure.getParamList() != null)
+        {
+            List<String> paramTriplets = procedure.getParamList().stream()
+                    .map(param ->
                     {
-                        paramParts.add(param.getMode());
-                    }
-                    paramParts.add(param.getName());
-                    paramParts.add(param.getType());
+                        List<String> paramParts = new ArrayList<>();
+                        if (procedure.getType().equals("PROCEDURE"))
+                        {
+                            paramParts.add(param.getMode());
+                        }
+                        paramParts.add(param.getName());
+                        paramParts.add(param.getType());
 
-                    return String.join(" ", paramParts);
-                })
-                .collect(Collectors.toList());
-        sb.append(String.join(", ", paramTriplets)).append(")\n");
+                        return String.join(" ", paramParts);
+                    })
+                    .collect(Collectors.toList());
+            sb.append(String.join(", ", paramTriplets));
+        }
+        sb.append(")\n");
 
         if (isFunction)
         {
@@ -116,10 +117,6 @@ public class ProcedureQueryExecutor implements BaseExecutor<Procedure>
         }
 
         sb.append(procedure.getBody());
-        if (!procedure.getBody().endsWith(";"))
-        {
-            sb.append(";");
-        }
 
         return sb.toString();
     }

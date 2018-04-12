@@ -75,12 +75,14 @@ export class CreateViewComponent implements OnInit
         modalRef.componentInstance.dbObject = request.name;
         modalRef.componentInstance.type = "create";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.createView(request)
-                .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schema, tab: 'view'}}))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+        modalRef.result
+                .then(() =>
+                {
+                    this.databaseService.createView(request)
+                        .then(() => this.router.navigate(['/db'], { queryParams: {schema: this.schema, tab: 'view'}}))
+                        .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

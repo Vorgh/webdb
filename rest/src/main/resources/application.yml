@@ -8,4 +8,4 @@ security:
 
 logging:
   level:
-    rest: DEBUG
+    rest: INFO

@@ -287,12 +287,12 @@ public class TableDAO extends AbstractDatabaseDAO
         }
     }
 
-    public void createTable(String schemaName, CreateTableRequest request)
+    public void createTable(CreateTableRequest request)
     {
         StringBuilder query = new StringBuilder();
         List<String> primaryKeys = new ArrayList<>();
 
-        query.append("CREATE TABLE IF NOT EXISTS ").append(quote(schemaName)).append(".").append(quote(request.tableName)).append("(");
+        query.append("CREATE TABLE IF NOT EXISTS ").append(quote(request.schemaName)).append(".").append(quote(request.tableName)).append("(");
         for (Column col : request.columns)
         {
             if (col.isPrimaryKey())
@@ -340,52 +340,55 @@ public class TableDAO extends AbstractDatabaseDAO
         if (request.isNullOrEmpty()) return;
 
         if (request.nameChange != null && !request.nameChange.isEmpty())
-            query.append("RENAME TO ").append(quote(request.nameChange)).append(", \n");
+            query.append("RENAME TO ").append(quote(schemaName)).append(".").append(quote(request.nameChange)).append(", \n");
 
-        for (Change<Column> change : request.columnChange)
+        if (request.columnChange != null)
         {
-            if (change.to == null) //Drop
+            for (Change<Column> change : request.columnChange)
             {
-                if (change.from.isPrimaryKey())
+                if (change.to == null) //Drop
+                {
+                    if (change.from.isPrimaryKey())
+                    {
+                        primaryKeys.remove(change.from.getName());
+                        primaryKeysChanged = true;
+                    }
+                    query.append("DROP COLUMN ").append(quote(change.from.getName())).append(", \n");
+                    continue;
+                }
+
+                if (change.from == null) //Add
+                {
+                    if (change.to.isPrimaryKey())
+                    {
+                        primaryKeys.add(change.to.getName());
+                        primaryKeysChanged = true;
+                    }
+                    query.append("ADD COLUMN ").append(createColumnDefinition(change.to)).append(", \n");
+                    continue;
+                }
+
+                if (change.from.isPrimaryKey() && !change.to.isPrimaryKey())
                 {
                     primaryKeys.remove(change.from.getName());
                     primaryKeysChanged = true;
                 }
-                query.append("DROP COLUMN ").append(quote(change.from.getName())).append(", \n");
-                continue;
-            }
-
-            if (change.from == null) //Add
-            {
-                if (change.to.isPrimaryKey())
+                if (!change.from.isPrimaryKey() && change.to.isPrimaryKey())
                 {
                     primaryKeys.add(change.to.getName());
                     primaryKeysChanged = true;
                 }
-                query.append("ADD COLUMN ").append(createColumnDefinition(change.to)).append(", \n");
-                continue;
-            }
 
-            if (change.from.isPrimaryKey() && !change.to.isPrimaryKey())
-            {
-                primaryKeys.remove(change.from.getName());
-                primaryKeysChanged = true;
-            }
-            if (!change.from.isPrimaryKey() && change.to.isPrimaryKey())
-            {
-                primaryKeys.add(change.to.getName());
-                primaryKeysChanged = true;
-            }
+                query.append("CHANGE COLUMN ").append(quote(change.from.getName())).append(" ");
+                query.append(createColumnDefinition(change.to)).append(", ");
 
-            query.append("CHANGE COLUMN ").append(quote(change.from.getName())).append(" ");
-            query.append(createColumnDefinition(change.to)).append(", ");
-
-            if (change.from.isUnique() && !change.to.isUnique() && !change.from.isPrimaryKey() && !change.to.isPrimaryKey())
-            {
-                indexList
-                        .stream()
-                        .filter(index -> index.unique && index.column.equals(change.from.getName()))
-                        .forEach(index -> query.append("DROP INDEX ").append(quote(index.indexName)).append(", "));
+                if (change.from.isUnique() && !change.to.isUnique() && !change.from.isPrimaryKey() && !change.to.isPrimaryKey())
+                {
+                    indexList
+                            .stream()
+                            .filter(index -> index.unique && index.column.equals(change.from.getName()))
+                            .forEach(index -> query.append("DROP INDEX ").append(quote(index.indexName)).append(", "));
+                }
             }
         }
 
@@ -399,71 +402,77 @@ public class TableDAO extends AbstractDatabaseDAO
                     .append("), ");
         }
 
-        for (Change<Constraint> change : request.constraintChange)
+        if (request.constraintChange != null)
         {
-            if (change.to == null) //Drop
+            for (Change<Constraint> change : request.constraintChange)
             {
-                if (thisTable.getEngine().equals("InnoDB"))
+                if (change.to == null) //Drop
                 {
-                    List<Index> tmpList = indexList.stream()
-                            .filter(index -> index.indexName.contains(change.from.constraintName) && index.column.equals(change.from.column))
-                            .collect(Collectors.toList());
-                    if (tmpList.size() > 0)
+                    if (thisTable.getEngine().equals("InnoDB"))
                     {
-                        query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
-                        postAlterQuery.append("DROP INDEX ").append(quote(tmpList.get(0).indexName)).append(", \n");
-                        continue;
-                    }
+                        List<Index> tmpList = indexList.stream()
+                                .filter(index -> index.indexName.contains(change.from.constraintName) && index.column.equals(change.from.column))
+                                .collect(Collectors.toList());
+                        if (tmpList.size() > 0)
+                        {
+                            query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
+                            postAlterQuery.append("DROP INDEX ").append(quote(tmpList.get(0).indexName)).append(", \n");
+                            continue;
+                        }
 
-                    tmpList = indexList.stream()
-                            .filter(index -> index.column.equals(change.from.column))
-                            .collect(Collectors.toList());
-                    if (tmpList.size() > 0)
-                    {
-                        query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
-                        postAlterQuery.append("DROP INDEX ").append(quote(indexList.get(0).indexName)).append(", \n");
-                        continue;
-                    }
-                }
-            }
-
-            if (change.from == null) //Add
-            {
-                if (thisTable.getEngine().equals("InnoDB"))
-                {
-                    List<Index> tmpList = indexList.stream()
-                            .filter(index -> index.indexName.contains(change.to.constraintName))
-                            .collect(Collectors.toList());
-
-                    if (tmpList.isEmpty())
-                    {
-                        query.append("ADD INDEX ").append(quote(change.to.constraintName + "_idx")).append(" (").append(quote(change.to.column)).append("), \n");
+                        tmpList = indexList.stream()
+                                .filter(index -> index.column.equals(change.from.column))
+                                .collect(Collectors.toList());
+                        if (tmpList.size() > 0)
+                        {
+                            query.insert(0, "DROP FOREIGN KEY " + quote(change.from.constraintName) + ", \n");
+                            postAlterQuery.append("DROP INDEX ").append(quote(indexList.get(0).indexName)).append(", \n");
+                            continue;
+                        }
                     }
                 }
 
-                query.append("ADD CONSTRAINT ").append(quote(change.to.constraintName)).append(" ");
-                query.append("FOREIGN KEY (").append(quote(change.to.column)).append(") ");
-                query.append("REFERENCES ").append(quote(change.to.refSchema)).append(".").append(quote(change.to.refTable)).append("(").append(quote(change.to.refColumn)).append(") ");
-                query.append("ON UPDATE ").append(change.to.updateRule).append(" ");
-                query.append("ON DELETE ").append(change.to.deleteRule).append(", \n");
+                if (change.from == null) //Add
+                {
+                    if (thisTable.getEngine().equals("InnoDB"))
+                    {
+                        List<Index> tmpList = indexList.stream()
+                                .filter(index -> index.indexName.contains(change.to.constraintName))
+                                .collect(Collectors.toList());
+
+                        if (tmpList.isEmpty())
+                        {
+                            query.append("ADD INDEX ").append(quote(change.to.constraintName + "_idx")).append(" (").append(quote(change.to.column)).append("), \n");
+                        }
+                    }
+
+                    query.append("ADD CONSTRAINT ").append(quote(change.to.constraintName)).append(" ");
+                    query.append("FOREIGN KEY (").append(quote(change.to.column)).append(") ");
+                    query.append("REFERENCES ").append(quote(change.to.refSchema)).append(".").append(quote(change.to.refTable)).append("(").append(quote(change.to.refColumn)).append(") ");
+                    query.append("ON UPDATE ").append(change.to.updateRule).append(" ");
+                    query.append("ON DELETE ").append(change.to.deleteRule).append(", \n");
+                }
             }
         }
 
-        for (Change<Index> change : request.indexChange)
+        if (request.indexChange != null)
         {
-            if (change.to == null) //Drop
+            for (Change<Index> change : request.indexChange)
             {
-                String drop = "DROP INDEX " + quote(change.from.indexName) + ", \n";
-                if (postAlterQuery.indexOf(drop) == -1)
-                    query.append(drop);
-                continue;
-            }
+                if (change.to == null) //Drop
+                {
+                    String drop = "DROP INDEX " + quote(change.from.indexName) + ", \n";
+                    if (postAlterQuery.indexOf(drop) == -1)
+                        query.append(drop);
+                    continue;
+                }
 
-            if (change.from == null) //Add
-            {
-                query.append("ADD ");
-                if (change.from.unique) query.append("UNIQUE ");
-                query.append("INDEX ").append(quote(change.from.indexName)).append("(").append(quote(change.to.column)).append("), \n");
+                if (change.from == null) //Add
+                {
+                    query.append("ADD ");
+                    if (change.from.unique) query.append("UNIQUE ");
+                    query.append("INDEX ").append(quote(change.from.indexName)).append("(").append(quote(change.to.column)).append("), \n");
+                }
             }
         }
 

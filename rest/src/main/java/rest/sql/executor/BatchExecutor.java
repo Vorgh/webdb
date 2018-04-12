@@ -32,6 +32,10 @@ public class BatchExecutor
             {
                 lastResults = jdbcTemplate.queryForList(s);
             }
+            else
+            {
+                jdbcTemplate.execute(s);
+            }
             logger.info("Statement executed: {}", s);
         }
         logger.info("Batch execution finished!");

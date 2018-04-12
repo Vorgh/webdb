@@ -23,6 +23,7 @@ export class ProcedureResolver implements Resolve<Procedure>
                        .then(procedure => procedure)
                        .catch(error =>
                        {
+                           this.router.navigate(["/home"]);
                            this.errorHandler.handleError(error);
                            return null;
                        })

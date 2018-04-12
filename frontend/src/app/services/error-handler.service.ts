@@ -21,7 +21,7 @@ export class GlobalErrorHandler implements ErrorHandler
         }
         else
         {
-            this.notificationService.error("An unknown error occurred", "Unknown Error");
+            this.notificationService.error("An unknown error has occurred", "Unknown Error");
         }
     }
 
@@ -29,6 +29,19 @@ export class GlobalErrorHandler implements ErrorHandler
     {
         this.notificationService.warning("The requested page was not found.");
         this.router.navigate(['/home']);
+    }
+
+    getErrorMessage(httpErrorObj): string
+    {
+        if (httpErrorObj != null && httpErrorObj.error != null)
+        {
+            let json = JSON.parse(httpErrorObj.error);
+            return json.message;
+        }
+        else
+        {
+            return "An unknown error has occurred"
+        }
     }
 
 }

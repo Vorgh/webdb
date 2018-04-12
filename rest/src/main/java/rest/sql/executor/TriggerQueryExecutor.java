@@ -68,10 +68,6 @@ public class TriggerQueryExecutor implements BaseExecutor<Trigger>
         query.append("ON ").append(bquote(requestTrigger.eventSchema)).append(".").append(bquote(requestTrigger.eventTable)).append(" \n");
         query.append("FOR EACH ROW \n");
         query.append(requestTrigger.triggerBody);
-        if (!requestTrigger.triggerBody.endsWith(";"))
-        {
-            query.append(";");
-        }
         //query.replace(query.lastIndexOf(delimiter), query.lastIndexOf(delimiter)+1, tempDelimiter);
         //query.append("DELIMITER ").append(delimiter).append("\n");
 

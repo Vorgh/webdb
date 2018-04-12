@@ -168,13 +168,15 @@ export class CreateTableComponent implements OnInit
         modalRef.componentInstance.dbObject = this.createTableForm.get('tableName').value;
         modalRef.componentInstance.type = "create";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
-                this.formColumns.value, this.formConstraints.value)
-                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+        modalRef.result
+            .then(() =>
+            {
+                this.databaseService.createTable(this.schema, this.createTableForm.get('tableName').value,
+                    this.formColumns.value, this.formConstraints.value)
+                    .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
+                    .catch(error => this.errorHandler.handleError(error));
+            })
+            .catch(() => null);
     }
 
     concatSchemaTableColumn(schema: string, table: string, column: string): string

@@ -186,39 +186,41 @@ export class TableComponent implements OnInit
         modalRef.componentInstance.dbObject = this.table;
         modalRef.componentInstance.type = "modify";
 
-        modalRef.result.then(() =>
-        {
-            let changeObj: { changes: any } = {changes: []};
-            this.newRowGroup.reset();
-
-            const rawFormValue = this.rowForm.getRawValue();
-            for (let key of Object.keys(rawFormValue))
-            {
-                let row = rawFormValue[key];
-
-                if (row.added)
+        modalRef.result
+                .then(() =>
                 {
-                    changeObj.changes.push({from: null, to: this.buildChangeObject(row)});
-                    continue;
-                }
+                    let changeObj: { changes: any } = {changes: []};
+                    this.newRowGroup.reset();
 
-                if (row.deleted)
-                {
-                    changeObj.changes.push({from: this.buildChangeObject(row), to: null});
-                    continue;
-                }
+                    const rawFormValue = this.rowForm.getRawValue();
+                    for (let key of Object.keys(rawFormValue))
+                    {
+                        let row = rawFormValue[key];
 
-                if (this.rowForm.get(key).dirty)
-                {
-                    let change = this.buildChangeObject(row);
-                    changeObj.changes.push({from: change, to: change});
-                }
-            }
+                        if (row.added)
+                        {
+                            changeObj.changes.push({from: null, to: this.buildChangeObject(row)});
+                            continue;
+                        }
 
-            this.databaseService.modifyRows(this.schema, this.table, changeObj)
-                .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                        if (row.deleted)
+                        {
+                            changeObj.changes.push({from: this.buildChangeObject(row), to: null});
+                            continue;
+                        }
+
+                        if (this.rowForm.get(key).dirty)
+                        {
+                            let change = this.buildChangeObject(row);
+                            changeObj.changes.push({from: change, to: change});
+                        }
+                    }
+
+                    this.databaseService.modifyRows(this.schema, this.table, changeObj)
+                        .then(() => this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: 'table'}}))
+                        .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(() => null);
     }
 
     private findMaxAutoIncrement(from: FormGroup, propertyKey: any): number

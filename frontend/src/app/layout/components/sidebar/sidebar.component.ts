@@ -4,6 +4,9 @@ import {DatabaseService} from "../../../services/database.service";
 import {Schema} from "../../../models/rest/rest-models";
 import {ConnectionService} from "../../../services/connection.service";
 import {GlobalErrorHandler} from "../../../services/error-handler.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NewDbComponent} from "../db-dialog/new-db/new-db.component";
+import {DbModalService} from "../../../services/db-modal.service";
 
 @Component({
     selector: 'app-sidebar',
@@ -13,14 +16,15 @@ import {GlobalErrorHandler} from "../../../services/error-handler.service";
 export class SidebarComponent implements OnInit
 {
     isActive: boolean = false;
-    showMenu: string = '';
     pushRightClass: string = 'push-right';
     schemas: Schema[];
 
     constructor(private databaseService: DatabaseService,
                 private connectionService: ConnectionService,
                 private router: Router,
-                private errorHandler: GlobalErrorHandler)
+                private errorHandler: GlobalErrorHandler,
+                private modalService: NgbModal,
+                private dbModalService: DbModalService)
     {
         this.router.events.subscribe(val =>
         {
@@ -37,22 +41,14 @@ export class SidebarComponent implements OnInit
 
     ngOnInit()
     {
-        this.databaseService.getAllSchemas()
-            .then(schemas => this.schemas = schemas)
-            .catch(error => this.errorHandler.handleError(error));
+        this.refreshSchemaList();
+
+        this.dbModalService.getRefreshObservable().subscribe(() =>
+        {
+            this.refreshSchemaList();
+        })
     }
 
-    addExpandClass(element: any)
-    {
-        if (element === this.showMenu)
-        {
-            this.showMenu = '0';
-        }
-        else
-        {
-            this.showMenu = element;
-        }
-    }
 
     isToggled(): boolean
     {
@@ -69,5 +65,29 @@ export class SidebarComponent implements OnInit
     onLoggedout()
     {
         this.connectionService.logout();
+    }
+
+    newDatabase()
+    {
+        const modalRef = this.modalService.open(NewDbComponent);
+
+        modalRef.result
+            .then((newDbName) =>
+            {
+                this.databaseService.createSchema(newDbName)
+                    .then(() =>
+                    {
+                        this.refreshSchemaList();
+                    })
+                    .catch(error => this.errorHandler.handleError(error));
+            })
+            .catch(() => null);
+    }
+
+    private refreshSchemaList()
+    {
+        this.databaseService.getAllSchemas()
+            .then(schemas => this.schemas = schemas)
+            .catch(error => this.errorHandler.handleError(error));
     }
 }

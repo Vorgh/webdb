@@ -37,6 +37,7 @@ export class DBHomeResolver implements Resolve<DbDataWrapper>
                 .catch(error =>
                 {
                     this.errorHandler.handleError(error);
+                    this.router.navigate(["/home"]);
                     return null;
                 });
         }

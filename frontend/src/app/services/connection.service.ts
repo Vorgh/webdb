@@ -87,6 +87,7 @@ export class ConnectionService
                        this.cookieService.delete('access_token');
                        this.cookieService.delete('refresh_token');
                        this.cookieService.delete('auth_id');
+                       this.cookieService.delete('user');
                        this.router.navigate(['/login']);
                    })
                    .catch(error =>
@@ -94,6 +95,7 @@ export class ConnectionService
                        this.cookieService.delete('access_token');
                        this.cookieService.delete('refresh_token');
                        this.cookieService.delete('auth_id');
+                       this.cookieService.delete('user');
                        this.router.navigate(['/login']);
                        return Promise.reject(error)
                    });

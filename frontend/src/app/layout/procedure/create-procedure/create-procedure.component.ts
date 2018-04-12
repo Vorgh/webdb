@@ -124,25 +124,27 @@ export class CreateProcedureComponent implements OnInit, AfterViewInit
         modalRef.componentInstance.dbObject = procedure.name;
         modalRef.componentInstance.type = "create";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.createProcedure(procedure)
+        modalRef.result
                 .then(() =>
                 {
-                    let redirectTab: string;
-                    if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
-                    {
-                        redirectTab = 'procedures';
-                    }
-                    else
-                    {
-                        redirectTab = 'functions';
-                    }
+                    this.databaseService.createProcedure(procedure)
+                        .then(() =>
+                        {
+                            let redirectTab: string;
+                            if (isNullOrUndefined(procedure.returnType) || procedure.returnType == '')
+                            {
+                                redirectTab = 'procedures';
+                            }
+                            else
+                            {
+                                redirectTab = 'functions';
+                            }
 
-                    this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                            this.router.navigate(['/db'], {queryParams: {schema: this.schema, tab: redirectTab}})
+                        })
+                        .catch(error => this.errorHandler.handleError(error));
                 })
-                .catch(error => this.errorHandler.handleError(error));
-        });
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

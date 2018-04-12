@@ -200,8 +200,8 @@ export const language = {
             [/`/, { token: 'identifier.quote', next: '@quotedIdentifier' }]
         ],
         quotedIdentifier: [
-            [/[^`]+/, 'identifier'],
-            [/``/, 'identifier'],
+            [/[^`]+/, 'identifier.quote'],
+            [/``/, 'identifie.quote'],
             [/`/, { token: 'identifier.quote', next: '@pop' }]
         ],
         scopes: []

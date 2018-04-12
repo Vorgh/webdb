@@ -7,6 +7,7 @@ import java.util.List;
 
 public class CreateTableRequest
 {
+    public String schemaName;
     public String tableName;
     public List<Column> columns;
     public List<Constraint> foreignKeys;

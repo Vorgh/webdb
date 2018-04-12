@@ -36,7 +36,7 @@ public class UrlWithNameAuthenticationProvider implements AuthenticationProvider
         UserConnection connection = connectionDAO.getConnectedUserByDomainAndName(url, name);
         if (connection == null)
         {
-            throw new BadCredentialsException("User not found,");
+            throw new BadCredentialsException("User not found.");
         }
 
         if (!password.equals(connection.getPassword()) && !url.equals(connection.getUrl()))

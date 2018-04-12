@@ -89,12 +89,14 @@ export class CreateTriggerComponent implements OnInit
         modalRef.componentInstance.dbObject = trigger.name;
         modalRef.componentInstance.type = "create";
 
-        modalRef.result.then(() =>
-        {
-            this.databaseService.createTrigger(this.schema, trigger)
-                .then(() => this.router.navigate(['/db', {queryParams: {schema: this.schema, tab: 'trigger'}}]))
-                .catch(error => this.errorHandler.handleError(error));
-        });
+        modalRef.result
+                .then(() =>
+                {
+                    this.databaseService.createTrigger(this.schema, trigger)
+                        .then(() => this.router.navigate(['/db', {queryParams: {schema: this.schema, tab: 'trigger'}}]))
+                        .catch(error => this.errorHandler.handleError(error));
+                })
+                .catch(() => null);
     }
 
     getFormControl(name: string): AbstractControl

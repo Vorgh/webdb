@@ -1,0 +1,17 @@
+div.modal-container {
+    display: flex;
+    flex-direction: column;
+}
+
+div.modal-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.modal-title {
+    font-size: 2em;
+    width: 100%;
+    text-align: center;
+}

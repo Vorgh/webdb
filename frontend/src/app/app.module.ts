@@ -22,32 +22,34 @@ import {AlterViewResolver} from "./layout/view/alter-view/alter-view-resolver.se
 import {MonacoEditorModule, NgxMonacoEditorConfig} from "ngx-monaco-editor";
 import {Utils} from "./shared/util/utils";
 import {conf, language} from "../assets/monaco/languages/mysql/mysql";
+import {DbModalService} from "./services/db-modal.service";
+
+export function monacoLoad()
+{
+    const monaco = window['monaco'];
+    monaco.languages.register({
+        id: 'mysql',
+        extensions: [],
+        aliases: ['MySQL', 'mysql']
+    });
+    monaco.languages.setMonarchTokensProvider('mysql', language);
+    monaco.languages.setLanguageConfiguration('mysql', conf);
+    monaco.languages.registerCompletionItemProvider('mysql', {
+        provideCompletionItems: function() {
+            return Utils.getMonacoCompletionProvider()
+        }
+    });
+
+    monaco.editor.defineTheme('mysqlTheme', {
+        base: 'vs', // can also be vs-dark or hc-black
+        inherit: true, // can also be false to completely replace the builtin rules
+        rules: [
+            { token: 'identifier.quote', foreground: 'ffa500'},
+    ]});
+}
 
 const monacoConfig: NgxMonacoEditorConfig = {
-    onMonacoLoad: () =>
-    {
-        const monaco = window['monaco'];
-        monaco.languages.register({
-            id: 'mysql',
-            extensions: [],
-            aliases: ['MySQL', 'mysql']
-        });
-        monaco.languages.setMonarchTokensProvider('mysql', language);
-        monaco.languages.setLanguageConfiguration('mysql', conf);
-        monaco.languages.registerCompletionItemProvider('mysql', {
-            provideCompletionItems: function() {
-                return Utils.getMonacoCompletionProvider()
-            }
-        });
-
-        monaco.editor.defineTheme('mysqlTheme', {
-            base: 'vs', // can also be vs-dark or hc-black
-            inherit: true, // can also be false to completely replace the builtin rules
-            rules: [
-                { token: 'identifier', foreground: 'ffa500'},
-            ]
-        });
-    }
+    onMonacoLoad: monacoLoad
 };
 
 @NgModule({
@@ -64,7 +66,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
     declarations: [AppComponent],
     providers: [AuthGuard, ConnectionService, DatabaseService, PageHeaderService, AlterTableResolver,
         TriggerResolver, ProcedureResolver, AlterViewResolver, DBHomeResolver, NotificationService,
-        CookieService, GlobalErrorHandler],
+        CookieService, GlobalErrorHandler, DbModalService],
     bootstrap: [AppComponent]
 })
 export class AppModule

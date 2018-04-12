@@ -22,6 +22,7 @@ export class AlterViewResolver implements Resolve<View>
             return this.databaseService.getView(route.queryParams['schema'], route.queryParams['view'])
                        .catch(error =>
                        {
+                           this.router.navigate(["/home"]);
                            this.errorHandler.handleError(error);
                            return null;
                        })

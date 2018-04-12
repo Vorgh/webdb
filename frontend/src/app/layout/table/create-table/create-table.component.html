@@ -46,7 +46,12 @@
 
 <app-page-header [path]="pageHeaderPath"></app-page-header>
 <div class="card-header">
-    <h4 class="card-title">Create Table...</h4>
+    <div class="row">
+        <h4 class="card-title col-sm-10">Alter Table...</h4>
+        <div class="col-sm-2 d-flex justify-content-center">
+            <button [disabled]="!createTableForm.valid" type="button" class="btn btn-success" (click)="submit()">Save</button>
+        </div>
+    </div>
 </div>
 <div class="card-body">
     <form class="p-4" [formGroup]="createTableForm">
@@ -176,7 +181,4 @@
             </div>
         </div>
     </form>
-</div>
-<div class="card-footer">
-    <button [disabled]="!createTableForm.valid" type="button" class="btn btn-outline-dark" (click)="submit()">Submit</button>
 </div>

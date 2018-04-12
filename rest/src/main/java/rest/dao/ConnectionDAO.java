@@ -1,5 +1,7 @@
 package rest.dao;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,8 @@ import rest.exception.DatabaseConnectionException;
 import rest.exception.MissingAuthInfoException;
 import rest.model.connection.ConnectionAuthInfo;
 import rest.model.connection.UserConnection;
+import rest.util.UriUtils;
 
-import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -51,7 +53,7 @@ public class ConnectionDAO
             throw new MissingAuthInfoException("Missing url or username.");
         }
 
-        Properties props = new Properties();
+        /*Properties props = new Properties();
         props.setProperty("rewriteBatchedStatements", "true");
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setConnectionProperties(props);
@@ -61,19 +63,38 @@ public class ConnectionDAO
         ds.setUsername(username);
         ds.setPassword(password);
 
-        if (!testConnection(jdbcTemplate))
+        verifyConnection(jdbcTemplate);*/
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("com.mysql.jdbc.Driver");
+        hikariConfig.setJdbcUrl(url);
+        hikariConfig.setUsername(username);
+        hikariConfig.setPassword(password);
+
+        hikariConfig.setConnectionTestQuery("SELECT 1");
+
+        hikariConfig.addDataSourceProperty("dataSource.cachePrepStmts", "true");
+        hikariConfig.addDataSourceProperty("dataSource.prepStmtCacheSize", "250");
+        hikariConfig.addDataSourceProperty("dataSource.prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("dataSource.useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("dataSource.rewriteBatchedStatements", "true");
+
+        try
+        {
+            HikariDataSource ds = new HikariDataSource(hikariConfig);
+            UserConnection userConnection = new UserConnection(url, username, passwordEncoder.encode(password), createUserAuthorities());
+            userConnection.setJdbcTemplate(ds);
+            connectedUsers.put(userConnection.getUrlUsernameID(), userConnection);
+            clientDetailsService.addClient(createClientDetails(userConnection.getUsername(), password, userConnection.getAuthorities()));
+        }
+        catch (Exception e)
         {
             throw new DatabaseConnectionException("Couldn't access the database. Maybe wrong credentials?");
         }
-
-        UserConnection userConnection = new UserConnection(url, username, passwordEncoder.encode(password), createUserAuthorities());
-        userConnection.setJdbcTemplate(url, username, password);
-        connectedUsers.put(userConnection.getUrlUsernameID(), userConnection);
-        clientDetailsService.addClient(createClientDetails(userConnection.getUsername(), password, userConnection.getAuthorities()));
     }
 
     @Transactional
-    protected boolean testConnection(JdbcTemplate jdbcTemplate)
+    protected boolean verifyConnection(JdbcTemplate jdbcTemplate)
     {
         String sql = "SELECT 1";
         try
@@ -84,14 +105,14 @@ public class ConnectionDAO
         catch (Exception e)
         {
             logger.error(e.getMessage());
-            return false;
+            throw new DatabaseConnectionException("Couldn't access the database. Maybe wrong credentials?");
         }
 
     }
 
     public UserConnection getConnectedUserByDomainAndName(String url, String username)
     {
-        String key = username+"@"+url;
+        String key = username+"@"+ UriUtils.extractDomainAndPortFromUrl(url);
         return connectedUsers.get(key);
     }
 

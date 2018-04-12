@@ -34,9 +34,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and()
             .authorizeRequests()
-            .antMatchers("/connection/**").permitAll()
-            .antMatchers("/oauth/**").permitAll()
-            .antMatchers("/**").authenticated();
+                .antMatchers("/connection/**").permitAll()
+                .antMatchers("/oauth/**").permitAll()
+                .antMatchers("/custom").authenticated()
+                .antMatchers("/procedure/**").authenticated()
+                .antMatchers("/schema/**").authenticated()
+                .antMatchers("/table/**").authenticated()
+                .antMatchers("/trigger/**").authenticated()
+                .antMatchers("/view/**").authenticated();
     }
 
     @Override
