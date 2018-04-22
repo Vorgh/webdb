@@ -46,30 +46,6 @@ export class Utils
 
     public static getMonacoCompletionProvider()
     {
-        /*let completionProvider = [];
-
-        for (let keyword of language.keywords)
-        {
-            let keywordProvider = {
-                label: keyword,
-                kind: monaco.languages.CompletionItemKind.Keyword,
-                insertText: keyword
-            };
-            completionProvider.push(keywordProvider);
-        }
-
-        for (let keyword of language.builtinFunctions)
-        {
-            let keywordProvider = {
-                label: keyword,
-                kind: monaco.languages.CompletionItemKind.Function,
-                insertText: keyword
-            };
-            completionProvider.push(keywordProvider);
-        }
-
-        console.log(completionProvider);
-        return completionProvider;*/
         return mysqlCompletionProvider;
     }
 }

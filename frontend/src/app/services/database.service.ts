@@ -253,11 +253,12 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    getProcedure(schema: string, procedure: string): Promise<Procedure>
+    getProcedure(schema: string, procedure: string, isFunction: string): Promise<Procedure>
     {
         let params = new HttpParams()
             .append('schema', schema)
-            .append('procedure', procedure);
+            .append('procedure', procedure)
+            .append('isFunction', isFunction);
 
         return this.http.get<Procedure>(`${this.urlPrefix}/procedure/single`, {params: params})
                    .toPromise()
@@ -278,11 +279,12 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    dropProcedure(schema: string, procedure: string): Promise<any>
+    dropProcedure(schema: string, procedure: string, isFunction: string): Promise<any>
     {
         let params = new HttpParams()
             .append('schema', schema)
-            .append('procedure', procedure);
+            .append('procedure', procedure)
+            .append('isFunction', isFunction);
 
         return this.http.delete(`${this.urlPrefix}/procedure/drop`, {params: params})
                    .toPromise()

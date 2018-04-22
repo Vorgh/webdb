@@ -37,11 +37,21 @@ public class ProcedureDAO extends AbstractDatabaseDAO
         return jdbcTemplate.query(procedureQuery, new Object[]{schemaName}, new ProcedureMapper(paramList));
     }
 
-    public Procedure getProcedure(String schemaName, String procedureName)
+    public Procedure getProcedure(String schemaName, String procedureName, boolean isFunction)
     {
-        String query = "SELECT routine_schema, routine_name, routine_type, dtd_identifier, routine_definition, last_altered " +
-                "FROM information_schema.routines " +
-                "WHERE routine_schema=? AND routine_name=?;";
+        String query;
+        if (isFunction)
+        {
+            query = "SELECT routine_schema, routine_name, routine_type, dtd_identifier, routine_definition, last_altered " +
+                    "FROM information_schema.routines " +
+                    "WHERE routine_schema=? AND routine_name=? AND routine_type='FUNCTION';";
+        }
+        else
+        {
+            query = "SELECT routine_schema, routine_name, routine_type, dtd_identifier, routine_definition, last_altered " +
+                    "FROM information_schema.routines " +
+                    "WHERE routine_schema=? AND routine_name=? AND routine_type='PROCEDURE';";
+        }
 
         String paramQuery = "SELECT specific_schema, specific_name, parameter_mode, parameter_name, dtd_identifier " +
                 "FROM information_schema.parameters " +
@@ -69,12 +79,11 @@ public class ProcedureDAO extends AbstractDatabaseDAO
         queryExecutor.modify(change);
     }
 
-    public void dropProcedure(String schemaName, String procedureName)
+    public void dropProcedure(String schemaName, String procedureName, boolean isFunction)
     {
-        Procedure procedure = getProcedure(schemaName, procedureName);
+        Procedure procedure = getProcedure(schemaName, procedureName, isFunction);
         if (procedure != null)
         {
-            boolean isFunction = procedure.getType().equals("FUNCTION");
             ProcedureQueryExecutor queryExecutor = new ProcedureQueryExecutor(jdbcTemplate, isFunction);
             queryExecutor.delete(schemaName, procedureName);
         }

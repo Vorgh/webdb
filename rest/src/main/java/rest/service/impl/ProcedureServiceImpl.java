@@ -43,16 +43,17 @@ public class ProcedureServiceImpl implements ProcedureService
     }
 
     @Override
-    public Procedure getProcedure(String schemaName, String procedureName, UserConnection connection)
+    public Procedure getProcedure(String schemaName, String procedureName, String isFunction, UserConnection connection)
     {
         Assert.hasLength(schemaName, "Missing schema name");
         Assert.hasLength(procedureName, "Missing procedure name");
         schemaAssert.doesSchemaExist(schemaName, connection);
 
+        System.out.println(isFunction);
         try
         {
             ProcedureDAO procedureDAO = new ProcedureDAO(connection);
-            return procedureDAO.getProcedure(schemaName, procedureName);
+            return procedureDAO.getProcedure(schemaName, procedureName, "true".equals(isFunction));
         }
         catch (EmptyResultDataAccessException e)
         {
@@ -86,11 +87,11 @@ public class ProcedureServiceImpl implements ProcedureService
     }
 
     @Override
-    public void dropProcedure(String schemaName, String procedureName, UserConnection connection)
+    public void dropProcedure(String schemaName, String procedureName, String isFunction, UserConnection connection)
     {
         procedureAssert.assertParams(schemaName, procedureName);
 
         ProcedureDAO procedureDAO = new ProcedureDAO(connection);
-        procedureDAO.dropProcedure(schemaName, procedureName);
+        procedureDAO.dropProcedure(schemaName, procedureName, "true".equals(isFunction));
     }
 }

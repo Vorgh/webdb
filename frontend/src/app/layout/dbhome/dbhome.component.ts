@@ -2,15 +2,13 @@ import {Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/co
 import {routerTransition} from '../../router.animations';
 import {Procedure, Table, Trigger} from "../../models/rest/rest-models";
 import {DatabaseService} from "../../services/database.service";
-import {ActivatedRoute, Params, Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
 import {NgbModal, NgbTab, NgbTabChangeEvent, NgbTabset} from "@ng-bootstrap/ng-bootstrap";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 import {GlobalErrorHandler} from "../../services/error-handler.service";
 import {DbDataWrapper} from "../../models/rest/db-data-wrapper";
 import {ConfirmdialogComponent} from "../components/confirmdialog/confirmdialog.component";
-import {DropDbComponent} from "../components/db-dialog/drop-db/drop-db.component";
-import {DbModalService} from "../../services/db-modal.service";
 
 @Component({
     selector: 'app-dbhome',
@@ -133,7 +131,7 @@ export class DBHomeComponent implements OnInit
                 .catch(() => null);
     }
 
-    dropProcedure(procedure: Procedure)
+    dropProcedure(procedure: Procedure, isFunction: string = "false")
     {
         const modalRef = this.modalService.open(ConfirmdialogComponent);
         modalRef.componentInstance.dbObject = procedure.name;
@@ -142,7 +140,7 @@ export class DBHomeComponent implements OnInit
         modalRef.result
                 .then(() =>
                 {
-                    this.databaseService.dropProcedure(procedure.schema, procedure.name)
+                    this.databaseService.dropProcedure(procedure.schema, procedure.name, isFunction)
                         .then(() =>
                         {
                             return this.databaseService.getAllProcedures(this.schema)

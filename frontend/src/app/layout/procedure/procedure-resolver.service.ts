@@ -19,14 +19,26 @@ export class ProcedureResolver implements Resolve<Procedure>
     {
         if (!isNullOrUndefined(route.queryParams['schema']) && !isNullOrUndefined(route.queryParams['procedure']))
         {
-            return this.databaseService.getProcedure(route.queryParams['schema'], route.queryParams['procedure'])
-                       .then(procedure => procedure)
-                       .catch(error =>
-                       {
-                           this.router.navigate(["/home"]);
-                           this.errorHandler.handleError(error);
-                           return null;
-                       })
+            if (!isNullOrUndefined(route.queryParams['isFunction']) && route.queryParams['isFunction'] == 'true')
+            {
+                return this.databaseService.getProcedure(route.queryParams['schema'], route.queryParams['procedure'], "true")
+                           .catch(error =>
+                           {
+                               this.router.navigate(["/home"]);
+                               this.errorHandler.handleError(error);
+                               return null;
+                           })
+            }
+            else
+            {
+                return this.databaseService.getProcedure(route.queryParams['schema'], route.queryParams['procedure'], "false")
+                           .catch(error =>
+                           {
+                               this.router.navigate(["/home"]);
+                               this.errorHandler.handleError(error);
+                               return null;
+                           })
+            }
         }
         else
         {

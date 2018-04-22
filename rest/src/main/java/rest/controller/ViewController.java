@@ -31,7 +31,7 @@ public class ViewController
     }
 
     @GetMapping("metadata/single")
-    public ResponseEntity<View> getTableMetadata(@RequestParam String schema,
+    public ResponseEntity<View> getViewMetadata(@RequestParam String schema,
                                                  @RequestParam String view,
                                                  @AuthenticationPrincipal UserConnection connection)
     {
@@ -61,7 +61,7 @@ public class ViewController
     }
 
     @DeleteMapping("drop")
-    public ResponseEntity<Void> deleteTable(@RequestParam String schema,
+    public ResponseEntity<Void> deleteView(@RequestParam String schema,
                                             @RequestParam String view,
                                             @AuthenticationPrincipal UserConnection connection)
     {

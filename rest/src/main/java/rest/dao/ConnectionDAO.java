@@ -70,14 +70,13 @@ public class ConnectionDAO
         hikariConfig.setJdbcUrl(url);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
-
         hikariConfig.setConnectionTestQuery("SELECT 1");
 
-        hikariConfig.addDataSourceProperty("dataSource.cachePrepStmts", "true");
-        hikariConfig.addDataSourceProperty("dataSource.prepStmtCacheSize", "250");
-        hikariConfig.addDataSourceProperty("dataSource.prepStmtCacheSqlLimit", "2048");
-        hikariConfig.addDataSourceProperty("dataSource.useServerPrepStmts", "true");
-        hikariConfig.addDataSourceProperty("dataSource.rewriteBatchedStatements", "true");
+        hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
 
         try
         {
@@ -91,23 +90,6 @@ public class ConnectionDAO
         {
             throw new DatabaseConnectionException("Couldn't access the database. Maybe wrong credentials?");
         }
-    }
-
-    @Transactional
-    protected boolean verifyConnection(JdbcTemplate jdbcTemplate)
-    {
-        String sql = "SELECT 1";
-        try
-        {
-            jdbcTemplate.execute(sql);
-            return true;
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage());
-            throw new DatabaseConnectionException("Couldn't access the database. Maybe wrong credentials?");
-        }
-
     }
 
     public UserConnection getConnectedUserByDomainAndName(String url, String username)

@@ -32,10 +32,11 @@ public class ProcedureController
     @GetMapping("single")
     public ResponseEntity<Procedure> getProcedure(@RequestParam String schema,
                                                   @RequestParam String procedure,
+                                                  @RequestParam(name="isFunction", required=false) String isFunction,
                                                   @AuthenticationPrincipal UserConnection connection)
     {
         Procedure procedureMetadata;
-        procedureMetadata = procedureService.getProcedure(schema, procedure, connection);
+        procedureMetadata = procedureService.getProcedure(schema, procedure, isFunction, connection);
 
         return new ResponseEntity<>(procedureMetadata, HttpStatus.OK);
     }
@@ -61,9 +62,10 @@ public class ProcedureController
     @DeleteMapping("drop")
     public ResponseEntity<Void> deleteProcedure(@RequestParam String schema,
                                                 @RequestParam String procedure,
+                                                @RequestParam(name="isFunction", required=false) String isFunction,
                                                 @AuthenticationPrincipal UserConnection connection)
     {
-        procedureService.dropProcedure(schema, procedure, connection);
+        procedureService.dropProcedure(schema, procedure, isFunction, connection);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

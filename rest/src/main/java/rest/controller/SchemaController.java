@@ -35,7 +35,7 @@ public class SchemaController
 
     @PostMapping("create")
     public ResponseEntity<Void> createSchema(@RequestParam String schema,
-                                                @AuthenticationPrincipal UserConnection connection)
+                                             @AuthenticationPrincipal UserConnection connection)
     {
         schemaService.createSchema(schema, connection);
 

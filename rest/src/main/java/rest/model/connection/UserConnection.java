@@ -13,7 +13,6 @@ import java.util.Properties;
 public class UserConnection extends User
 {
     private String url;
-    private Collection<? extends GrantedAuthority> authorities;
     private String urlUsernameID;
     private JdbcTemplate jdbcTemplate;
 
@@ -35,19 +34,6 @@ public class UserConnection extends User
             throw new IllegalArgumentException("Invalid null argument.");
     }
 
-    private JdbcTemplate jdbcTemplateBuilder(String url, String username, String password)
-    {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        Properties props = new Properties();
-        props.setProperty("rewriteBatchedStatements", "true");
-        ds.setUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
-        ds.setConnectionProperties(props);
-
-        return new JdbcTemplate(ds);
-    }
-
     public String getUrl()
     {
         return url;
@@ -61,11 +47,6 @@ public class UserConnection extends User
     public JdbcTemplate getJdbcTemplate()
     {
         return jdbcTemplate;
-    }
-
-    public void setJdbcTemplate(String url, String username, String password)
-    {
-        this.jdbcTemplate = jdbcTemplateBuilder(url, username, password);
     }
 
     public void setJdbcTemplate(DataSource ds)

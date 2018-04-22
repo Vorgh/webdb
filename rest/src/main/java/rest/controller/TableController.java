@@ -130,9 +130,9 @@ public class TableController
 
     @PostMapping("rows/modify")
     public ResponseEntity<Void> modifyRows(@RequestParam String schema,
-                                          @RequestParam String table,
-                                          @RequestBody RowModifyRequest rowModifyRequest,
-                                          @AuthenticationPrincipal UserConnection connection)
+                                           @RequestParam String table,
+                                           @RequestBody RowModifyRequest rowModifyRequest,
+                                           @AuthenticationPrincipal UserConnection connection)
     {
         tableService.modifyRows(schema, table, rowModifyRequest, connection);
 

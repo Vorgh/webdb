@@ -246,7 +246,7 @@
                                     <tbody>
                                     <tr *ngFor="let procedure of procedures">
                                         <ng-template [ngIf]="procedure.returnType != null && procedure.returnType != ''">
-                                            <th scope="row"><a [routerLink]="['/procedure']" [queryParams]="{schema: schema, procedure: procedure.name}">{{procedure.name}}</a></th>
+                                            <th scope="row"><a [routerLink]="['/procedure']" [queryParams]="{schema: schema, procedure: procedure.name, isFunction: 'true'}">{{procedure.name}}</a></th>
                                             <td>{{procedure.returnType}}</td>
                                             <td class="long-text-col">
                                                 <ng-template #procedureCodeTemplate let-c="close" let-d="dismiss">
@@ -267,7 +267,7 @@
                                             </td>
                                             <td>{{procedure.modified}}</td>
                                             <td class="d-flex justify-content-center">
-                                                <button class="btn btn-danger" (click)="dropProcedure(procedure)">
+                                                <button class="btn btn-danger" (click)="dropProcedure(procedure, 'true')">
                                                     <i class="fa fa-times" aria-hidden="true"></i>
                                                 </button>
                                             </td>

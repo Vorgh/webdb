@@ -62,11 +62,6 @@ export class ViewComponent implements OnInit
         });
     }
 
-    onModify()
-    {
-        this.router.navigate(['/view/create', { queryParams: {schema: this.schema, tab: 'view'}}]);
-    }
-
     showCodeModal(template)
     {
         this.modalService.open(template);
