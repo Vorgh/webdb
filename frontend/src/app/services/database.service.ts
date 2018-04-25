@@ -291,9 +291,9 @@ export class DatabaseService
                    .catch(error => Promise.reject(error));
     }
 
-    executeCustomSql(sql: string): Promise<Row[]>
+    executeCustomSql(sql: string): Promise<Row[][]>
     {
-        return this.http.post<Row[]>(`${this.urlPrefix}/custom`, sql)
+        return this.http.post<Row[][]>(`${this.urlPrefix}/custom`, sql)
                    .toPromise()
                    .catch(error => Promise.reject(error));
     }

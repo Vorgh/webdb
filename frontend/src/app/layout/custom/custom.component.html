@@ -19,20 +19,30 @@
 <div class="card-body monaco-container">
     <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" (onInit)="monacoInit($event)"></ngx-monaco-editor>
 </div>
-<div *ngIf="results.length > 0" class="results-container">
-    <div class="small-text results-returned">Results: {{results.length}} rows returned.</div>
-    <div  class="table-responsive result-table-container">
-        <table class="table table-bordered result-table">
-            <thead>
-            <tr>
-                <th *ngFor="let col of results[0] | keys">{{col}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let row of results">
-                <td *ngFor="let r of row | keys">{{row[r]}}</td>
-            </tr>
-            </tbody>
-        </table>
+<div *ngIf="results" class="results-container">
+    <div class="d-flex results-returned w-25">
+        <div class="w-50 align-middle">Showing result of:</div>
+        <select class="form-control form-control-sm w-50" [(ngModel)]="selectedResult" (ngModelChange)="onResultChange($event)">
+            <option *ngFor="let result of results; let i = index" [ngValue]="i">SELECT #{{i + 1}}</option>
+        </select>
+    </div>
+    <div *ngFor="let result of results, let i = index">
+        <div *ngIf="i == selectedResult">
+            <div class="small-text results-returned">Results: {{result.length}} rows returned.</div>
+            <div  class="table-responsive result-table-container">
+                <table class="table table-bordered result-table">
+                    <thead>
+                    <tr>
+                        <th *ngFor="let col of result[0] | keys">{{col}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let row of result">
+                        <td *ngFor="let r of row | keys">{{row[r]}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

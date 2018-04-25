@@ -1,9 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 
-import {conf, language} from "../../../assets/monaco/languages/mysql/mysql";
 import {DatabaseService} from "../../services/database.service";
 import {GlobalErrorHandler} from "../../services/error-handler.service";
-import {Utils} from "../../shared/util/utils";
 import {Row} from "../../models/rest/rest-models";
 import {PageHeaderService} from "../../shared/modules/page-header/page-header.service";
 
@@ -25,7 +23,8 @@ export class CustomComponent implements OnInit
         fontSize: 16,
         formatOnPaste: true};
     code: string= 'SELECT * FROM information_schema.tables;\n';
-    results: Row[] = [];
+    results: Row[][];
+    selectedResult = 0;
 
     pageHeaderPath = [];
 
@@ -48,15 +47,25 @@ export class CustomComponent implements OnInit
     execute()
     {
         this.databaseService.executeCustomSql(this.editor.getValue())
-            .then(results => this.results = results)
+            .then(results => this.processResults(results))
             .catch(error => this.errorHandler.handleError(error));
     }
 
     executeSelected()
     {
         this.databaseService.executeCustomSql(this.editor.getModel().getValueInRange(this.editor.getSelection()))
-            .then(results => this.results = results)
+            .then(results => this.processResults(results))
             .catch(error => this.errorHandler.handleError(error));
+    }
+
+    processResults(results)
+    {
+        this.results = results
+    }
+
+    onResultChange(event)
+    {
+        console.log(event);
     }
 
 }

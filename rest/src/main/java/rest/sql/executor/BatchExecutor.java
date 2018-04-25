@@ -21,16 +21,16 @@ public class BatchExecutor
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Map<String, Object>> batch(String[] statements)
+    public List<List<Map<String, Object>>> batch(String[] statements)
     {
-        List<Map<String, Object>> lastResults = null;
+        List<List<Map<String, Object>>> results = new ArrayList<>();
 
         logger.info("Batch execution started!");
         for (String s : statements)
         {
             if (s.toUpperCase().trim().startsWith("SELECT"))
             {
-                lastResults = jdbcTemplate.queryForList(s);
+                results.add(jdbcTemplate.queryForList(s));
             }
             else
             {
@@ -40,7 +40,7 @@ public class BatchExecutor
         }
         logger.info("Batch execution finished!");
 
-        return lastResults;
+        return results;
     }
 
     public void batchInsert(String[] insertQueries)

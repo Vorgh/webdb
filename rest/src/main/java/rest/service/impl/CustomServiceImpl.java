@@ -14,15 +14,15 @@ import java.util.Random;
 public class CustomServiceImpl implements CustomService
 {
     @Override
-    public List<Map<String, Object>> execute(String sql, UserConnection connection)
+    public List<List<Map<String, Object>>> execute(String sql, UserConnection connection)
     {
         CustomDAO customDAO = new CustomDAO(connection);
         String[] statements;
 
-        String randomDelimeter = String.valueOf(new Random().nextInt(10000));
-        while (sql.contains(randomDelimeter))
+        String randomDelimiter = String.valueOf(new Random().nextInt(10000));
+        while (sql.contains(randomDelimiter))
         {
-            randomDelimeter += randomDelimeter;
+            randomDelimiter += randomDelimiter;
         }
 
         String tempSql = sql.toUpperCase();
@@ -37,7 +37,7 @@ public class CustomServiceImpl implements CustomService
                 semicolonIndex = tempSql.indexOf(';', semicolonIndex + 1);
                 if (semicolonIndex != -1)
                 {
-                    tempSql = tempSql.substring(0, semicolonIndex) + randomDelimeter + tempSql.substring(semicolonIndex + 1, tempSql.length());
+                    tempSql = tempSql.substring(0, semicolonIndex) + randomDelimiter + tempSql.substring(semicolonIndex + 1, tempSql.length());
                 }
             }
 
@@ -47,7 +47,7 @@ public class CustomServiceImpl implements CustomService
         statements = tempSql.split("(;[\n]*)|(\n{2,})");
         for (int i=0; i<statements.length; i++)
         {
-            statements[i] = statements[i].replace(randomDelimeter, ";");
+            statements[i] = statements[i].replace(randomDelimiter, ";");
         }
 
         return customDAO.execute(statements);

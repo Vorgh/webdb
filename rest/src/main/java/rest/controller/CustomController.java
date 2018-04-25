@@ -21,10 +21,10 @@ public class CustomController
     private CustomService customService;
 
     @PostMapping("custom")
-    public ResponseEntity<List<Map<String, Object>>> executeSql(@RequestBody String sql,
+    public ResponseEntity<List<List<Map<String, Object>>>> executeSql(@RequestBody String sql,
                                                       @AuthenticationPrincipal UserConnection connection)
     {
-        List<Map<String, Object>> result = this.customService.execute(sql, connection);
+        List<List<Map<String, Object>>> result = this.customService.execute(sql, connection);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

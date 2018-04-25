@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface CustomService
 {
-    List<Map<String, Object>> execute(String sql, UserConnection connection);
+    List<List<Map<String, Object>>> execute(String sql, UserConnection connection);
 }

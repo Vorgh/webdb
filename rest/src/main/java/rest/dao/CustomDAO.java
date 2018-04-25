@@ -19,7 +19,7 @@ public class CustomDAO extends AbstractDatabaseDAO
         super(connection);
     }
 
-    public List<Map<String, Object>> execute(String[] statements)
+    public List<List<Map<String, Object>>> execute(String[] statements)
     {
         BatchExecutor batchExecutor = new BatchExecutor(jdbcTemplate);
 
